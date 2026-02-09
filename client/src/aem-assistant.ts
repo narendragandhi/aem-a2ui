@@ -16,14 +16,24 @@ import './components/seo-panel.js';
 import './components/review-panel.js';
 import './components/review-comments.js';
 import './components/workflow-panel.js';
+import './components/version-history.js';
+import './components/live-presence.js';
+import './components/live-cursors.js';
+import './components/live-chat.js';
+import './components/emoji-reactions.js';
+import './components/content-locks.js';
+import './components/live-notifications.js';
+import './components/demo-mode.js';
+import './components/aem-connection-status.js';
 import './components/dam-browser.js';
 import './components/aem-status.js';
 import './components/component-recommender.js';
 import './components/streaming-content.js';
 
-import { ContentSuggestion, ImageAsset, Review, DamAsset, PageRecommendation } from './lib/types.js';
+import { ContentSuggestion, ImageAsset, Review, DamAsset, PageRecommendation, LiveUser, ChatMessage, CursorPosition } from './lib/types.js';
 import { StreamingContent } from './components/streaming-content.js';
 import { HistoryService } from './services/history-service.js';
+import { collaborationService, LiveUser as CollaborationLiveUser, ChatMessage as CollabChatMessage } from './services/collaboration-service.js';
 import { ContentWizard } from './components/content-wizard.js';
 import { BrandPanel } from './components/brand-panel.js';
 import { PageBuilder } from './components/page-builder.js';
@@ -89,6 +99,28 @@ export class AemAssistant extends LitElement {
   @state() private streamingSectionId: string | null = null;
   @state() private streamingComponentType = '';
   @state() private streamingPrompt = '';
+
+  @state() private connectedUsers: LiveUser[] = [];
+  @state() private cursors: CursorPosition[] = [];
+  @state() private chatMessages: ChatMessage[] = [];
+  @state() private wsConnected = false;
+  @state() private aemConnected = false;
+  @state() private aemAuthorUrl = '';
+
+  @state() private notifications: Array<{
+    id: string;
+    type: 'info' | 'success' | 'warning' | 'error' | 'review';
+    title: string;
+    message: string;
+    fromUser?: string;
+    timestamp: string;
+  }> = [];
+
+  @state() private fieldLocks: Array<{ field: string; sessionId: string; username: string }> = [];
+
+  @state() private fieldReactions: Array<{ emoji: string; count: number; sessionIds: string[] }> = [];
+
+  @state() private demoModeEnabled = false;
 
   private _generationTask = new Task(this, {
     task: async ([prompt], { signal }) => {
@@ -587,7 +619,39 @@ export class AemAssistant extends LitElement {
           @agent-changed=${this.handleAgentChange}
           @toggle-theme=${this.toggleTheme}
         ></assistant-header>
-        <aem-status style="margin-right: 16px;"></aem-status>
+
+        <!-- Live Collaboration -->
+        ${this.wsConnected ? html`
+          <live-presence
+            .users=${this.connectedUsers}
+            .currentUserId=${collaborationService.getSessionId()}
+            style="margin-right: 8px;"
+          ></live-presence>
+        ` : ''}
+
+        <aem-connection-status
+          .connected=${this.aemConnected}
+          .authorUrl=${this.aemAuthorUrl}
+          style="margin-right: 16px;"
+        ></aem-connection-status>
+
+        <live-chat
+          .messages=${this.chatMessages}
+          .currentUserId=${collaborationService.getSessionId()}
+          .currentUserName=${'Demo User'}
+          style="margin-right: 16px;"
+          @send-message=${this.handleChatMessage}
+        ></live-chat>
+
+        <!-- Notifications -->
+        <live-notifications
+          .notifications=${this.notifications}
+        ></live-notifications>
+
+        <!-- Demo Mode Toggle -->
+        <demo-mode
+          .enabled=${this.demoModeEnabled}
+        ></demo-mode>
       </div>
 
       <!-- DAM Browser Modal -->
@@ -711,6 +775,11 @@ export class AemAssistant extends LitElement {
           ></aem-preview>
         ` : html`
           <div class="right-panel-content">
+            <live-cursors
+              .cursors=${this.cursors}
+              .currentUserId=${collaborationService.getSessionId()}
+            ></live-cursors>
+
             <assistant-preview
               .appliedContent=${this.appliedContent}
               @copy-content=${this.handleCopyContent}
@@ -735,6 +804,12 @@ export class AemAssistant extends LitElement {
                   @workflow-started=${this.handleWorkflowStarted}
                   @workflow-advanced=${this.handleWorkflowAdvanced}
                 ></workflow-panel>
+
+                <version-history
+                  .contentId=${this.appliedContent?.id || 'content-' + Date.now()}
+                  .currentContent=${this.appliedContent}
+                  @version-restored=${this.handleVersionRestored}
+                ></version-history>
               </div>
             ` : ''}
           </div>
@@ -791,6 +866,104 @@ export class AemAssistant extends LitElement {
     } else {
       this.theme = 'light';
       document.documentElement.removeAttribute('data-theme');
+    }
+    this.setupCollaboration();
+    this.checkAemConnection();
+  }
+
+  private async setupCollaboration() {
+    try {
+      await collaborationService.connect(this.agentUrl);
+      this.wsConnected = true;
+
+      collaborationService.on('presence', (users: unknown) => {
+        this.connectedUsers = users as LiveUser[];
+      });
+
+      collaborationService.on('cursor', (cursor: unknown) => {
+        const existing = this.cursors.findIndex(c => c.sessionId === (cursor as CursorPosition).sessionId);
+        if (existing >= 0) {
+          this.cursors[existing] = cursor as CursorPosition;
+        } else {
+          this.cursors.push(cursor as CursorPosition);
+        }
+        this.cursors = [...this.cursors];
+      });
+
+      collaborationService.on('chat', (message: unknown) => {
+        this.chatMessages = [...this.chatMessages, message as ChatMessage];
+      });
+
+      collaborationService.on('lock', (data: unknown) => {
+        const lockData = data as { type: string; sessionId: string; username: string; field: string };
+        if (lockData.type === 'locked') {
+          this.fieldLocks = [...this.fieldLocks, { field: lockData.field, sessionId: lockData.sessionId, username: lockData.username }];
+        } else if (lockData.type === 'unlocked' || lockData.type === 'released') {
+          this.fieldLocks = this.fieldLocks.filter(l => !(l.field === lockData.field && l.sessionId === lockData.sessionId));
+        }
+      });
+
+      collaborationService.on('reaction', (data: unknown) => {
+        const reactionData = data as { type: string; emoji: string; sessionId: string };
+        if (reactionData.type === 'remove') {
+          const existing = this.fieldReactions.findIndex(r => r.emoji === reactionData.emoji);
+          if (existing >= 0) {
+            const reaction = this.fieldReactions[existing];
+            reaction.sessionIds = reaction.sessionIds.filter(s => s !== reactionData.sessionId);
+            reaction.count = reaction.sessionIds.length;
+            if (reaction.count === 0) {
+              this.fieldReactions = this.fieldReactions.filter(r => r.emoji !== reactionData.emoji);
+            } else {
+              this.fieldReactions = [...this.fieldReactions];
+            }
+          }
+        } else {
+          const existing = this.fieldReactions.findIndex(r => r.emoji === reactionData.emoji);
+          if (existing >= 0) {
+            const reaction = this.fieldReactions[existing];
+            if (!reaction.sessionIds.includes(reactionData.sessionId)) {
+              reaction.sessionIds.push(reactionData.sessionId);
+              reaction.count = reaction.sessionIds.length;
+              this.fieldReactions = [...this.fieldReactions];
+            }
+          } else {
+            this.fieldReactions = [...this.fieldReactions, { emoji: reactionData.emoji, count: 1, sessionIds: [reactionData.sessionId] }];
+          }
+        }
+      });
+
+      collaborationService.on('notification', (notification: unknown) => {
+        const notif = notification as { type: string; title: string; message: string; fromUser?: string };
+        this.notifications = [{
+          id: Date.now().toString(),
+          type: notif.type || 'info',
+          title: notif.title,
+          message: notif.message,
+          fromUser: notif.fromUser,
+          timestamp: new Date().toISOString()
+        }, ...this.notifications];
+      });
+
+      if (this.appliedContent?.id) {
+        collaborationService.joinRoom(this.appliedContent.id);
+      }
+    } catch (error) {
+      console.warn('WebSocket connection failed:', error);
+      this.wsConnected = false;
+    }
+  }
+
+  private async checkAemConnection() {
+    try {
+      const response = await fetch(`${this.agentUrl}/api/aem/health`);
+      if (response.ok) {
+        const status = await response.json();
+        this.aemConnected = status.connected;
+        this.aemAuthorUrl = status.authorUrl || '';
+      }
+    } catch (error) {
+      console.warn('AEM health check failed:', error);
+      this.aemConnected = false;
     }
   }
 
@@ -1419,6 +1592,11 @@ export class AemAssistant extends LitElement {
     console.log('Workflow advanced:', e.detail.workflow);
   }
 
+  private handleVersionRestored(e: CustomEvent) {
+    this.appliedContent = e.detail.content;
+    console.log('Version restored:', this.appliedContent);
+  }
+
   private handleDamAssetSelected(e: CustomEvent) {
     const asset: DamAsset = e.detail.asset;
     this.selectedDamAsset = asset;
@@ -1438,6 +1616,11 @@ export class AemAssistant extends LitElement {
 
   private openDamBrowser() {
     this.showDamBrowser = true;
+  }
+
+  private handleChatMessage(e: CustomEvent) {
+    const { message } = e.detail;
+    collaborationService.sendChatMessage(message);
   }
 
   private async copyToClipboard(content: ContentSuggestion, format: 'json' | 'html' = 'json') {

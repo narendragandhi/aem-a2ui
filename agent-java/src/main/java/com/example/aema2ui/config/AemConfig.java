@@ -5,7 +5,11 @@ import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Configuration properties for AEM SDK integration.
@@ -27,6 +31,11 @@ import org.springframework.context.annotation.Configuration;
 public class AemConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(AemConfig.class);
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 
     /**
      * Enable/disable real AEM integration.

@@ -124,14 +124,14 @@ public class SecurityConfig {
             httpResponse.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
             httpResponse.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
 
-            // Content Security Policy - restrictive but allows necessary functionality
+            // Content Security Policy - allows WebSocket and live collaboration
             httpResponse.setHeader("Content-Security-Policy",
                 "default-src 'self'; " +
-                "script-src 'self'; " +
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
                 "style-src 'self' 'unsafe-inline'; " +
-                "img-src 'self' https: data:; " +
-                "font-src 'self'; " +
-                "connect-src 'self'; " +
+                "img-src 'self' https: data: blob:; " +
+                "font-src 'self' data:; " +
+                "connect-src 'self' ws: wss:; " +
                 "frame-ancestors 'none'");
 
             // HSTS header for HTTPS environments
