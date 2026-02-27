@@ -2,7 +2,7 @@
 
 ## Overview
 
-AEM A2UI Demo is an AI-powered content assistant for Adobe Experience Manager (AEM) that demonstrates the power of a "Brand-Aware AI" to generate on-brand content.
+AEM A2UI is an AI-powered content assistant for Adobe Experience Manager (AEM) that demonstrates the power of a "Brand-Aware AI" to generate on-brand content.
 
 ## Current Status
 
@@ -27,7 +27,7 @@ AEM A2UI Demo is an AI-powered content assistant for Adobe Experience Manager (A
 ### 📁 Project Structure
 
 ```
-aem-a2ui-demo/
+aem-a2ui/
 ├── agent-java/           # Java backend (Spring Boot)
 │   └── src/main/java/
 │       ├── controller/   # REST APIs

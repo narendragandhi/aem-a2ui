@@ -206,7 +206,7 @@ This starts:
 ## File Locations
 
 ```
-aem-a2ui-demo/
+aem-a2ui/
 ├── agent-java/
 │   ├── src/main/java/.../service/aem/   # AEM clients
 │   ├── src/main/resources/application.properties

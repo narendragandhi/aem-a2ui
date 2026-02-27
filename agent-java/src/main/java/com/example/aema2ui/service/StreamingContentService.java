@@ -377,6 +377,25 @@ public class StreamingContentService {
     }
 
     /**
+     * Emit progress update via STATE_DELTA event.
+     * This enables real-time progress bars in the UI.
+     */
+    private void emitProgressDelta(SseEmitter emitter, String runId, int percentage, String message) {
+        try {
+            emitEvent(emitter, STATE_DELTA, Map.of(
+                "runId", runId,
+                "delta", Map.of(
+                    "progress", percentage,
+                    "progressMessage", message,
+                    "timestamp", System.currentTimeMillis()
+                )
+            ));
+        } catch (IOException e) {
+            log.debug("Failed to emit progress delta: {}", e.getMessage());
+        }
+    }
+
+    /**
      * Emit an SSE event with AG-UI format.
      */
     private void emitEvent(SseEmitter emitter, String eventType, Map<String, Object> data)
@@ -521,6 +540,8 @@ public class StreamingContentService {
             try {
                 int stepIndex = 0;
 
+                int totalSteps = 5; // Total workflow steps for progress calculation
+
                 // ═══════════════════════════════════════════════════════════
                 // RUN_STARTED with enhanced metadata
                 // ═══════════════════════════════════════════════════════════
@@ -528,9 +549,13 @@ public class StreamingContentService {
                     "runId", runId,
                     "agentName", "AEM Content Assistant",
                     "version", "2.0",
-                    "capabilities", java.util.List.of("content_generation", "dam_search", "workflow_submit"),
-                    "aemConnected", aemIntegrationService.isConnected()
+                    "capabilities", java.util.List.of("content_generation", "dam_search", "workflow_submit", "hitl_approval"),
+                    "aemConnected", aemIntegrationService.isConnected(),
+                    "totalSteps", totalSteps
                 ));
+
+                // Initial progress
+                emitProgressDelta(emitter, runId, 0, "Starting content generation...");
 
                 // ═══════════════════════════════════════════════════════════
                 // STEP 1: Parse Intent
@@ -562,6 +587,9 @@ public class StreamingContentService {
                     "status", "completed",
                     "result", Map.of("componentType", parsed.getDetectedComponentType())
                 ));
+
+                // Progress: 20%
+                emitProgressDelta(emitter, runId, 20, "Request analyzed, searching DAM...");
 
                 // ═══════════════════════════════════════════════════════════
                 // STEP 2: Search AEM DAM (Real Tool Call)
@@ -624,6 +652,9 @@ public class StreamingContentService {
                     "result", Map.of("foundAssets", damAssets.size())
                 ));
 
+                // Progress: 40%
+                emitProgressDelta(emitter, runId, 40, "Found " + damAssets.size() + " assets, generating content...");
+
                 // ═══════════════════════════════════════════════════════════
                 // STEP 3: Generate Content
                 // ═══════════════════════════════════════════════════════════
@@ -660,13 +691,72 @@ public class StreamingContentService {
                     "status", "completed"
                 ));
 
+                // Progress: 60%
+                emitProgressDelta(emitter, runId, 60, "Content generated, awaiting review...");
+
                 // ═══════════════════════════════════════════════════════════
-                // STEP 4: Stream Content
+                // STEP 4: HITL Approval (Human-in-the-Loop)
                 // ═══════════════════════════════════════════════════════════
                 String stepId4 = "step-" + (++stepIndex);
                 emitEvent(emitter, STEP_STARTED, Map.of(
                     "runId", runId,
                     "stepId", stepId4,
+                    "stepIndex", stepIndex,
+                    "stepName", "content_review",
+                    "stepTitle", "Ready for Review",
+                    "icon", "👁️"
+                ));
+
+                // Emit INTERRUPT_REQUESTED for HITL approval
+                String interruptId = UUID.randomUUID().toString();
+                emitEvent(emitter, INTERRUPT_REQUESTED, Map.of(
+                    "runId", runId,
+                    "interruptId", interruptId,
+                    "type", "approval",
+                    "title", "Review Generated Content",
+                    "description", "Please review the content before publishing to AEM.",
+                    "options", java.util.List.of(
+                        Map.of("id", "approve", "label", "✓ Approve & Publish", "style", "primary"),
+                        Map.of("id", "edit", "label", "✏️ Edit Content", "style", "secondary"),
+                        Map.of("id", "reject", "label", "✕ Reject", "style", "danger")
+                    ),
+                    "content", content,
+                    "metadata", Map.of(
+                        "componentType", content.getComponentType(),
+                        "hasImage", content.getImageUrl() != null,
+                        "damAssetCount", damAssets.size()
+                    )
+                ));
+
+                // Simulate auto-resolve for demo (in real app, this would wait for user input)
+                Thread.sleep(100); // Small delay to let UI render
+
+                // Auto-resolve with "approve" for demo flow
+                emitEvent(emitter, INTERRUPT_RESOLVED, Map.of(
+                    "runId", runId,
+                    "interruptId", interruptId,
+                    "resolution", "approve",
+                    "resolvedBy", "auto",
+                    "timestamp", System.currentTimeMillis()
+                ));
+
+                emitEvent(emitter, STEP_FINISHED, Map.of(
+                    "runId", runId,
+                    "stepId", stepId4,
+                    "status", "completed",
+                    "result", Map.of("approved", true)
+                ));
+
+                // Progress: 80%
+                emitProgressDelta(emitter, runId, 80, "Approved! Streaming content...");
+
+                // ═══════════════════════════════════════════════════════════
+                // STEP 5: Stream Content
+                // ═══════════════════════════════════════════════════════════
+                String stepId5 = "step-" + (++stepIndex);
+                emitEvent(emitter, STEP_STARTED, Map.of(
+                    "runId", runId,
+                    "stepId", stepId5,
                     "stepIndex", stepIndex,
                     "stepName", "stream_output",
                     "stepTitle", "Delivering content...",
@@ -683,9 +773,12 @@ public class StreamingContentService {
 
                 emitEvent(emitter, STEP_FINISHED, Map.of(
                     "runId", runId,
-                    "stepId", stepId4,
+                    "stepId", stepId5,
                     "status", "completed"
                 ));
+
+                // Progress: 95%
+                emitProgressDelta(emitter, runId, 95, "Finalizing...");
 
                 // ═══════════════════════════════════════════════════════════
                 // STATE_SNAPSHOT - Full state for UI recovery

@@ -1,4 +1,4 @@
-# AEM A2UI Demo - Claude Development Notes
+# AEM A2UI - Development Notes
 
 This file documents key decisions, architecture choices, and updates made during development.
 
@@ -883,13 +883,47 @@ eventTypes.forEach(type => {
 
 **Advanced Workflow Example** (`/stream/advanced`):
 ```
-STEP 1: 🔍 Analyzing request...    → parse_intent
-STEP 2: 🖼️ Searching AEM DAM...   → dam_search (TOOL_CALL events)
-STEP 3: ✨ Generating content...   → generate_content
-STEP 4: 📤 Delivering content...   → stream_output
+STEP 1: 🔍 Analyzing request...    → parse_intent      [STATE_DELTA: 0% → 20%]
+STEP 2: 🖼️ Searching AEM DAM...   → dam_search        [STATE_DELTA: 20% → 40%]
+STEP 3: ✨ Generating content...   → generate_content  [STATE_DELTA: 40% → 60%]
+STEP 4: 👁️ Ready for Review       → INTERRUPT_REQUESTED (HITL approval)
+                                   → INTERRUPT_RESOLVED (auto/user approve)
+                                   [STATE_DELTA: 60% → 80%]
+STEP 5: 📤 Delivering content...   → stream_output     [STATE_DELTA: 80% → 95%]
 → STATE_SNAPSHOT for full recovery
 → CUSTOM_EVENT: aem.content.ready
-→ RUN_FINISHED with summary
+→ RUN_FINISHED with summary [100%]
+```
+
+**Progress Events (STATE_DELTA)**:
+```json
+{
+  "type": "STATE_DELTA",
+  "data": {
+    "delta": {
+      "progress": 60,
+      "progressMessage": "Content generated, awaiting review..."
+    }
+  }
+}
+```
+
+**HITL Approval Event (INTERRUPT_REQUESTED)**:
+```json
+{
+  "type": "INTERRUPT_REQUESTED",
+  "data": {
+    "interruptId": "uuid",
+    "type": "approval",
+    "title": "Review Generated Content",
+    "description": "Please review the content before publishing to AEM.",
+    "options": [
+      { "id": "approve", "label": "✓ Approve & Publish", "style": "primary" },
+      { "id": "edit", "label": "✏️ Edit Content", "style": "secondary" },
+      { "id": "reject", "label": "✕ Reject", "style": "danger" }
+    ]
+  }
+}
 ```
 
 ### 22. AI-Driven Component Recommendations (A2UI)
@@ -934,10 +968,11 @@ Agent: [Navigation → Hero → Teaser x3 → CTA → Footer]
 - [x] **State synchronization (AG-UI)** - STATE_SNAPSHOT for recovery, STATE_DELTA for updates
 - [x] **Tool Call Visualization** - Real-time display of AEM DAM search operations
 - [x] **Multi-step Workflow Progress** - Visual step tracking with icons
+- [x] **Human-in-the-Loop (HITL) Approval** - INTERRUPT_REQUESTED/RESOLVED for content review
+- [x] **Real-time Progress Bars** - STATE_DELTA progress events (0% → 100%)
 - [ ] Multi-language support
 - [ ] Custom brand config upload
 - [ ] A/B testing for content variations
-- [ ] Human-in-the-Loop approval interrupts (INTERRUPT_REQUESTED/RESOLVED)
 
 ## Troubleshooting
 

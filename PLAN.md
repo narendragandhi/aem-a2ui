@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add **AEM Workflow Integration** and **Collaborative Review** capabilities to the AEM A2UI Demo.
+Add **AEM Workflow Integration** and **Collaborative Review** capabilities to the AEM A2UI.
 
 ---
 

@@ -1,4 +1,4 @@
-# AEM A2UI Demo
+# AEM A2UI
 
 An AI-powered content assistant for Adobe Experience Manager (AEM) that demonstrates the power of a "Brand-Aware AI" to generate on-brand content with real-time streaming using the full AG-UI protocol.
 
@@ -88,7 +88,7 @@ The Java-based agent leverages the Embabel AI framework and provides features su
 ## Project Structure
 
 ```
-aem-a2ui-demo/
+aem-a2ui/
 ├── README.md                 # This file
 ├── agent/                    # Python agent (FastAPI) - Basic Demo
 ├── agent-java/               # Java agent (Spring Boot) - Advanced Features
@@ -216,7 +216,8 @@ Real integration with local AEM SDK:
 
 ## Future Enhancements
 
-- [ ] Human-in-the-Loop approval interrupts (INTERRUPT_REQUESTED/RESOLVED)
+- [x] Human-in-the-Loop approval (INTERRUPT_REQUESTED/RESOLVED)
+- [x] Real-time progress bars (STATE_DELTA events)
 - [ ] Multi-language support
 - [ ] Custom brand config upload UI
 - [ ] A/B testing for content variations

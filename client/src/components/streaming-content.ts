@@ -57,6 +57,16 @@ interface DamAsset {
   thumbnailUrl?: string;
 }
 
+interface HitlInterrupt {
+  interruptId: string;
+  type: string;
+  title: string;
+  description: string;
+  options: Array<{ id: string; label: string; style: string }>;
+  resolved: boolean;
+  resolution?: string;
+}
+
 interface AgUiEvent {
   type: AgUiEventType;
   timestamp: number;
@@ -517,6 +527,109 @@ export class StreamingContent extends LitElement {
       background: var(--spectrum-gray-200);
       color: var(--spectrum-gray-600);
     }
+
+    /* Progress Message */
+    .progress-message {
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--spectrum-gray-600);
+      background: var(--spectrum-gray-50);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-percentage {
+      font-weight: 600;
+      color: var(--spectrum-blue-600);
+      min-width: 40px;
+    }
+
+    /* HITL Approval Panel */
+    .hitl-panel {
+      padding: 16px;
+      background: linear-gradient(135deg, var(--spectrum-blue-50) 0%, var(--spectrum-purple-50) 100%);
+      border: 2px solid var(--spectrum-blue-400);
+      border-radius: 8px;
+      margin: 16px;
+    }
+
+    .hitl-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .hitl-icon {
+      font-size: 24px;
+    }
+
+    .hitl-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--spectrum-gray-800);
+    }
+
+    .hitl-description {
+      font-size: 13px;
+      color: var(--spectrum-gray-700);
+      margin-bottom: 16px;
+    }
+
+    .hitl-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hitl-btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .hitl-btn.primary {
+      background: var(--spectrum-green-500);
+      color: white;
+    }
+
+    .hitl-btn.primary:hover {
+      background: var(--spectrum-green-600);
+    }
+
+    .hitl-btn.secondary {
+      background: var(--spectrum-gray-200);
+      color: var(--spectrum-gray-800);
+    }
+
+    .hitl-btn.secondary:hover {
+      background: var(--spectrum-gray-300);
+    }
+
+    .hitl-btn.danger {
+      background: var(--spectrum-red-500);
+      color: white;
+    }
+
+    .hitl-btn.danger:hover {
+      background: var(--spectrum-red-600);
+    }
+
+    .hitl-resolved {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--spectrum-green-100);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--spectrum-green-700);
+    }
   `;
 
   @property({ type: String }) agentUrl = 'http://localhost:10003';
@@ -535,6 +648,8 @@ export class StreamingContent extends LitElement {
   @state() private aemConnected = false;
   @state() private agentName = 'AEM Content Assistant';
   @state() private useAdvanced = false;
+  @state() private progressMessage = '';
+  @state() private hitlInterrupt: HitlInterrupt | null = null;
 
   private eventSource: EventSource | null = null;
   private fieldOrder = ['title', 'subtitle', 'description', 'ctaText', 'price', 'imageUrl'];
@@ -716,9 +831,20 @@ export class StreamingContent extends LitElement {
       // ═══════════════════════════════════════════════════════════
       case 'STATE_DELTA':
         if (data.delta && typeof data.delta === 'object') {
-          const deltaObj = data.delta as { content?: ContentSuggestion };
+          const deltaObj = data.delta as {
+            content?: ContentSuggestion;
+            progress?: number;
+            progressMessage?: string;
+          };
           if (deltaObj.content) {
             this.content = deltaObj.content;
+          }
+          // Handle progress updates
+          if (typeof deltaObj.progress === 'number') {
+            this.progress = deltaObj.progress;
+          }
+          if (deltaObj.progressMessage) {
+            this.progressMessage = deltaObj.progressMessage;
           }
         }
         break;
@@ -750,6 +876,38 @@ export class StreamingContent extends LitElement {
               composed: true,
             })
           );
+        }
+        break;
+
+      // ═══════════════════════════════════════════════════════════
+      // HITL (Human-in-the-Loop) EVENTS
+      // ═══════════════════════════════════════════════════════════
+      case 'INTERRUPT_REQUESTED':
+        this.hitlInterrupt = {
+          interruptId: data.interruptId as string || '',
+          type: data.type as string || 'approval',
+          title: data.title as string || 'Review Required',
+          description: data.description as string || '',
+          options: (data.options as Array<{ id: string; label: string; style: string }>) || [],
+          resolved: false,
+        };
+        // Emit event for parent components
+        this.dispatchEvent(
+          new CustomEvent('hitl-interrupt', {
+            detail: this.hitlInterrupt,
+            bubbles: true,
+            composed: true,
+          })
+        );
+        break;
+
+      case 'INTERRUPT_RESOLVED':
+        if (this.hitlInterrupt && this.hitlInterrupt.interruptId === data.interruptId) {
+          this.hitlInterrupt = {
+            ...this.hitlInterrupt,
+            resolved: true,
+            resolution: data.resolution as string,
+          };
         }
         break;
 
@@ -825,6 +983,8 @@ export class StreamingContent extends LitElement {
     this.steps = [];
     this.toolCalls = [];
     this.damAssets = [];
+    this.progressMessage = '';
+    this.hitlInterrupt = null;
   }
 
   /**
@@ -863,9 +1023,11 @@ export class StreamingContent extends LitElement {
       <div class="streaming-container">
         ${this.renderHeader()}
         ${this.status !== 'idle' ? this.renderProgressBar() : ''}
+        ${this.progressMessage ? this.renderProgressMessage() : ''}
         ${this.status === 'idle' ? this.renderIdleState() : ''}
         ${this.status === 'error' ? this.renderError() : ''}
         ${this.steps.length > 0 ? this.renderSteps() : ''}
+        ${this.hitlInterrupt ? this.renderHitlPanel() : ''}
         ${this.toolCalls.length > 0 ? this.renderToolCalls() : ''}
         ${this.status === 'streaming' || this.status === 'completed'
           ? this.renderContent()
@@ -996,6 +1158,65 @@ export class StreamingContent extends LitElement {
         <div class="progress-fill" style="width: ${this.progress}%"></div>
       </div>
     `;
+  }
+
+  private renderProgressMessage() {
+    return html`
+      <div class="progress-message">
+        <span class="progress-percentage">${this.progress}%</span>
+        <span>${this.progressMessage}</span>
+      </div>
+    `;
+  }
+
+  private renderHitlPanel() {
+    if (!this.hitlInterrupt) return '';
+
+    if (this.hitlInterrupt.resolved) {
+      return html`
+        <div class="hitl-panel">
+          <div class="hitl-resolved">
+            <span>✓</span>
+            <span>Approved - Continuing workflow...</span>
+          </div>
+        </div>
+      `;
+    }
+
+    return html`
+      <div class="hitl-panel">
+        <div class="hitl-header">
+          <span class="hitl-icon">👁️</span>
+          <span class="hitl-title">${this.hitlInterrupt.title}</span>
+        </div>
+        <p class="hitl-description">${this.hitlInterrupt.description}</p>
+        <div class="hitl-actions">
+          ${this.hitlInterrupt.options.map(
+            (option) => html`
+              <button
+                class="hitl-btn ${option.style}"
+                @click=${() => this.handleHitlAction(option.id)}
+              >
+                ${option.label}
+              </button>
+            `
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  private handleHitlAction(actionId: string) {
+    this.dispatchEvent(
+      new CustomEvent('hitl-action', {
+        detail: {
+          interruptId: this.hitlInterrupt?.interruptId,
+          action: actionId,
+        },
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
   private renderIdleState() {
