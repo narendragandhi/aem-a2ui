@@ -77,6 +77,12 @@
             <version>4.0.0</version>
         </dependency>
 
+        <!-- Spring Boot Actuator for health/metrics -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

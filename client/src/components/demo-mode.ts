@@ -211,7 +211,7 @@ export class DemoMode extends LitElement {
         collaborationService.sendChatMessage(`Demo: ${activeUser.name} says hello!`);
       } else if (action === 'reaction') {
         const emojis = ['👍', '❤️', '🎉', '🔥'];
-        collaborationService.addReaction(activeUser.id, 'demo-content', emojis[Math.floor(Math.random() * emojis.length)], 'title');
+        collaborationService.addReaction(emojis[Math.floor(Math.random() * emojis.length)], 'title');
       }
     }
   }

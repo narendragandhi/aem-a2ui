@@ -770,48 +770,127 @@ const titleAttrs = getFieldAttributes('title');
 
 ## AG-UI & A2UI Protocol Features
 
-### 21. SSE Streaming (AG-UI Protocol)
+### 21. Full AG-UI Protocol Implementation (17 Event Types)
 
-**Feature**: Real-time content generation with Server-Sent Events streaming.
+**Feature**: Complete AG-UI protocol support with real-time streaming, multi-step workflows, tool call visualization, and state management.
 
-Implements AG-UI protocol event types for responsive content generation:
+Implements ALL 17 AG-UI protocol event types organized into 5 categories:
 
-**Event Types**:
+**Lifecycle Events**:
 | Event | Description |
 |-------|-------------|
-| `RUN_STARTED` | Generation begins |
+| `RUN_STARTED` | Agent run begins with metadata (agentName, version, capabilities) |
+| `RUN_FINISHED` | Run completes successfully |
+| `RUN_ERROR` | Error occurred with recovery info |
+| `STEP_STARTED` | Multi-step workflow step begins (with icon, title, description) |
+| `STEP_FINISHED` | Step completes with result |
+
+**Text Message Events**:
+| Event | Description |
+|-------|-------------|
 | `TEXT_MESSAGE_START` | New field generation starts |
 | `TEXT_MESSAGE_DELTA` | Incremental text update (word by word) |
 | `TEXT_MESSAGE_END` | Field complete |
-| `STATE_DELTA` | Full content state update |
-| `RUN_FINISHED` | Generation complete |
-| `RUN_ERROR` | Error occurred |
+
+**Tool Call Events** (NEW):
+| Event | Description |
+|-------|-------------|
+| `TOOL_CALL_START` | Tool execution begins (e.g., AEM DAM search) |
+| `TOOL_CALL_ARGS` | Tool arguments streamed |
+| `TOOL_CALL_END` | Tool execution completes |
+| `TOOL_CALL_RESULT` | Tool output with results |
+
+**State Management Events** (NEW):
+| Event | Description |
+|-------|-------------|
+| `STATE_DELTA` | Incremental state update |
+| `STATE_SNAPSHOT` | Full state for UI recovery/reconnection |
+| `MESSAGES_SNAPSHOT` | Full conversation history |
+
+**Extension Events** (NEW):
+| Event | Description |
+|-------|-------------|
+| `RAW_EVENT` | Raw data passthrough |
+| `CUSTOM_EVENT` | AEM-specific events (e.g., `aem.content.ready`) |
+
+**HITL Events** (NEW):
+| Event | Description |
+|-------|-------------|
+| `INTERRUPT_REQUESTED` | Human approval needed |
+| `INTERRUPT_RESOLVED` | User responded to interrupt |
 
 **Backend** (`StreamingContentService.java`, `StreamingController.java`):
 ```java
+// Basic streaming
 @GetMapping(value = "/stream/generate", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 public SseEmitter streamGenerate(@RequestParam String input, @RequestParam String componentType) {
     SseEmitter emitter = streamingService.createEmitter();
-    streamingService.streamContentGeneration(input, componentType, emitter);
+    streamingService.streamContentGeneration(input, componentType, emitter, useAi);
+    return emitter;
+}
+
+// Advanced streaming with AEM DAM integration and full AG-UI events
+@GetMapping(value = "/stream/advanced", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+public SseEmitter streamAdvanced(@RequestParam String input, @RequestParam String componentType) {
+    SseEmitter emitter = streamingService.createEmitter();
+    streamingService.streamWithDamIntegration(input, componentType, emitter, aemIntegrationService);
     return emitter;
 }
 ```
 
 **Frontend** (`streaming-content.ts`):
 ```typescript
-const eventSource = new EventSource(`${agentUrl}/stream/generate?input=${prompt}`);
-eventSource.addEventListener('TEXT_MESSAGE_DELTA', (e) => {
-  const event = JSON.parse(e.data);
-  this.content[event.data.field] = event.data.content;
+// Listen for ALL 17 event types
+const eventTypes = [
+  'RUN_STARTED', 'RUN_FINISHED', 'RUN_ERROR', 'STEP_STARTED', 'STEP_FINISHED',
+  'TEXT_MESSAGE_START', 'TEXT_MESSAGE_DELTA', 'TEXT_MESSAGE_END',
+  'TOOL_CALL_START', 'TOOL_CALL_ARGS', 'TOOL_CALL_END', 'TOOL_CALL_RESULT',
+  'STATE_DELTA', 'STATE_SNAPSHOT', 'MESSAGES_SNAPSHOT',
+  'RAW_EVENT', 'CUSTOM_EVENT'
+];
+
+const eventSource = new EventSource(`${agentUrl}/stream/advanced?input=${prompt}`);
+eventTypes.forEach(type => {
+  eventSource.addEventListener(type, (e) => this.handleEvent(type, JSON.parse(e.data)));
 });
 ```
 
 **API Endpoints**:
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/stream/generate` | GET | SSE streaming endpoint |
-| `/stream/generate` | POST | SSE with complex input |
-| `/stream/health` | GET | Streaming health check |
+| `/stream/generate` | GET/POST | Basic SSE streaming |
+| `/stream/advanced` | GET/POST | Full AG-UI with DAM integration |
+| `/stream/raw` | GET | Raw LLM token streaming |
+| `/stream/health` | GET | Protocol health with all event types |
+
+**Health Response**:
+```json
+{
+  "status": "ok",
+  "protocol": "AG-UI",
+  "version": "2.0",
+  "aemConnected": true,
+  "events": {
+    "lifecycle": ["RUN_STARTED", "RUN_FINISHED", "RUN_ERROR", "STEP_STARTED", "STEP_FINISHED"],
+    "textMessage": ["TEXT_MESSAGE_START", "TEXT_MESSAGE_DELTA", "TEXT_MESSAGE_END"],
+    "toolCall": ["TOOL_CALL_START", "TOOL_CALL_ARGS", "TOOL_CALL_END", "TOOL_CALL_RESULT"],
+    "state": ["STATE_DELTA", "STATE_SNAPSHOT", "MESSAGES_SNAPSHOT"],
+    "extension": ["RAW_EVENT", "CUSTOM_EVENT"],
+    "hitl": ["INTERRUPT_REQUESTED", "INTERRUPT_RESOLVED"]
+  }
+}
+```
+
+**Advanced Workflow Example** (`/stream/advanced`):
+```
+STEP 1: 🔍 Analyzing request...    → parse_intent
+STEP 2: 🖼️ Searching AEM DAM...   → dam_search (TOOL_CALL events)
+STEP 3: ✨ Generating content...   → generate_content
+STEP 4: 📤 Delivering content...   → stream_output
+→ STATE_SNAPSHOT for full recovery
+→ CUSTOM_EVENT: aem.content.ready
+→ RUN_FINISHED with summary
+```
 
 ### 22. AI-Driven Component Recommendations (A2UI)
 
@@ -851,10 +930,14 @@ Agent: [Navigation → Hero → Teaser x3 → CTA → Footer]
 - [x] Integration with AEM Sites Editor (Universal Editor)
 - [x] SSE Streaming for real-time content generation (AG-UI)
 - [x] AI-driven component recommendations (A2UI)
+- [x] **Full AG-UI Protocol (17 event types)** - Steps, Tool Calls, State Management, HITL
+- [x] **State synchronization (AG-UI)** - STATE_SNAPSHOT for recovery, STATE_DELTA for updates
+- [x] **Tool Call Visualization** - Real-time display of AEM DAM search operations
+- [x] **Multi-step Workflow Progress** - Visual step tracking with icons
 - [ ] Multi-language support
 - [ ] Custom brand config upload
 - [ ] A/B testing for content variations
-- [ ] State synchronization (AG-UI bi-directional state)
+- [ ] Human-in-the-Loop approval interrupts (INTERRUPT_REQUESTED/RESOLVED)
 
 ## Troubleshooting
 

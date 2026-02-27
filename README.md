@@ -1,6 +1,6 @@
 # AEM A2UI Demo
 
-An AI-powered content assistant for Adobe Experience Manager (AEM) that demonstrates the power of a "Brand-Aware AI" to generate on-brand content.
+An AI-powered content assistant for Adobe Experience Manager (AEM) that demonstrates the power of a "Brand-Aware AI" to generate on-brand content with real-time streaming using the full AG-UI protocol.
 
 ## Project Overview
 
@@ -9,10 +9,11 @@ This project is a sophisticated prototype of an AI-powered authoring assistant f
 **Core Technologies:**
 
 - **A2UI Protocol v0.8:** Google's Agent-to-User Interface protocol for generating rich, interactive UIs.
-- **AG-UI Protocol:** Event streaming protocol for real-time updates (Server-Sent Events).
+- **AG-UI Protocol v2.0:** Full implementation with all 17 event types for real-time streaming.
 - **Embabel Agent Framework:** A powerful AI agent framework for the JVM.
 - **Multi-LLM Support:** Integrates with OpenAI, Anthropic, and Ollama (for local development).
 - **Adobe Spectrum:** Adobe's official design system for a professional and intuitive UI.
+- **Real AEM SDK Integration:** Live connection to AEM Author with DAM search, content creation, and workflow support.
 
 ## Understanding A2UI vs AG-UI
 
@@ -21,7 +22,20 @@ This project uses two complementary protocols:
 | Protocol | Purpose | Example |
 |----------|---------|---------|
 | **A2UI** | Message format for rich UIs | Defines content, UI, actions |
-| **AG-UI** | Real-time streaming | Updates appear as they're generated |
+| **AG-UI** | Real-time streaming (17 events) | Updates appear as they're generated |
+
+### AG-UI Protocol - Full Implementation (17 Event Types)
+
+This project implements the **complete AG-UI protocol** with all 17 event types:
+
+| Category | Events | Description |
+|----------|--------|-------------|
+| **Lifecycle** | `RUN_STARTED`, `RUN_FINISHED`, `RUN_ERROR`, `STEP_STARTED`, `STEP_FINISHED` | Agent run lifecycle tracking |
+| **Text Message** | `TEXT_MESSAGE_START`, `TEXT_MESSAGE_DELTA`, `TEXT_MESSAGE_END` | Streaming text generation |
+| **Tool Call** | `TOOL_CALL_START`, `TOOL_CALL_ARGS`, `TOOL_CALL_END`, `TOOL_CALL_RESULT` | Real-time tool execution (e.g., AEM DAM search) |
+| **State** | `STATE_DELTA`, `STATE_SNAPSHOT`, `MESSAGES_SNAPSHOT` | State synchronization for UI recovery |
+| **Extension** | `RAW_EVENT`, `CUSTOM_EVENT` | AEM-specific events (e.g., `aem.content.ready`) |
+| **HITL** | `INTERRUPT_REQUESTED`, `INTERRUPT_RESOLVED` | Human-in-the-Loop approval |
 
 **See [docs/PROTOCOL.md](docs/PROTOCOL.md)** for a detailed explanation of both protocols and how they work together.
 
@@ -150,13 +164,63 @@ npm run dev
 
 Navigate to `http://localhost:5173` to see the application in action.
 
+## Streaming Endpoints
+
+The project provides multiple streaming endpoints for real-time content generation:
+
+| Endpoint | Description | Events |
+|----------|-------------|--------|
+| `/stream/generate` | Basic SSE streaming | Lifecycle + Text Message events |
+| `/stream/advanced` | Full AG-UI with AEM DAM integration | All 17 event types |
+| `/stream/raw` | Raw LLM token streaming | Raw tokens as generated |
+| `/stream/health` | Protocol health check | Lists all supported events |
+
+### Example: Advanced Streaming Workflow
+
+```
+STEP 1: 🔍 Analyzing request...    → STEP_STARTED (parse_intent)
+STEP 2: 🖼️ Searching AEM DAM...   → TOOL_CALL_START (aem_dam_search)
+STEP 3: ✨ Generating content...   → TEXT_MESSAGE_DELTA (streaming)
+STEP 4: 📤 Delivering content...   → STATE_SNAPSHOT (recovery)
+→ CUSTOM_EVENT: aem.content.ready
+→ RUN_FINISHED
+```
+
+## AEM SDK Integration
+
+Real integration with local AEM SDK:
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **DAM Browse/Search** | ✅ | Browse folders, search assets with MIME filters |
+| **Content Creation** | ✅ | Create pages and content fragments |
+| **Workflow Submit** | ✅ | Submit to AEM workflow engine |
+| **Health Check** | ✅ | Automatic connection monitoring |
+| **GraphQL** | ✅ | Content Fragment queries |
+| **Webhooks** | ✅ | AEM event handlers |
+
+## Features Implemented
+
+- [x] Full AG-UI Protocol (17 event types)
+- [x] Real-time SSE streaming with word-by-word updates
+- [x] Multi-step workflow visualization with icons
+- [x] Tool call visualization (AEM DAM search)
+- [x] State synchronization for UI recovery
+- [x] Direct AEM SDK integration (DAM, Content, Workflows)
+- [x] Brand alignment scoring (textual + visual)
+- [x] 20 component types across 7 categories
+- [x] Collaborative review workflow
+- [x] Universal Editor integration
+- [x] AI-driven component recommendations
+- [x] Multi-LLM support (OpenAI, Anthropic, Ollama)
+
 ## Future Enhancements
 
-- Direct AEM integration via Granite APIs
-- Integration with AEM's asset library
-- Workflow integration for content approval
-- Multi-language support
-- A UI for managing brand configurations
+- [ ] Human-in-the-Loop approval interrupts (INTERRUPT_REQUESTED/RESOLVED)
+- [ ] Multi-language support
+- [ ] Custom brand config upload UI
+- [ ] A/B testing for content variations
+- [ ] Enterprise SSO (Adobe IMS)
 
 ## License
 

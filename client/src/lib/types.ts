@@ -231,3 +231,51 @@ export interface PageRecommendation {
   sections: SectionRecommendation[];
   alternatives: string[];
 }
+
+// Collaboration Types
+
+export interface LiveUser {
+  sessionId: string;
+  username: string;
+  color: string;
+  avatar?: string;
+  joinedAt: string;
+  lastActive: string;
+  currentField?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  sessionId: string;
+  username: string;
+  content: string;
+  timestamp: string;
+  type?: 'message' | 'system' | 'action';
+}
+
+export interface CursorPosition {
+  sessionId: string;
+  username: string;
+  color: string;
+  x: number;
+  y: number;
+  field?: string;
+  timestamp?: string;
+}
+
+export interface FieldLock {
+  field: string;
+  sessionId: string;
+  username: string;
+  lockedAt: string;
+}
+
+export interface Notification {
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'error' | 'review';
+  title: string;
+  message: string;
+  fromUser?: string;
+  timestamp: string;
+  read?: boolean;
+}

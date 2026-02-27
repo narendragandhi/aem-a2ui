@@ -106,8 +106,8 @@ export class AssistantHeader extends LitElement {
     return html`
       <div class="header">
         <h1>
-          <span class="header-logo">A</span>
-          AEM Content Assistant
+          <span class="header-logo">🏭</span>
+          AEM Component Factory
         </h1>
         <div class="agent-selector">
           <select @change=${this.handleAgentChange}>

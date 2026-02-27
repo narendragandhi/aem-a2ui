@@ -1225,7 +1225,6 @@ export class AemPreview extends LitElement {
             </div>
           `;
 
-      case 'teaser':
       case 'product':
       case 'banner':
       case 'team':

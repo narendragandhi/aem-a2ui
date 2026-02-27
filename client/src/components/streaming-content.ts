@@ -3,27 +3,95 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { ContentSuggestion } from '../lib/types';
 
 /**
- * AG-UI Event Types from the backend
+ * AG-UI Event Types - Full Protocol Support (17 event types)
  */
 type AgUiEventType =
+  // Lifecycle Events
   | 'RUN_STARTED'
+  | 'RUN_FINISHED'
+  | 'RUN_ERROR'
+  | 'STEP_STARTED'
+  | 'STEP_FINISHED'
+  // Text Message Events
   | 'TEXT_MESSAGE_START'
   | 'TEXT_MESSAGE_DELTA'
   | 'TEXT_MESSAGE_END'
+  // Tool Call Events
+  | 'TOOL_CALL_START'
+  | 'TOOL_CALL_ARGS'
+  | 'TOOL_CALL_END'
+  | 'TOOL_CALL_RESULT'
+  // State Management Events
   | 'STATE_DELTA'
-  | 'RUN_FINISHED'
-  | 'RUN_ERROR';
+  | 'STATE_SNAPSHOT'
+  | 'MESSAGES_SNAPSHOT'
+  // Extension Events
+  | 'RAW_EVENT'
+  | 'CUSTOM_EVENT'
+  // HITL Events
+  | 'INTERRUPT_REQUESTED'
+  | 'INTERRUPT_RESOLVED';
+
+interface AgentStep {
+  stepId: string;
+  stepIndex: number;
+  stepName: string;
+  stepTitle: string;
+  icon?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'error';
+}
+
+interface ToolCall {
+  toolCallId: string;
+  toolName: string;
+  toolDescription: string;
+  args?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  status: 'started' | 'args_received' | 'completed';
+}
+
+interface DamAsset {
+  path: string;
+  title: string;
+  mimeType?: string;
+  thumbnailUrl?: string;
+}
 
 interface AgUiEvent {
   type: AgUiEventType;
   timestamp: number;
   data: {
     runId: string;
+    // Step data
+    stepId?: string;
+    stepIndex?: number;
+    stepName?: string;
+    stepTitle?: string;
+    stepDescription?: string;
+    icon?: string;
+    // Tool call data
+    toolCallId?: string;
+    toolName?: string;
+    toolDescription?: string;
+    args?: Record<string, unknown>;
+    result?: Record<string, unknown>;
+    // Text message data
     field?: string;
     delta?: string | { content?: ContentSuggestion; componentType?: string };
     content?: string | ContentSuggestion;
+    // State data
+    state?: Record<string, unknown>;
+    // Custom event data
+    eventType?: string;
+    payload?: Record<string, unknown>;
+    // Error data
     error?: string;
     status?: string;
+    // Metadata
+    agentName?: string;
+    version?: string;
+    aemConnected?: boolean;
+    totalSteps?: number;
   };
 }
 
@@ -269,6 +337,186 @@ export class StreamingContent extends LitElement {
       margin-bottom: 16px;
       opacity: 0.5;
     }
+
+    /* Steps Progress */
+    .steps-container {
+      padding: 16px;
+      background: var(--spectrum-gray-75);
+      border-bottom: 1px solid var(--spectrum-gray-200);
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 13px;
+    }
+
+    .step-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      background: var(--spectrum-gray-200);
+      color: var(--spectrum-gray-600);
+    }
+
+    .step-icon.in_progress {
+      background: var(--spectrum-blue-500);
+      color: white;
+      animation: pulse 1s infinite;
+    }
+
+    .step-icon.completed {
+      background: var(--spectrum-green-500);
+      color: white;
+    }
+
+    .step-icon.error {
+      background: var(--spectrum-red-500);
+      color: white;
+    }
+
+    .step-info {
+      flex: 1;
+    }
+
+    .step-title {
+      font-weight: 500;
+      color: var(--spectrum-gray-800);
+    }
+
+    .step-title.in_progress {
+      color: var(--spectrum-blue-600);
+    }
+
+    .step-description {
+      font-size: 11px;
+      color: var(--spectrum-gray-600);
+    }
+
+    /* Tool Calls */
+    .tool-calls-container {
+      padding: 12px 16px;
+      background: var(--spectrum-gray-50);
+      border-bottom: 1px solid var(--spectrum-gray-200);
+    }
+
+    .tool-call {
+      background: white;
+      border: 1px solid var(--spectrum-gray-200);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .tool-call:last-child {
+      margin-bottom: 0;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .tool-icon {
+      font-size: 16px;
+    }
+
+    .tool-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--spectrum-gray-800);
+    }
+
+    .tool-status {
+      margin-left: auto;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--spectrum-gray-200);
+    }
+
+    .tool-status.completed {
+      background: var(--spectrum-green-100);
+      color: var(--spectrum-green-700);
+    }
+
+    .tool-args, .tool-result {
+      font-size: 11px;
+      font-family: monospace;
+      background: var(--spectrum-gray-100);
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      overflow-x: auto;
+    }
+
+    .tool-args-label, .tool-result-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--spectrum-gray-600);
+      margin-bottom: 4px;
+    }
+
+    /* DAM Assets */
+    .dam-assets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .dam-asset {
+      width: 60px;
+      height: 60px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .dam-asset:hover {
+      border-color: var(--spectrum-blue-500);
+    }
+
+    .dam-asset.selected {
+      border-color: var(--spectrum-green-500);
+    }
+
+    .dam-asset img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* AEM Badge */
+    .aem-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .aem-badge.connected {
+      background: var(--spectrum-green-100);
+      color: var(--spectrum-green-700);
+    }
+
+    .aem-badge.disconnected {
+      background: var(--spectrum-gray-200);
+      color: var(--spectrum-gray-600);
+    }
   `;
 
   @property({ type: String }) agentUrl = 'http://localhost:10003';
@@ -281,6 +529,12 @@ export class StreamingContent extends LitElement {
   @state() private error = '';
   @state() private progress = 0;
   @state() private runId = '';
+  @state() private steps: AgentStep[] = [];
+  @state() private toolCalls: ToolCall[] = [];
+  @state() private damAssets: DamAsset[] = [];
+  @state() private aemConnected = false;
+  @state() private agentName = 'AEM Content Assistant';
+  @state() private useAdvanced = false;
 
   private eventSource: EventSource | null = null;
   private fieldOrder = ['title', 'subtitle', 'description', 'ctaText', 'price', 'imageUrl'];
@@ -292,13 +546,17 @@ export class StreamingContent extends LitElement {
 
   /**
    * Start streaming content generation
+   * @param prompt User input prompt
+   * @param componentType Target component type
+   * @param advanced Use advanced endpoint with DAM integration
    */
-  public async startStreaming(prompt: string, componentType?: string) {
+  public async startStreaming(prompt: string, componentType?: string, advanced = false) {
     this.cancelStream(); // Cancel any existing stream
     this.reset();
 
     this.prompt = prompt;
     if (componentType) this.componentType = componentType;
+    this.useAdvanced = advanced;
     this.status = 'streaming';
 
     const params = new URLSearchParams({
@@ -306,18 +564,27 @@ export class StreamingContent extends LitElement {
       ...(this.componentType && { componentType: this.componentType }),
     });
 
-    try {
-      this.eventSource = new EventSource(`${this.agentUrl}/stream/generate?${params}`);
+    // Use advanced endpoint for full AG-UI demo with DAM
+    const endpoint = advanced ? '/stream/advanced' : '/stream/generate';
 
-      // Listen for all AG-UI event types
+    try {
+      this.eventSource = new EventSource(`${this.agentUrl}${endpoint}?${params}`);
+
+      // Listen for ALL AG-UI event types (17 total)
       const eventTypes: AgUiEventType[] = [
-        'RUN_STARTED',
-        'TEXT_MESSAGE_START',
-        'TEXT_MESSAGE_DELTA',
-        'TEXT_MESSAGE_END',
-        'STATE_DELTA',
-        'RUN_FINISHED',
-        'RUN_ERROR',
+        // Lifecycle
+        'RUN_STARTED', 'RUN_FINISHED', 'RUN_ERROR',
+        'STEP_STARTED', 'STEP_FINISHED',
+        // Text Message
+        'TEXT_MESSAGE_START', 'TEXT_MESSAGE_DELTA', 'TEXT_MESSAGE_END',
+        // Tool Call
+        'TOOL_CALL_START', 'TOOL_CALL_ARGS', 'TOOL_CALL_END', 'TOOL_CALL_RESULT',
+        // State
+        'STATE_DELTA', 'STATE_SNAPSHOT', 'MESSAGES_SNAPSHOT',
+        // Extension
+        'RAW_EVENT', 'CUSTOM_EVENT',
+        // HITL
+        'INTERRUPT_REQUESTED', 'INTERRUPT_RESOLVED',
       ];
 
       eventTypes.forEach((eventType) => {
@@ -341,17 +608,90 @@ export class StreamingContent extends LitElement {
   }
 
   /**
-   * Handle incoming AG-UI events
+   * Handle incoming AG-UI events (17 event types supported)
    */
   private handleEvent(type: AgUiEventType, event: AgUiEvent) {
     const { data } = event;
 
     switch (type) {
+      // ═══════════════════════════════════════════════════════════
+      // LIFECYCLE EVENTS
+      // ═══════════════════════════════════════════════════════════
       case 'RUN_STARTED':
         this.runId = data.runId;
         this.progress = 5;
+        if (data.agentName) this.agentName = data.agentName;
+        if (data.aemConnected !== undefined) this.aemConnected = data.aemConnected;
         break;
 
+      case 'STEP_STARTED':
+        this.steps = [
+          ...this.steps,
+          {
+            stepId: data.stepId || '',
+            stepIndex: data.stepIndex || 0,
+            stepName: data.stepName || '',
+            stepTitle: data.stepTitle || '',
+            icon: data.icon,
+            status: 'in_progress',
+          },
+        ];
+        break;
+
+      case 'STEP_FINISHED':
+        this.steps = this.steps.map((step) =>
+          step.stepId === data.stepId
+            ? { ...step, status: data.status === 'completed' ? 'completed' : 'error' }
+            : step
+        );
+        // Update progress based on steps
+        if (data.stepIndex && data.totalSteps) {
+          this.progress = Math.min(95, (data.stepIndex / data.totalSteps) * 100);
+        }
+        break;
+
+      // ═══════════════════════════════════════════════════════════
+      // TOOL CALL EVENTS
+      // ═══════════════════════════════════════════════════════════
+      case 'TOOL_CALL_START':
+        this.toolCalls = [
+          ...this.toolCalls,
+          {
+            toolCallId: data.toolCallId || '',
+            toolName: data.toolName || '',
+            toolDescription: data.toolDescription || '',
+            status: 'started',
+          },
+        ];
+        break;
+
+      case 'TOOL_CALL_ARGS':
+        this.toolCalls = this.toolCalls.map((tc) =>
+          tc.toolCallId === data.toolCallId
+            ? { ...tc, args: data.args, status: 'args_received' }
+            : tc
+        );
+        break;
+
+      case 'TOOL_CALL_RESULT':
+        this.toolCalls = this.toolCalls.map((tc) =>
+          tc.toolCallId === data.toolCallId ? { ...tc, result: data.result } : tc
+        );
+        // Extract DAM assets from tool result if present
+        if (data.result?.assets) {
+          this.damAssets = data.result.assets as DamAsset[];
+        }
+        break;
+
+      case 'TOOL_CALL_END':
+        this.toolCalls = this.toolCalls.map((tc) =>
+          tc.toolCallId === data.toolCallId ? { ...tc, status: 'completed' } : tc
+        );
+        break;
+
+      // ═══════════════════════════════════════════════════════════
+      // TEXT MESSAGE EVENTS
+      // ═══════════════════════════════════════════════════════════
       case 'TEXT_MESSAGE_START':
         this.currentField = data.field || '';
         this.updateProgress(data.field);
@@ -371,8 +711,10 @@ export class StreamingContent extends LitElement {
         this.currentField = '';
         break;
 
+      // ═══════════════════════════════════════════════════════════
+      // STATE MANAGEMENT EVENTS
+      // ═══════════════════════════════════════════════════════════
       case 'STATE_DELTA':
-        // Full content update
         if (data.delta && typeof data.delta === 'object') {
           const deltaObj = data.delta as { content?: ContentSuggestion };
           if (deltaObj.content) {
@@ -381,15 +723,57 @@ export class StreamingContent extends LitElement {
         }
         break;
 
+      case 'STATE_SNAPSHOT':
+        // Full state recovery - useful for reconnection
+        if (data.state) {
+          const state = data.state as {
+            content?: ContentSuggestion;
+            damAssets?: DamAsset[];
+            aemConnected?: boolean;
+          };
+          if (state.content) this.content = state.content;
+          if (state.damAssets) this.damAssets = state.damAssets;
+          if (state.aemConnected !== undefined) this.aemConnected = state.aemConnected;
+        }
+        break;
+
+      // ═══════════════════════════════════════════════════════════
+      // EXTENSION EVENTS
+      // ═══════════════════════════════════════════════════════════
+      case 'CUSTOM_EVENT':
+        // Handle AEM-specific custom events
+        if (data.eventType === 'aem.content.ready') {
+          this.dispatchEvent(
+            new CustomEvent('aem-content-ready', {
+              detail: data.payload,
+              bubbles: true,
+              composed: true,
+            })
+          );
+        }
+        break;
+
+      // ═══════════════════════════════════════════════════════════
+      // COMPLETION EVENTS
+      // ═══════════════════════════════════════════════════════════
       case 'RUN_FINISHED':
         this.status = 'completed';
         this.progress = 100;
         this.eventSource?.close();
 
+        // Mark all steps as completed
+        this.steps = this.steps.map((s) =>
+          s.status === 'in_progress' ? { ...s, status: 'completed' } : s
+        );
+
         // Emit content-ready event
         this.dispatchEvent(
           new CustomEvent('content-ready', {
-            detail: { content: this.content },
+            detail: {
+              content: this.content,
+              damAssets: this.damAssets,
+              aemConnected: this.aemConnected,
+            },
             bubbles: true,
             composed: true,
           })
@@ -438,6 +822,9 @@ export class StreamingContent extends LitElement {
     this.error = '';
     this.progress = 0;
     this.runId = '';
+    this.steps = [];
+    this.toolCalls = [];
+    this.damAssets = [];
   }
 
   /**
@@ -478,6 +865,8 @@ export class StreamingContent extends LitElement {
         ${this.status !== 'idle' ? this.renderProgressBar() : ''}
         ${this.status === 'idle' ? this.renderIdleState() : ''}
         ${this.status === 'error' ? this.renderError() : ''}
+        ${this.steps.length > 0 ? this.renderSteps() : ''}
+        ${this.toolCalls.length > 0 ? this.renderToolCalls() : ''}
         ${this.status === 'streaming' || this.status === 'completed'
           ? this.renderContent()
           : ''}
@@ -499,12 +888,104 @@ export class StreamingContent extends LitElement {
         <div class="stream-status">
           <span class="status-dot ${this.status}"></span>
           <span>${statusText[this.status]}</span>
+          ${this.useAdvanced
+            ? html`
+                <span class="aem-badge ${this.aemConnected ? 'connected' : 'disconnected'}">
+                  ${this.aemConnected ? '🟢 AEM Live' : '⚪ Mock Mode'}
+                </span>
+              `
+            : ''}
         </div>
         ${this.status === 'streaming'
           ? html`
               <button class="cancel-btn" @click=${this.cancelStream}>Cancel</button>
             `
           : ''}
+      </div>
+    `;
+  }
+
+  private renderSteps() {
+    return html`
+      <div class="steps-container">
+        ${this.steps.map(
+          (step) => html`
+            <div class="step-item">
+              <div class="step-icon ${step.status}">
+                ${step.status === 'completed'
+                  ? '✓'
+                  : step.status === 'in_progress'
+                  ? '⟳'
+                  : step.icon || (step.stepIndex || 0).toString()}
+              </div>
+              <div class="step-info">
+                <div class="step-title ${step.status}">${step.stepTitle}</div>
+              </div>
+            </div>
+          `
+        )}
+      </div>
+    `;
+  }
+
+  private renderToolCalls() {
+    return html`
+      <div class="tool-calls-container">
+        ${this.toolCalls.map(
+          (tc) => html`
+            <div class="tool-call">
+              <div class="tool-header">
+                <span class="tool-icon">🔧</span>
+                <span class="tool-name">${tc.toolName}</span>
+                <span class="tool-status ${tc.status}">${tc.status}</span>
+              </div>
+              ${tc.toolDescription
+                ? html`<div class="step-description">${tc.toolDescription}</div>`
+                : ''}
+              ${tc.args
+                ? html`
+                    <div class="tool-args-label">Arguments</div>
+                    <div class="tool-args">
+                      <pre>${JSON.stringify(tc.args, null, 2)}</pre>
+                    </div>
+                  `
+                : ''}
+              ${tc.result
+                ? html`
+                    <div class="tool-result-label">Result</div>
+                    <div class="tool-result">
+                      <pre>${JSON.stringify(tc.result, null, 2)}</pre>
+                    </div>
+                    ${this.renderDamAssets(tc)}
+                  `
+                : ''}
+            </div>
+          `
+        )}
+      </div>
+    `;
+  }
+
+  private renderDamAssets(tc: ToolCall) {
+    if (tc.toolName !== 'aem_dam_search' || !tc.result?.assets) return '';
+
+    const assets = tc.result.assets as DamAsset[];
+    if (assets.length === 0) return '';
+
+    return html`
+      <div class="dam-assets">
+        ${assets.slice(0, 5).map(
+          (asset) => html`
+            <div class="dam-asset" title="${asset.title || asset.path}">
+              <img
+                src="${asset.thumbnailUrl ||
+                `http://host.docker.internal:4502${asset.path}/_jcr_content/renditions/cq5dam.thumbnail.48.48.png`}"
+                alt="${asset.title || 'Asset'}"
+                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect fill=%22%23f0f0f0%22 width=%2248%22 height=%2248%22/><text x=%2224%22 y=%2228%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%2212%22>📷</text></svg>'"
+              />
+            </div>
+          `
+        )}
       </div>
     `;
   }

@@ -28,6 +28,7 @@ export interface CursorPosition {
   avatar: string;
   x: number;
   y: number;
+  timestamp?: string;
 }
 
 export interface CollaborationEvent {

@@ -3,6 +3,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { Task } from '@lit/task';
 import brandConfig from "./data/brand-config.json";
 import './spectrum-imports.js';
+
+// Core components
 import './components/assistant-header.js';
 import './components/assistant-input.js';
 import './components/assistant-suggestions.js';
@@ -13,10 +15,15 @@ import './components/brand-panel.js';
 import './components/page-builder.js';
 import './components/aem-preview.js';
 import './components/seo-panel.js';
+import './components/asset-browser.js';
+
+// Review & workflow
 import './components/review-panel.js';
 import './components/review-comments.js';
 import './components/workflow-panel.js';
 import './components/version-history.js';
+
+// Collaboration
 import './components/live-presence.js';
 import './components/live-cursors.js';
 import './components/live-chat.js';
@@ -24,21 +31,44 @@ import './components/emoji-reactions.js';
 import './components/content-locks.js';
 import './components/live-notifications.js';
 import './components/demo-mode.js';
+
+// AEM integration
 import './components/aem-connection-status.js';
 import './components/dam-browser.js';
 import './components/aem-status.js';
 import './components/component-recommender.js';
 import './components/streaming-content.js';
+import './components/aem-export-panel.js';
+import './components/bulk-generator.js';
+import './components/content-fragment-panel.js';
+import './components/advanced-export-panel.js';
+import './components/seo-toolkit.js';
+import './components/seo-dashboard.js';
 
+// New UX components
+import './components/loading-skeleton.js';
+import './components/onboarding.js';
+import './components/mode-toggle.js';
+import './components/shortcuts-help.js';
+
+// Types
 import { ContentSuggestion, ImageAsset, Review, DamAsset, PageRecommendation, LiveUser, ChatMessage, CursorPosition } from './lib/types.js';
 import { StreamingContent } from './components/streaming-content.js';
+
+// Services
 import { HistoryService } from './services/history-service.js';
 import { collaborationService, LiveUser as CollaborationLiveUser, ChatMessage as CollabChatMessage } from './services/collaboration-service.js';
+import { logger, uiLogger, contentLogger } from './services/logger.js';
+import { api } from './services/api.js';
+import { appState, ViewMode } from './services/app-state.js';
+import { errorHandler, AppError, withRetry } from './services/error-handler.js';
+import { keyboardShortcuts } from './services/keyboard-shortcuts.js';
+
+// Component refs for type checking
 import { ContentWizard } from './components/content-wizard.js';
 import { BrandPanel } from './components/brand-panel.js';
 import { PageBuilder } from './components/page-builder.js';
 import { AemPreview } from './components/aem-preview.js';
-import './components/asset-browser.js';
 
 interface PageSection {
   id: string;
@@ -84,7 +114,8 @@ export class AemAssistant extends LitElement {
   @state() private refinementMode = false;
   @state() private history: ContentSuggestion[] = [];
   @state() private theme: 'light' | 'dark' = 'light';
-  @state() private viewMode: 'wizard' | 'quick' | 'pagebuilder' | 'ai-recommend' = 'ai-recommend';
+  // Simplified to 2 modes: 'create' (wizard/quick combined) and 'build' (pagebuilder)
+  @state() private viewMode: ViewMode = 'create';
   @state() private pageSections: PageSection[] = [];
   @state() private currentSectionIndex = 0;
   @state() private selectedComponentType = 'hero';
@@ -94,7 +125,11 @@ export class AemAssistant extends LitElement {
   @state() private showDamBrowser = false;
   @state() private selectedDamAsset: DamAsset | null = null;
   @state() private loading = false;
-  @state() private error = '';
+  @state() private appError: AppError | null = null;
+
+  // New UX state
+  @state() private showOnboarding = false;
+  @state() private showShortcutsHelp = false;
   @state() private showStreamingModal = false;
   @state() private streamingSectionId: string | null = null;
   @state() private streamingComponentType = '';
@@ -675,51 +710,41 @@ export class AemAssistant extends LitElement {
             ></seo-panel>
           ` : ''}
 
-          <!-- View Mode Toggle -->
-          <div class="view-mode-toggle">
-            <sp-action-group selects="single" @change=${this.handleModeChange}>
-              <sp-action-button ?selected=${this.viewMode === 'ai-recommend'} value="ai-recommend">
-                AI Recommend
-              </sp-action-button>
-              <sp-action-button ?selected=${this.viewMode === 'wizard'} value="wizard">
-                Guided
-              </sp-action-button>
-              <sp-action-button ?selected=${this.viewMode === 'quick'} value="quick">
-                Quick
-              </sp-action-button>
-              <sp-action-button ?selected=${this.viewMode === 'pagebuilder'} value="pagebuilder">
-                Page Builder
-              </sp-action-button>
-            </sp-action-group>
-          </div>
+          <!-- View Mode Toggle - Simplified to 2 modes -->
+          <mode-toggle
+            .mode=${this.viewMode}
+            @mode-changed=${(e: CustomEvent) => this.viewMode = e.detail.mode}
+          ></mode-toggle>
 
-          ${this.viewMode === 'ai-recommend' ? html`
-            <!-- AI Recommend Mode -->
+          
+          ${this.viewMode === 'build' ? html`
+            <!-- Build Mode - Page Builder with AI Recommendations -->
             <div class="wizard-container">
               <component-recommender
                 .agentUrl=${this.agentUrl}
                 @recommendation-accepted=${this.handleRecommendationAccepted}
               ></component-recommender>
-            </div>
-          ` : this.viewMode === 'wizard' ? html`
-            <!-- Wizard Mode -->
-            <div class="wizard-container">
-              <content-wizard
-                @generate=${this.handleWizardGenerate}
-              ></content-wizard>
-            </div>
-          ` : this.viewMode === 'pagebuilder' ? html`
-            <!-- Page Builder Mode -->
-            <div class="wizard-container">
               <page-builder
                 @sections-changed=${this.handleSectionsChanged}
                 @generate-section=${this.handleGenerateSection}
                 @page-ready=${this.handlePageReady}
               ></page-builder>
+
+              <!-- Bulk Component Generator -->
+              <bulk-generator
+                .agentUrl=${this.agentUrl}
+                @bulk-complete=${this.handleBulkComplete}
+              ></bulk-generator>
             </div>
           ` : html`
-            <!-- Quick Mode -->
+            <!-- Create Mode - Unified wizard + quick content creation -->
             <div class="left-panel-content">
+              <!-- Content Wizard for guided creation -->
+              <content-wizard
+                @generate=${this.handleWizardGenerate}
+              ></content-wizard>
+
+              <!-- Quick Input -->
               <assistant-input
                 .prompt=${this.prompt}
                 .loading=${this.loading}
@@ -727,15 +752,27 @@ export class AemAssistant extends LitElement {
                 @generate-content=${this.generateContent}
               ></assistant-input>
 
-              ${this.error ? html`<error-message .message=${this.error}></error-message>` : ''}
+              <!-- Error with retry support -->
+              ${this.appError ? html`
+                <error-message
+                  .error=${this.appError}
+                  .showRetry=${this.appError.retryable}
+                  @retry=${() => this.generateContent()}
+                ></error-message>
+              ` : ''}
 
-              <assistant-suggestions
-                .suggestions=${this.suggestions}
-                .selectedSuggestion=${this.selectedSuggestion}
-                @suggestion-selected=${this.handleSuggestionSelected}
-                @suggestion-applied=${this.handleSuggestionApplied}
-                @copy-suggestion=${this.handleCopySuggestion}
-              ></assistant-suggestions>
+              <!-- Loading skeleton while generating -->
+              ${this.loading ? html`
+                <content-skeleton type="suggestions"></content-skeleton>
+              ` : html`
+                <assistant-suggestions
+                  .suggestions=${this.suggestions}
+                  .selectedSuggestion=${this.selectedSuggestion}
+                  @suggestion-selected=${this.handleSuggestionSelected}
+                  @suggestion-applied=${this.handleSuggestionApplied}
+                  @copy-suggestion=${this.handleCopySuggestion}
+                ></assistant-suggestions>
+              `}
 
               <!-- History Section -->
               <div class="history-section">
@@ -769,7 +806,7 @@ export class AemAssistant extends LitElement {
           `}
         </div>
 
-        ${this.viewMode === 'pagebuilder' ? html`
+        ${this.viewMode === 'build' ? html`
           <aem-preview
             .sections=${this.pageSections}
           ></aem-preview>
@@ -785,6 +822,45 @@ export class AemAssistant extends LitElement {
               @copy-content=${this.handleCopyContent}
               @content-updated=${this.handleContentUpdated}
             ></assistant-preview>
+
+            <!-- AEM Export Panel -->
+            ${this.appliedContent ? html`
+              <aem-export-panel
+                .content=${this.appliedContent}
+                .aemUrl=${this.agentUrl}
+                .aemConnected=${this.aemConnected}
+                @deployed=${(e: CustomEvent) => {
+                  logger.info('Component deployed to AEM', 'Export', e.detail);
+                }}
+              ></aem-export-panel>
+
+              <!-- Content Fragment Export Panel -->
+              <content-fragment-panel
+                .content=${this.appliedContent}
+                .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
+                .aemConnected=${this.aemConnected}
+              ></content-fragment-panel>
+
+              <!-- Advanced Export Panel -->
+              <advanced-export-panel
+                .content=${this.appliedContent}
+                .contents=${this.suggestions}
+                .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
+                .aemConnected=${this.aemConnected}
+              ></advanced-export-panel>
+
+              <!-- SEO Toolkit (Basic) -->
+              <seo-toolkit
+                .content=${this.appliedContent}
+                .baseUrl=${this.aemAuthorUrl || 'https://example.com'}
+              ></seo-toolkit>
+
+              <!-- SEO Dashboard (Advanced: SERP, Backlinks, PageSpeed, Rich Results) -->
+              <seo-dashboard
+                .content=${this.appliedContent}
+                .targetUrl=${this.aemAuthorUrl || 'https://example.com'}
+              ></seo-dashboard>
+            ` : ''}
 
             <!-- Review & Workflow Panels -->
             ${this.appliedContent ? html`
@@ -854,11 +930,37 @@ export class AemAssistant extends LitElement {
           <div class="spinner"></div>
         </div>
       ` : ''}
+
+      <!-- Onboarding for first-time users -->
+      ${this.showOnboarding ? html`
+        <app-onboarding
+          @complete=${() => {
+            this.showOnboarding = false;
+            localStorage.setItem('aem-assistant-onboarding-complete', 'true');
+          }}
+          @skip=${() => {
+            this.showOnboarding = false;
+            localStorage.setItem('aem-assistant-onboarding-complete', 'true');
+          }}
+        ></app-onboarding>
+      ` : ''}
+
+      <!-- Keyboard Shortcuts Help -->
+      ${this.showShortcutsHelp ? html`
+        <shortcuts-help
+          @close=${() => this.showShortcutsHelp = false}
+        ></shortcuts-help>
+      ` : ''}
     `;
   }
 
   firstUpdated() {
+    uiLogger.info('AEM Assistant initialized');
+
+    // Load history
     this.history = HistoryService.getHistory();
+
+    // Load theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       this.theme = 'dark';
@@ -867,8 +969,76 @@ export class AemAssistant extends LitElement {
       this.theme = 'light';
       document.documentElement.removeAttribute('data-theme');
     }
+
+    // Check for first-time user (show onboarding)
+    const hasSeenOnboarding = localStorage.getItem('aem-assistant-onboarding-complete');
+    if (!hasSeenOnboarding) {
+      this.showOnboarding = true;
+    }
+
+    // Setup keyboard shortcuts
+    this.setupKeyboardShortcuts();
+
+    // Connect collaboration services
     this.setupCollaboration();
     this.checkAemConnection();
+  }
+
+  private setupKeyboardShortcuts() {
+    // Register app-specific shortcuts
+    keyboardShortcuts.register({
+      id: 'show-shortcuts',
+      key: '?',
+      modifiers: ['shift'],
+      description: 'Show keyboard shortcuts',
+      action: () => { this.showShortcutsHelp = true; }
+    });
+
+    keyboardShortcuts.register({
+      id: 'toggle-mode',
+      key: 'm',
+      modifiers: ['ctrl'],
+      description: 'Toggle view mode',
+      action: () => { this.viewMode = this.viewMode === 'create' ? 'build' : 'create'; }
+    });
+
+    keyboardShortcuts.register({
+      id: 'generate',
+      key: 'Enter',
+      modifiers: ['ctrl'],
+      description: 'Generate content',
+      action: () => { if (this.prompt.trim()) this.generateContent(); }
+    });
+
+    keyboardShortcuts.register({
+      id: 'toggle-theme',
+      key: 'd',
+      modifiers: ['ctrl', 'shift'],
+      description: 'Toggle dark mode',
+      action: () => { this.toggleTheme(); }
+    });
+
+    keyboardShortcuts.register({
+      id: 'focus-input',
+      key: '/',
+      description: 'Focus prompt input',
+      action: () => {
+        const input = this.shadowRoot?.querySelector('assistant-input');
+        if (input) (input as HTMLElement).focus();
+      }
+    });
+
+    keyboardShortcuts.register({
+      id: 'escape',
+      key: 'Escape',
+      description: 'Close panels/modals',
+      action: () => {
+        this.showShortcutsHelp = false;
+        this.showCommentsPanel = false;
+        this.showDamBrowser = false;
+        this.showStreamingModal = false;
+      }
+    });
   }
 
   private async setupCollaboration() {
@@ -934,9 +1104,12 @@ export class AemAssistant extends LitElement {
 
       collaborationService.on('notification', (notification: unknown) => {
         const notif = notification as { type: string; title: string; message: string; fromUser?: string };
+        const notifType = (['info', 'success', 'warning', 'error', 'review'].includes(notif.type)
+          ? notif.type
+          : 'info') as 'info' | 'success' | 'warning' | 'error' | 'review';
         this.notifications = [{
           id: Date.now().toString(),
-          type: notif.type || 'info',
+          type: notifType,
           title: notif.title,
           message: notif.message,
           fromUser: notif.fromUser,
@@ -948,21 +1121,19 @@ export class AemAssistant extends LitElement {
         collaborationService.joinRoom(this.appliedContent.id);
       }
     } catch (error) {
-      console.warn('WebSocket connection failed:', error);
+      logger.warn('WebSocket connection failed', 'Collaboration', error);
       this.wsConnected = false;
     }
   }
 
   private async checkAemConnection() {
     try {
-      const response = await fetch(`${this.agentUrl}/api/aem/health`);
-      if (response.ok) {
-        const status = await response.json();
-        this.aemConnected = status.connected;
-        this.aemAuthorUrl = status.authorUrl || '';
-      }
+      const status = await api.checkAemHealth();
+      this.aemConnected = status.connected;
+      this.aemAuthorUrl = status.authorUrl || '';
+      logger.info(`AEM connection: ${status.connected ? 'connected' : 'disconnected'}`, 'AEM');
     } catch (error) {
-      console.warn('AEM health check failed:', error);
+      logger.warn('AEM health check failed', 'AEM', error);
       this.aemConnected = false;
     }
   }
@@ -996,7 +1167,7 @@ export class AemAssistant extends LitElement {
       this.suggestions = [];
       this.selectedSuggestion = null;
       this.appliedContent = null;
-      this.error = '';
+      this.appError = null;
     }
   }
 
@@ -1008,11 +1179,12 @@ export class AemAssistant extends LitElement {
     const target = e.target as HTMLElement;
     const selected = target.querySelector('[selected]');
     if (selected) {
-      this.viewMode = selected.getAttribute('value') as 'wizard' | 'quick' | 'pagebuilder' | 'ai-recommend';
-      // Reset page sections when switching to pagebuilder
-      if (this.viewMode === 'pagebuilder') {
+      this.viewMode = selected.getAttribute('value') as ViewMode;
+      // Reset page sections when switching to build mode
+      if (this.viewMode === 'build') {
         this.pageSections = [];
       }
+      uiLogger.debug(`View mode changed to: ${this.viewMode}`);
     }
   }
 
@@ -1051,7 +1223,7 @@ export class AemAssistant extends LitElement {
    * Handle streaming content ready (generation complete)
    */
   private handleStreamingContentReady(e: CustomEvent) {
-    console.log('Streaming content ready:', e.detail.content);
+    contentLogger.debug('Streaming content ready', e.detail.content);
     // Content is ready but user hasn't accepted yet
   }
 
@@ -1094,18 +1266,16 @@ export class AemAssistant extends LitElement {
   private handlePageReady(e: CustomEvent) {
     const { sections } = e.detail;
     this.pageSections = sections;
-    console.log('Page ready with sections:', sections);
+    contentLogger.debug('Page ready with sections', sections);
   }
 
   private async handleWizardGenerate(e: CustomEvent) {
     const { componentType, tone, imageStyle, description, prompt, selectedAsset } = e.detail;
-    console.log('handleWizardGenerate - componentType from wizard:', componentType);
-    console.log('handleWizardGenerate - selectedAsset from wizard:', selectedAsset);
+    contentLogger.debug('Wizard generate request', { componentType, selectedAsset: !!selectedAsset });
 
     // Store the selected component type for use in mock suggestions
     this.selectedComponentType = componentType;
     this.wizardSelectedAsset = selectedAsset || null;
-    console.log('handleWizardGenerate - stored selectedComponentType:', this.selectedComponentType);
 
     // Set the prompt and generate
     this.prompt = prompt;
@@ -1117,10 +1287,8 @@ export class AemAssistant extends LitElement {
       wizard.setLoading(false);
     }
 
-    // Switch to quick mode to show results if we have suggestions
-    if (this.suggestions.length > 0) {
-      this.viewMode = 'quick';
-    }
+    // Stay in create mode - suggestions will show below the wizard
+    contentLogger.info(`Wizard generated ${this.suggestions.length} suggestions`);
   }
 
   /**
@@ -1133,7 +1301,7 @@ export class AemAssistant extends LitElement {
       userInput: string;
     };
 
-    console.log('Recommendation accepted:', recommendation);
+    contentLogger.info('Recommendation accepted', { pageType: recommendation.pageType });
 
     // Convert recommendation sections to page builder format
     this.pageSections = recommendation.sections.map((section, index) => ({
@@ -1146,8 +1314,8 @@ export class AemAssistant extends LitElement {
     // Store the user input as context for generation
     this.prompt = userInput;
 
-    // Switch to page builder mode to show the recommended layout
-    this.viewMode = 'pagebuilder';
+    // Stay in build mode to show the recommended layout
+    this.viewMode = 'build';
 
     // Update the page builder component with the sections
     setTimeout(() => {
@@ -1167,37 +1335,31 @@ export class AemAssistant extends LitElement {
     if (!this.prompt.trim()) return;
 
     this.loading = true;
-    this.error = '';
+    this.appError = null;
     this.suggestions = [];
     this.selectedSuggestion = null;
 
+    contentLogger.info(`Generating content for: "${this.prompt.substring(0, 50)}..."`);
+
     try {
-      const response = await fetch(`${this.agentUrl}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          message: {
-            role: 'user',
-            parts: [{ text: this.prompt }],
-          },
-        }),
-      });
+      const data = await withRetry(
+        () => api.generateContent(this.prompt),
+        { maxRetries: 2, delay: 1000 }
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Agent response:', data);
+      contentLogger.debug('Agent response received', data);
 
       // Parse the response to extract content suggestions
       const suggestions = this.parseAgentResponse(data);
 
       if (suggestions.length === 0) {
-        this.error = 'No suggestions generated. Try a different prompt.';
+        this.appError = {
+          code: 'NO_SUGGESTIONS',
+          message: 'No suggestions generated',
+          userMessage: 'No content suggestions were generated.',
+          suggestion: 'Try rephrasing your prompt or be more specific about what you need.',
+          retryable: true,
+        };
       } else {
         this.suggestions = suggestions;
         // Auto-select and apply the first suggestion
@@ -1205,10 +1367,11 @@ export class AemAssistant extends LitElement {
         this.appliedContent = suggestions[0];
         HistoryService.addSuggestion(suggestions[0]);
         this.history = HistoryService.getHistory();
+        contentLogger.info(`Generated ${suggestions.length} suggestions`);
       }
     } catch (error) {
-      console.error('Generation error:', error);
-      this.error = `Failed to generate content: ${error}`;
+      contentLogger.error('Generation failed', error);
+      this.appError = errorHandler.handle(error);
     } finally {
       this.loading = false;
     }
@@ -1264,7 +1427,7 @@ export class AemAssistant extends LitElement {
     // Override componentType with user's selection from wizard if available
     if (this.selectedComponentType) {
       const normalizedType = this.selectedComponentType.toLowerCase();
-      console.log('Overriding componentType in suggestions with:', normalizedType);
+      contentLogger.debug(`Setting component type to: ${normalizedType}`);
       suggestions.forEach(suggestion => {
         suggestion.componentType = normalizedType;
 
@@ -1273,7 +1436,6 @@ export class AemAssistant extends LitElement {
           suggestion.imageUrl = this.wizardSelectedAsset.url;
           suggestion.selectedAssetId = this.wizardSelectedAsset.id;
           suggestion.visualScore = this.wizardSelectedAsset.brandAligned ? 10 : 5;
-          console.log('Using wizard-selected asset:', this.wizardSelectedAsset.name);
         } else {
           const { url, score: visualScore } = this.getBrandAlignedImage(normalizedType);
           suggestion.imageUrl = url;
@@ -1315,7 +1477,7 @@ export class AemAssistant extends LitElement {
         }
       }
     } catch (e) {
-      console.error('Error extracting from A2UI:', e);
+      contentLogger.error('Error extracting from A2UI', e);
     }
     return null;
   }
@@ -1325,7 +1487,6 @@ export class AemAssistant extends LitElement {
     // Normalize to lowercase for consistent matching in preview
     const rawType = this.selectedComponentType || this.detectComponentType(this.prompt);
     const componentType = rawType.toLowerCase();
-    console.log('createMockSuggestion - rawType:', rawType, 'componentType:', componentType, 'selectedComponentType:', this.selectedComponentType);
     const variations: Record<string, Partial<ContentSuggestion>> = {
       '1': {
         title: 'Unleash Your Potential',
@@ -1562,17 +1723,17 @@ export class AemAssistant extends LitElement {
   // Review & Workflow Event Handlers
   private handleReviewStarted(e: CustomEvent) {
     this.currentReview = e.detail.review;
-    console.log('Review started:', this.currentReview);
+    logger.info('Review started', 'Review', { reviewId: this.currentReview?.id });
   }
 
   private handleReviewApproved(e: CustomEvent) {
     this.currentReview = e.detail.review;
-    console.log('Review approved:', this.currentReview);
+    logger.info('Review approved', 'Review', { reviewId: this.currentReview?.id });
   }
 
   private handleReviewRejected(e: CustomEvent) {
     this.currentReview = e.detail.review;
-    console.log('Review rejected:', this.currentReview);
+    logger.info('Review rejected', 'Review', { reviewId: this.currentReview?.id });
   }
 
   private handleOpenComments(e: CustomEvent) {
@@ -1585,22 +1746,44 @@ export class AemAssistant extends LitElement {
   }
 
   private handleWorkflowStarted(e: CustomEvent) {
-    console.log('Workflow started:', e.detail.workflow);
+    logger.info('Workflow started', 'Workflow', { workflowId: e.detail.workflow?.id });
   }
 
   private handleWorkflowAdvanced(e: CustomEvent) {
-    console.log('Workflow advanced:', e.detail.workflow);
+    logger.info('Workflow advanced', 'Workflow', { workflowId: e.detail.workflow?.id });
   }
 
   private handleVersionRestored(e: CustomEvent) {
     this.appliedContent = e.detail.content;
-    console.log('Version restored:', this.appliedContent);
+    logger.info('Version restored', 'Content', { contentId: this.appliedContent?.id });
+  }
+
+  private handleBulkComplete(e: CustomEvent) {
+    const { results, items } = e.detail;
+    const successCount = items.filter((i: { status: string }) => i.status === 'complete').length;
+    const errorCount = items.filter((i: { status: string }) => i.status === 'error').length;
+
+    logger.info(`Bulk generation complete: ${successCount} succeeded, ${errorCount} failed`, 'BulkGenerator');
+
+    // Convert results to page sections for preview
+    if (results.length > 0) {
+      this.pageSections = results.map((content: ContentSuggestion, index: number) => ({
+        id: `bulk-section-${index}-${Date.now()}`,
+        type: content.componentType || 'teaser',
+        content,
+        status: 'ready' as const,
+      }));
+
+      // Apply the first result as the selected content
+      this.appliedContent = results[0];
+      this.selectedSuggestion = results[0];
+    }
   }
 
   private handleDamAssetSelected(e: CustomEvent) {
     const asset: DamAsset = e.detail.asset;
     this.selectedDamAsset = asset;
-    console.log('DAM asset selected:', asset);
+    logger.debug('DAM asset selected', 'DAM', { assetPath: asset.path });
 
     // If we have applied content, update its image URL
     if (this.appliedContent && asset.originalUrl) {
@@ -1639,7 +1822,7 @@ export class AemAssistant extends LitElement {
         this.showCopiedToast = false;
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      uiLogger.error('Failed to copy to clipboard', err);
     }
   }
 

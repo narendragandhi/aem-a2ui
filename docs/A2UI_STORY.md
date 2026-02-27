@@ -279,7 +279,7 @@ cd agent-java
 mvn spring-boot:run
 ```
 
-The Java agent starts on `http://localhost:8080`.
+The Java agent starts on `http://localhost:10003`.
 
 ### Step 2: Start the Frontend
 

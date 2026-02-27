@@ -2,31 +2,34 @@
 
 ## Prerequisites
 
-- AEM running on `localhost:4502` (or configured via `AEM_HOST`)
+- AEM SDK running on `localhost:4502` (or configure via `AEM_AUTHOR_URL`)
 - Java 21+ and Maven
 - Node.js 18+
+- (Optional) Ollama for local AI generation
 
-## 1. Start the Backend
+## Quick Start (5 minutes)
 
+### 1. Start the Backend
+
+**Template mode (no AI):**
 ```bash
 cd agent-java
-mvn spring-boot:run
+AEM_ENABLED=true AEM_AUTHOR_URL=http://localhost:4502 mvn spring-boot:run
 ```
 
-The Java agent will start on `http://localhost:8080`.
-
-**With AI (Ollama for local generation):**
-
+**AI mode (with Ollama):**
 ```bash
-# First start Ollama
+# First start Ollama (in separate terminal)
 ollama run llama3.2
 
-# Then start the agent with AI enabled
+# Then start the agent
 cd agent-java
-AI_ENABLED=true LLM_PROVIDER=ollama mvn spring-boot:run
+AI_ENABLED=true LLM_PROVIDER=ollama AEM_ENABLED=true mvn spring-boot:run
 ```
 
-## 2. Start the Frontend
+The Java agent will start on `http://localhost:10003`.
+
+### 2. Start the Frontend
 
 ```bash
 cd client
@@ -36,139 +39,182 @@ npm run dev
 
 The client will start on `http://localhost:5173`.
 
-## 3. Open http://localhost:5173
+### 3. Open http://localhost:5173
 
 You'll see the A2UI sidebar with the assistant panel.
 
-## Your First Request
+## Configuration Options
 
-1. In the text input box, type: **"Create a hero banner for our summer sale"**
-2. Press Enter
-3. Watch the brand score calculate in real-time
-4. Review the 3 content variations generated
-5. Click **[Apply]** to send the content to AEM
+### Environment Variables
 
-## What Just Happened?
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AEM_ENABLED` | `true` | Enable AEM SDK integration |
+| `AEM_AUTHOR_URL` | `http://localhost:4502` | AEM Author URL |
+| `AEM_USERNAME` | `admin` | AEM username |
+| `AEM_PASSWORD` | `admin` | AEM password |
+| `AI_ENABLED` | `false` | Enable AI generation |
+| `LLM_PROVIDER` | `ollama` | LLM: openai, anthropic, ollama |
+| `SECURITY_API_KEY_ENABLED` | `false` | Enable API key auth |
+| `SECURITY_API_KEY` | - | Your API key |
 
+## API Endpoints
+
+### Core Endpoints (port 10003)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/tasks` | POST | Generate content with AI |
+| `/advanced/tasks` | POST | Advanced content generation |
+| `/recommend` | POST | AI component recommendations |
+
+### SSE Streaming Endpoints (AG-UI Protocol v2.0)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/stream/generate` | GET/POST | Basic SSE streaming with text events |
+| `/stream/advanced` | GET/POST | Full AG-UI with all 17 event types + AEM DAM |
+| `/stream/raw` | GET | Raw LLM token streaming |
+| `/stream/health` | GET | Protocol health with all supported events |
+
+### AEM Integration
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/aem/health` | GET | AEM connection status |
+| `/aem/config` | GET | AEM configuration |
+| `/aem/content` | POST | Save content to AEM |
+| `/dam/browse` | GET | Browse DAM assets |
+| `/dam/search` | GET | Search DAM assets |
+
+### Brand Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/brands` | GET | List all brands |
+| `/brands/active` | GET | Get active brand config |
+| `/brands` | POST | Create new brand |
+| `/brands/{id}` | PUT | Update brand |
+
+### Webhooks
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/webhooks/aem` | POST | AEM event webhooks |
+| `/webhooks/adobe-io` | POST | Adobe I/O events |
+| `/webhooks/workflow` | POST | Workflow events |
+
+### Monitoring
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/actuator/health` | GET | Health check |
+| `/actuator/metrics` | GET | Application metrics |
+| `/actuator/info` | GET | App info |
+
+## Testing the Integration
+
+### 1. Check Health
+```bash
+curl http://localhost:10003/actuator/health
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         REQUEST FLOW DIAGRAM                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
 
-   ┌──────────┐    "Create hero"    ┌──────────┐
-   │  BROWSER │ ──────────────────► │  CLIENT  │
-   └──────────┘                     └────┬─────┘
-                                        │
-                                        │ Build A2UI Request
-                                        ▼
-                              ┌─────────────────────┐
-                              │  POST /tasks/run    │
-                              └──────────┬──────────┘
-                                         │
-                                         ▼
-                              ┌─────────────────────┐
-                              │  JAVA AGENT         │
-                              │  • Load brand.json  │
-                              │  • Generate content│
-                              │  • Calculate score │
-                              └──────────┬──────────┘
-                                         │
-                                         │ A2UI Response
-                                         ▼
-                              ┌─────────────────────┐
-                              │  RENDER PREVIEW     │
-                              │  • Hero component   │
-                              │  • Brand score      │
-                              │  • Action buttons   │
-                              └──────────┬──────────┘
-                                         │
-                                         ▼
-                              ┌─────────────────────┐
-                              │  APPLY TO AEM       │
-                              │  POST /content/...  │
-                              └─────────────────────┘
+Response:
+```json
+{
+  "status": "UP",
+  "components": {
+    "aem": {
+      "status": "UP",
+      "details": {
+        "authorUrl": "http://localhost:4502",
+        "contentRoot": "/content/wknd"
+      }
+    }
+  }
+}
 ```
 
-### Step-by-Step Breakdown
+### 2. Browse DAM
+```bash
+curl "http://localhost:10003/dam/browse?folder=/content/dam"
+```
 
-| Step | Component | What Happens |
-|------|-----------|--------------|
-| 1 | Browser | User types request in input field |
-| 2 | Client | Builds A2UI JSON request with message |
-| 3 | Java Agent | Receives request, loads brand guidelines |
-| 4 | LLM/Templates | Generates 3 content variations |
-| 5 | Brand Scorer | Evaluates each variation (0-100%) |
-| 6 | Client | Renders interactive preview |
-| 7 | User | Clicks [Apply] button |
-| 8 | Agent | POSTs content to AEM endpoint |
+### 3. Generate Content (Template Mode)
+```bash
+curl -X POST http://localhost:10003/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"message":{"role":"user","parts":[{"text":"hero banner for summer sale"}]}}'
+```
 
-## Try These Requests
+### 4. Generate Content (AI Mode)
+```bash
+AI_ENABLED=true LLM_PROVIDER=ollama mvn spring-boot:run
+# Then use the UI or API
+```
 
-| Request | What You Get |
-|---------|--------------|
-| `"Create a hero banner"` | Basic hero with title, subtitle, CTA |
-| `"Product card for premium widget"` | Product card with image, price, description |
-| `"Teaser for summer sale"` | Teaser component with countdown |
-| `"Footer with social links"` | Footer with icon placeholders |
+### 5. Test SSE Streaming (AG-UI Protocol)
+```bash
+# Basic streaming
+curl -N "http://localhost:10003/stream/generate?input=hero+banner&componentType=hero"
 
-## Explore the UI
+# Advanced streaming with AEM DAM integration
+curl -N "http://localhost:10003/stream/advanced?input=summer+hiking&componentType=hero"
 
-### DAM Browser
+# Check supported events
+curl http://localhost:10003/stream/health
+```
 
-Click the **image icon** in any component preview to open the DAM browser. The agent will:
-1. Query AEM's Sling JSON export for assets
-2. Filter by brand visual guidelines
-3. Display brand-aligned suggestions
+**Expected AG-UI Events:**
+```
+event:RUN_STARTED
+event:STEP_STARTED (🔍 Analyzing request...)
+event:STEP_FINISHED
+event:STEP_STARTED (🖼️ Searching AEM DAM...)
+event:TOOL_CALL_START (aem_dam_search)
+event:TOOL_CALL_ARGS
+event:TOOL_CALL_END
+event:TOOL_CALL_RESULT
+event:STEP_FINISHED
+event:STEP_STARTED (✨ Generating content...)
+event:TEXT_MESSAGE_START
+event:TEXT_MESSAGE_DELTA (word by word)
+event:TEXT_MESSAGE_END
+event:STATE_SNAPSHOT
+event:RUN_FINISHED
+```
 
-### Brand Panel
+## Running with Docker
 
-Click **"Brand Guidelines"** to see:
-- Voice and tone rules
-- Value pillars
-- Headline examples
-- Content to avoid
+```bash
+docker-compose up -d
+```
 
-### Workflow Submit
-
-After applying content, click **[Submit for Review]** to:
-1. POST content to AEM workflow
-2. Initiate "Review & Approve" process
-3. Track status in the UI
-
-## Next Steps
-
-- **Try variations:** Click "Bold" or "Friendly" to see alternative tones
-- **Edit inline:** Click any text field to edit directly
-- **Change brand:** Edit `client/src/data/brand-config.json` and restart
-- **Add components:** See `PLAN.md` for planned features
+This starts:
+- Java agent on port 10003
+- Client on port 8080
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Client won't start | Run `npm install` first |
-| Agent returns 500 | Check AEM is running on port 4502 |
-| No brand score | Ensure `brand-config.json` exists |
-| AI not generating | Verify Ollama is running |
+| AEM not connecting | Check AEM SDK is running on port 4502 |
+| AI not generating | Start Ollama: `ollama run llama3.2` |
+| 401 errors | Check AEM credentials in environment |
+| Port conflicts | Agent uses 10003, Client uses 5173 |
 
 ## File Locations
 
 ```
 aem-a2ui-demo/
 ├── agent-java/
-│   ├── src/main/java/.../AemContentAgent.java   # Main agent logic
-│   └── src/main/resources/brand-config.json     # Brand guidelines
+│   ├── src/main/java/.../service/aem/   # AEM clients
+│   ├── src/main/resources/application.properties
+│   └── src/main/resources/brand-config.json
 ├── client/
-│   ├── src/aem-assistant.ts                     # Main component
-│   ├── src/components/                          # UI components
-│   └── src/data/brand-config.json               # Brand config (frontend)
+│   ├── src/aem-assistant.ts
+│   └── src/components/
 └── docs/
-    ├── A2UI_STORY.md                           # Narrative guide
-    └── PROTOCOL.md                              # A2UI spec
+    ├── PROTOCOL.md      # A2UI/AG-UI specs
+    └── A2UI_STORY.md    # User journey
 ```
-
-## Learn More
-
-- **[A2UI_STORY.md](docs/A2UI_STORY.md)** - Full narrative with diagrams
-- **[CONCEPTS.md](CONCEPTS.md)** - AEM-to-A2UI concept mapping
-- **[PLAN.md](PLAN.md)** - Future features and roadmap

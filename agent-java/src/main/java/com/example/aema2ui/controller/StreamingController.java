@@ -1,5 +1,6 @@
 package com.example.aema2ui.controller;
 
+import com.example.aema2ui.service.AemIntegrationService;
 import com.example.aema2ui.service.StreamingContentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,17 +8,29 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * SSE Streaming Controller for real-time content generation.
  *
- * Implements AG-UI protocol streaming pattern:
- * - Client connects to SSE endpoint
- * - Server streams events: RUN_STARTED, TEXT_MESSAGE_DELTA, RUN_FINISHED
- * - Client updates UI progressively as content arrives
+ * Implements full AG-UI protocol (17 event types):
  *
- * This creates the "ChatGPT-like" typing effect for content generation.
+ * Lifecycle Events:
+ * - RUN_STARTED, RUN_FINISHED, RUN_ERROR
+ * - STEP_STARTED, STEP_FINISHED
+ *
+ * Text Message Events:
+ * - TEXT_MESSAGE_START, TEXT_MESSAGE_DELTA, TEXT_MESSAGE_END
+ *
+ * Tool Call Events:
+ * - TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END, TOOL_CALL_RESULT
+ *
+ * State Management Events:
+ * - STATE_DELTA, STATE_SNAPSHOT, MESSAGES_SNAPSHOT
+ *
+ * Extension Events:
+ * - RAW_EVENT, CUSTOM_EVENT
  */
 @Slf4j
 @RestController
@@ -26,6 +39,7 @@ import java.util.Map;
 public class StreamingController {
 
     private final StreamingContentService streamingService;
+    private final AemIntegrationService aemIntegrationService;
 
     /**
      * Stream content generation with SSE.
@@ -95,7 +109,49 @@ public class StreamingController {
     }
 
     /**
-     * Health check for streaming endpoint.
+     * Advanced streaming with AEM DAM integration.
+     *
+     * This endpoint demonstrates:
+     * - Full AG-UI protocol with all 17 event types
+     * - Multi-step workflow with STEP_STARTED/FINISHED
+     * - Real AEM DAM search with TOOL_CALL events
+     * - STATE_SNAPSHOT for UI recovery
+     * - CUSTOM_EVENT for AEM-specific notifications
+     *
+     * Example: /stream/advanced?input=summer+hiking+adventure&componentType=hero
+     */
+    @GetMapping(value = "/advanced", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamAdvanced(
+            @RequestParam String input,
+            @RequestParam(required = false, defaultValue = "hero") String componentType) {
+
+        log.info("Starting advanced SSE stream with DAM integration - input: '{}', type: {}, AEM: {}",
+            input, componentType, aemIntegrationService.isConnected());
+
+        SseEmitter emitter = streamingService.createEmitter();
+        streamingService.streamWithDamIntegration(input, componentType, emitter, aemIntegrationService);
+
+        return emitter;
+    }
+
+    /**
+     * POST variant for advanced streaming.
+     */
+    @PostMapping(value = "/advanced", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamAdvancedPost(@RequestBody Map<String, Object> request) {
+        String input = (String) request.getOrDefault("input", "");
+        String componentType = (String) request.getOrDefault("componentType", "hero");
+
+        log.info("Starting advanced SSE stream (POST) with DAM - input: '{}', type: {}", input, componentType);
+
+        SseEmitter emitter = streamingService.createEmitter();
+        streamingService.streamWithDamIntegration(input, componentType, emitter, aemIntegrationService);
+
+        return emitter;
+    }
+
+    /**
+     * Health check for streaming endpoint - shows full AG-UI protocol support.
      */
     @GetMapping("/health")
     public Map<String, Object> health() {
@@ -103,15 +159,21 @@ public class StreamingController {
             "status", "ok",
             "streaming", true,
             "protocol", "AG-UI",
-            "events", new String[]{
-                "RUN_STARTED",
-                "TEXT_MESSAGE_START",
-                "TEXT_MESSAGE_DELTA",
-                "TEXT_MESSAGE_END",
-                "STATE_DELTA",
-                "RUN_FINISHED",
-                "RUN_ERROR"
-            }
+            "version", "2.0",
+            "aemConnected", aemIntegrationService.isConnected(),
+            "events", Map.of(
+                "lifecycle", List.of("RUN_STARTED", "RUN_FINISHED", "RUN_ERROR", "STEP_STARTED", "STEP_FINISHED"),
+                "textMessage", List.of("TEXT_MESSAGE_START", "TEXT_MESSAGE_DELTA", "TEXT_MESSAGE_END"),
+                "toolCall", List.of("TOOL_CALL_START", "TOOL_CALL_ARGS", "TOOL_CALL_END", "TOOL_CALL_RESULT"),
+                "state", List.of("STATE_DELTA", "STATE_SNAPSHOT", "MESSAGES_SNAPSHOT"),
+                "extension", List.of("RAW_EVENT", "CUSTOM_EVENT"),
+                "hitl", List.of("INTERRUPT_REQUESTED", "INTERRUPT_RESOLVED")
+            ),
+            "endpoints", Map.of(
+                "basic", "/stream/generate",
+                "advanced", "/stream/advanced",
+                "raw", "/stream/raw"
+            )
         );
     }
 }

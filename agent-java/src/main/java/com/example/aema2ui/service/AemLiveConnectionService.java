@@ -34,7 +34,8 @@ public class AemLiveConnectionService {
         }
 
         try {
-            String healthUrl = aemConfig.getAuthorUrl() + "/system/health";
+            // Use a reliable endpoint that exists in AEM
+            String healthUrl = aemConfig.getAuthorUrl() + "/libs/granite/core/content/login.html";
             HttpHeaders headers = createAuthHeaders();
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
