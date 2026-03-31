@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Service for integrating with AEM APIs.
@@ -109,13 +111,13 @@ public class AemIntegrationService {
             queryPath.append("&p.limit=50");
 
             if (searchTerm != null && !searchTerm.isEmpty()) {
-                queryPath.append("&fulltext=").append(searchTerm);
+                queryPath.append("&fulltext=").append(urlEncode(searchTerm));
             }
 
             if (mimeType != null && !mimeType.isEmpty()) {
                 queryPath.append("&property=jcr:content/metadata/dc:format");
                 queryPath.append("&property.operation=like");
-                queryPath.append("&property.value=").append(mimeType).append("%");
+                queryPath.append("&property.value=").append(urlEncode(mimeType)).append("%");
             }
 
             JsonNode response = aemHttpClient.get(queryPath.toString());
@@ -141,6 +143,10 @@ public class AemIntegrationService {
             log.warn("Failed to search DAM assets: {} - falling back to mock data", e.getMessage());
             return getMockDamAssets();
         }
+    }
+
+    private String urlEncode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     private List<Map<String, Object>> getMockDamAssets() {

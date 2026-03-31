@@ -3,8 +3,15 @@ package com.example.aema2ui.controller;
 import com.example.aema2ui.model.PageRecommendation;
 import com.example.aema2ui.model.TaskRequest;
 import com.example.aema2ui.model.TaskResponse;
+import com.example.aema2ui.model.BrandValidationResult;
+import com.example.aema2ui.model.ContentSuggestion;
+import com.example.aema2ui.service.AemComponentMappingService;
+import com.example.aema2ui.service.AemIntegrationService;
 import com.example.aema2ui.service.AgentRecommendationService;
+import com.example.aema2ui.service.BrandConfigService;
+import com.example.aema2ui.service.BrandValidationService;
 import com.example.aema2ui.service.ContentSuggestionService;
+import com.example.aema2ui.service.TelemetryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +31,11 @@ public class AgentController {
 
     private final ContentSuggestionService suggestionService;
     private final AgentRecommendationService recommendationService;
+    private final AemIntegrationService aemIntegrationService;
+    private final AemComponentMappingService mappingService;
+    private final BrandConfigService brandConfigService;
+    private final BrandValidationService brandValidationService;
+    private final TelemetryService telemetryService;
 
     // PERFORMANCE: Reduce default variations to 1 for faster response
     @Value("${aem.agent.suggestions.count:1}")
@@ -65,6 +77,10 @@ public class AgentController {
     public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest request) {
         // Extract user text from request
         String userText = extractUserText(request);
+        telemetryService.record("content.generate", Map.of(
+            "promptLength", userText != null ? userText.length() : 0,
+            "variations", suggestionsCount
+        ));
 
         // Generate suggestions (default 1 for fast response, configurable via aem.agent.suggestions.count)
         var suggestionsResult = suggestionService.generateMultipleSuggestions(userText, suggestionsCount);
@@ -93,6 +109,10 @@ public class AgentController {
             return ResponseEntity.badRequest().build();
         }
 
+        telemetryService.record("layout.recommend", Map.of(
+            "promptLength", userInput.length()
+        ));
+
         PageRecommendation recommendation = recommendationService.recommendLayout(userInput);
         return ResponseEntity.ok(recommendation);
     }
@@ -106,10 +126,7 @@ public class AgentController {
             @RequestBody(required = false) Map<String, Object> context) {
 
         return switch (actionName) {
-            case "apply_suggestion" -> ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Content applied to component"
-            ));
+            case "apply_suggestion" -> handleApplySuggestion(context);
             case "regenerate" -> ResponseEntity.ok(Map.of(
                 "success", true,
                 "messages", suggestionService.generateSuggestion("random")
@@ -119,6 +136,70 @@ public class AgentController {
                 "message", "Unknown action: " + actionName
             ));
         };
+    }
+
+    private ResponseEntity<Map<String, Object>> handleApplySuggestion(Map<String, Object> context) {
+        if (context == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Missing apply context"
+            ));
+        }
+
+        String componentPath = (String) context.get("componentPath");
+        String componentType = (String) context.get("componentType");
+        String brandId = (String) context.get("brandId");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> suggestionMap = (Map<String, Object>) context.get("suggestion");
+        ContentSuggestion suggestion = new ContentSuggestion();
+        if (suggestionMap != null) {
+            suggestion.setTitle((String) suggestionMap.get("title"));
+            suggestion.setSubtitle((String) suggestionMap.get("subtitle"));
+            suggestion.setDescription((String) suggestionMap.get("description"));
+            suggestion.setCtaText((String) suggestionMap.get("ctaText"));
+            suggestion.setCtaUrl((String) suggestionMap.get("ctaUrl"));
+            suggestion.setImageUrl((String) suggestionMap.get("imageUrl"));
+            suggestion.setComponentType((String) suggestionMap.get("componentType"));
+            suggestion.setPrice((String) suggestionMap.get("price"));
+        }
+
+        BrandValidationResult validation = brandValidationService.validate(
+            suggestion,
+            brandId != null
+                ? brandConfigService.getBrandConfig(brandId).orElse(brandConfigService.getActiveBrandConfig())
+                : brandConfigService.getActiveBrandConfig()
+        );
+
+        if (validation.hasErrors()) {
+            return ResponseEntity.unprocessableEntity().body(Map.of(
+                "success", false,
+                "message", "Brand validation failed",
+                "validation", validation
+            ));
+        }
+
+        if (componentPath == null || componentPath.isBlank()) {
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Validated. No component path provided.",
+                "validation", validation
+            ));
+        }
+
+        Map<String, Object> properties = mappingService.mapSuggestion(suggestion, componentType);
+        boolean updated = aemIntegrationService.updateComponentProperties(componentPath, properties);
+        telemetryService.record("aem.apply_suggestion", Map.of(
+            "componentPath", componentPath,
+            "success", updated
+        ));
+
+        return ResponseEntity.ok(Map.of(
+            "success", updated,
+            "message", updated ? "Content applied to component" : "Failed to apply content",
+            "properties", properties,
+            "validation", validation
+        ));
     }
 
     /**

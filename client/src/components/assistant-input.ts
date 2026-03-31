@@ -5,6 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 export class AssistantInput extends LitElement {
   @property({ type: String }) prompt = '';
   @property({ type: Boolean }) loading = false;
+  @property({ type: String }) componentType: string = 'hero';
 
   static styles = css`
     .input-section {
@@ -101,6 +102,7 @@ export class AssistantInput extends LitElement {
   `;
 
   render() {
+    const prompts = this.getPromptsForType(this.componentType);
     return html`
       <div class="input-section">
         <h2>Describe Your Content</h2>
@@ -122,10 +124,9 @@ export class AssistantInput extends LitElement {
           </button>
         </div>
         <div class="quick-prompts">
-          <span class="quick-prompt" @click=${() => this.setPrompt('Hero banner for product launch')}>Hero Banner</span>
-          <span class="quick-prompt" @click=${() => this.setPrompt('Product card for electronics')}>Product Card</span>
-          <span class="quick-prompt" @click=${() => this.setPrompt('Promotional teaser for holiday sale')}>Promo Teaser</span>
-          <span class="quick-prompt" @click=${() => this.setPrompt('Announcement banner for new feature')}>Banner</span>
+          ${prompts.map((p) => html`
+            <span class="quick-prompt" @click=${() => this.setPrompt(p)}>${p.split(' ').slice(0, 3).join(' ')}...</span>
+          `)}
         </div>
       </div>
     `;
@@ -161,6 +162,41 @@ export class AssistantInput extends LitElement {
       bubbles: true,
       composed: true,
     }));
+  }
+
+  private getPromptsForType(componentType: string): string[] {
+    const type = (componentType || 'hero').toLowerCase();
+    switch (type) {
+      case 'product':
+        return [
+          'Product card for premium smart watch with luxury finish',
+          'Ecommerce product spotlight for wireless earbuds',
+          'Pricing highlight for pro subscription tier',
+          'Feature grid for new flagship device launch',
+        ];
+      case 'teaser':
+        return [
+          'Promotional teaser for holiday sale',
+          'Teaser for upcoming webinar registration',
+          'Short teaser for new feature announcement',
+          'Teaser for limited time offer',
+        ];
+      case 'banner':
+        return [
+          'Announcement banner for new feature',
+          'Top-of-page banner for security update',
+          'Urgent banner for maintenance window',
+          'Seasonal banner for spring collection',
+        ];
+      case 'hero':
+      default:
+        return [
+          'Hero banner for product launch with bold headline',
+          'Hero section for enterprise security platform',
+          'Hero for summer sale with beach theme',
+          'Hero for customer story spotlight',
+        ];
+    }
   }
 }
 

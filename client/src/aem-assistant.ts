@@ -22,6 +22,8 @@ import './components/review-panel.js';
 import './components/review-comments.js';
 import './components/workflow-panel.js';
 import './components/version-history.js';
+import './components/demo-hub.js';
+import './components/telemetry-panel.js';
 
 // Collaboration
 import './components/live-presence.js';
@@ -141,6 +143,7 @@ export class AemAssistant extends LitElement {
   @state() private wsConnected = false;
   @state() private aemConnected = false;
   @state() private aemAuthorUrl = '';
+  @state() private contentId: string | null = null;
 
   @state() private notifications: Array<{
     id: string;
@@ -748,6 +751,7 @@ export class AemAssistant extends LitElement {
               <assistant-input
                 .prompt=${this.prompt}
                 .loading=${this.loading}
+                .componentType=${this.selectedComponentType}
                 @prompt-changed=${this.handlePromptChange}
                 @generate-content=${this.generateContent}
               ></assistant-input>
@@ -837,6 +841,7 @@ export class AemAssistant extends LitElement {
               <!-- Content Fragment Export Panel -->
               <content-fragment-panel
                 .content=${this.appliedContent}
+                .agentUrl=${this.agentUrl}
                 .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
                 .aemConnected=${this.aemConnected}
               ></content-fragment-panel>
@@ -867,7 +872,7 @@ export class AemAssistant extends LitElement {
               <div class="collaboration-panels">
                 <review-panel
                   .content=${this.appliedContent}
-                  .contentId=${this.appliedContent?.id || 'content-' + Date.now()}
+                  .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
                   @review-started=${this.handleReviewStarted}
                   @review-approved=${this.handleReviewApproved}
                   @review-rejected=${this.handleReviewRejected}
@@ -875,17 +880,26 @@ export class AemAssistant extends LitElement {
                 ></review-panel>
 
                 <workflow-panel
-                  .contentId=${this.appliedContent?.id || 'content-' + Date.now()}
+                  .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
                   .review=${this.currentReview}
                   @workflow-started=${this.handleWorkflowStarted}
                   @workflow-advanced=${this.handleWorkflowAdvanced}
                 ></workflow-panel>
 
                 <version-history
-                  .contentId=${this.appliedContent?.id || 'content-' + Date.now()}
+                  .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
                   .currentContent=${this.appliedContent}
                   @version-restored=${this.handleVersionRestored}
                 ></version-history>
+
+                <demo-hub
+                  .agentUrl=${this.agentUrl}
+                  .content=${this.appliedContent}
+                ></demo-hub>
+
+                <telemetry-panel
+                  .agentUrl=${this.agentUrl}
+                ></telemetry-panel>
               </div>
             ` : ''}
           </div>
@@ -976,12 +990,37 @@ export class AemAssistant extends LitElement {
       this.showOnboarding = true;
     }
 
+    // Optional demo content injection for visual tests or demos
+    this.initializeDemoContent();
+
     // Setup keyboard shortcuts
     this.setupKeyboardShortcuts();
 
     // Connect collaboration services
     this.setupCollaboration();
     this.checkAemConnection();
+  }
+
+  /**
+   * Initialize mock content when demo query param is present.
+   * Usage: http://localhost:5173/?demo=1
+   */
+  private initializeDemoContent() {
+    const params = new URLSearchParams(window.location.search);
+    const demo = params.get('demo');
+    if (!demo) {
+      return;
+    }
+
+    this.prompt = 'Hero banner for summer sale';
+    this.selectedComponentType = 'hero';
+    const s1 = this.createMockSuggestion('1');
+    const s2 = this.createMockSuggestion('2');
+    const s3 = this.createMockSuggestion('3');
+    this.suggestions = [s1, s2, s3];
+    this.selectedSuggestion = s1;
+    this.appliedContent = s1;
+    this.contentId = s1.id;
   }
 
   private setupKeyboardShortcuts() {
@@ -1696,6 +1735,18 @@ export class AemAssistant extends LitElement {
     const { content } = e.detail;
     this.appliedContent = content;
 
+    if (!this.contentId) {
+      this.contentId = content?.id || `content-${Date.now()}`;
+    }
+    if (content) {
+      api.recordContentVersion(
+        this.contentId,
+        content,
+        'demo-user',
+        'Content updated'
+      ).catch(() => undefined);
+    }
+
     // Also update in suggestions if it exists there
     const index = this.suggestions.findIndex(s => s.id === content.id);
     if (index >= 0) {
@@ -1714,6 +1765,17 @@ export class AemAssistant extends LitElement {
   private handleSuggestionApplied(e: CustomEvent) {
     this.appliedContent = e.detail.suggestion;
     this.selectedSuggestion = e.detail.suggestion;
+    if (!this.contentId) {
+      this.contentId = this.appliedContent?.id || `content-${Date.now()}`;
+    }
+    if (this.appliedContent) {
+      api.recordContentVersion(
+        this.contentId,
+        this.appliedContent,
+        'demo-user',
+        'Applied suggestion'
+      ).catch(() => undefined);
+    }
   }
 
   private handleCopySuggestion(e: CustomEvent) {

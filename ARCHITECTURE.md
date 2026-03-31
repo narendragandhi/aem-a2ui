@@ -132,6 +132,16 @@
 
 ---
 
+## Observability and Governance
+
+To support demos and evaluation, the agent exposes lightweight telemetry and governance checks:
+
+- **Telemetry aggregation:** The backend records key demo events and exposes summary feeds for the UI.
+- **Governance streaming:** A dedicated SSE stream (`/stream/governance`) emits compliance results as `CUSTOM_EVENT` and uses HITL signals for blocking violations.
+- **Feature gating:** Demo-only endpoints are controlled by `aem.demo.enabled` to keep production surfaces clean.
+
+---
+
 ## Why A2UI Over Alternative Approaches?
 
 ### Comparison of Approaches

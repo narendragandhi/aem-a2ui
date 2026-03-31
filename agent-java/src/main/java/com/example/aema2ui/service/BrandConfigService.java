@@ -24,6 +24,8 @@ public class BrandConfigService {
 
     private final ObjectMapper objectMapper;
     private final Map<String, BrandConfig> brandConfigs = new ConcurrentHashMap<>();
+    private final Map<String, String> siteBrandMap = new ConcurrentHashMap<>();
+    private String activeBrandId = DEFAULT_BRAND_ID;
 
     @Value("${aem.agent.brand.config-path:${user.home}/.aem-a2ui/brands}")
     private String configPath;
@@ -36,6 +38,7 @@ public class BrandConfigService {
     @PostConstruct
     public void init() {
         loadAllBrandConfigs();
+        loadActiveBrandConfig();
     }
 
     private void loadAllBrandConfigs() {
@@ -118,7 +121,22 @@ public class BrandConfigService {
     }
 
     public BrandConfig getActiveBrandConfig() {
-        return brandConfigs.getOrDefault(DEFAULT_BRAND_ID, createEmbeddedDefault());
+        BrandConfig config = brandConfigs.get(activeBrandId);
+        if (config == null) {
+            config = brandConfigs.get(DEFAULT_BRAND_ID);
+        }
+        return config != null ? config : createEmbeddedDefault();
+    }
+
+    public BrandConfig getActiveBrandConfig(String siteKey) {
+        if (siteKey != null && siteBrandMap.containsKey(siteKey)) {
+            String brandId = siteBrandMap.get(siteKey);
+            BrandConfig config = brandConfigs.get(brandId);
+            if (config != null) {
+                return config;
+            }
+        }
+        return getActiveBrandConfig();
     }
 
     public List<BrandConfig> getAllBrandConfigs() {
@@ -143,6 +161,33 @@ public class BrandConfigService {
         }
 
         return config;
+    }
+
+    public void setActiveBrand(String brandId) {
+        if (brandId == null || !brandConfigs.containsKey(brandId)) {
+            return;
+        }
+        activeBrandId = brandId;
+        persistActiveConfig();
+    }
+
+    public void setActiveBrandForSite(String siteKey, String brandId) {
+        if (siteKey == null || siteKey.isBlank()) {
+            return;
+        }
+        if (brandId == null || !brandConfigs.containsKey(brandId)) {
+            return;
+        }
+        siteBrandMap.put(siteKey, brandId);
+        persistActiveConfig();
+    }
+
+    public String getActiveBrandId() {
+        return activeBrandId;
+    }
+
+    public Map<String, String> getSiteBrandMap() {
+        return new HashMap<>(siteBrandMap);
     }
 
     public boolean deleteBrandConfig(String id) {
@@ -186,5 +231,43 @@ public class BrandConfigService {
 
     public String getConfigPath() {
         return configPath;
+    }
+
+    private void loadActiveBrandConfig() {
+        try {
+            Path filePath = Paths.get(configPath, "active.json");
+            if (!Files.exists(filePath)) {
+                return;
+            }
+            String json = Files.readString(filePath);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = objectMapper.readValue(json, Map.class);
+            Object active = data.get("activeBrandId");
+            if (active instanceof String id && brandConfigs.containsKey(id)) {
+                activeBrandId = id;
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, String> siteMap = (Map<String, String>) data.get("siteBrandMap");
+            if (siteMap != null) {
+                siteBrandMap.putAll(siteMap);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to load active brand config: {}", e.getMessage());
+        }
+    }
+
+    private void persistActiveConfig() {
+        try {
+            Path brandDir = Paths.get(configPath);
+            Files.createDirectories(brandDir);
+            Path filePath = brandDir.resolve("active.json");
+            Map<String, Object> data = new HashMap<>();
+            data.put("activeBrandId", activeBrandId);
+            data.put("siteBrandMap", siteBrandMap);
+            String json = objectMapper.writeValueAsString(data);
+            Files.writeString(filePath, json);
+        } catch (IOException e) {
+            logger.warn("Failed to persist active brand config: {}", e.getMessage());
+        }
     }
 }

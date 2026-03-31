@@ -163,6 +163,27 @@ public class BrandCheckWorkflowProcess implements WorkflowProcess {
 
 ---
 
+### Governance Stream vs Approval Step
+
+**AEM Approval Step (Traditional):**
+```java
+public class ApprovalWorkflowProcess implements WorkflowProcess {
+    public void execute(WorkItem workItem, WorkflowSession session) {
+        // Wait for review/approval
+    }
+}
+```
+
+**AG-UI Governance Stream (Equivalent):**
+```
+event: CUSTOM_EVENT (governance.result)
+event: INTERRUPT_REQUESTED (requires human approval)
+```
+
+**Key Difference:** Governance signals are emitted in real time via streaming events, allowing the UI to interrupt and request approval before changes are applied.
+
+---
+
 ## Component Type Mapping
 
 | A2UI Component | AEM Component | Notes |

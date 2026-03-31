@@ -89,6 +89,8 @@ This document explains the two protocols used in this demo and how they work tog
 | `STATE_DELTA` | Full content state update |
 | `RUN_FINISHED` | Generation complete |
 | `RUN_ERROR` | Error occurred |
+| `CUSTOM_EVENT` | AEM-specific events (e.g., governance results) |
+| `INTERRUPT_REQUESTED` | Human approval required |
 
 ### AG-UI Streaming Example
 
@@ -113,6 +115,22 @@ data: {"delta":{"content":{"title":"Summer Savings","subtitle":...}}}
 
 event: RUN_FINISHED
 data: {"runId":"abc-123","status":"completed"}
+```
+
+### Custom Events Used in This Demo
+
+The demo emits a `CUSTOM_EVENT` called `governance.result` during governance streaming:
+
+```
+event: CUSTOM_EVENT
+data: {"name":"governance.result","payload":{"score":88,"issues":[...]}}
+```
+
+If the content violates brand rules, the stream may include a HITL event:
+
+```
+event: INTERRUPT_REQUESTED
+data: {"reason":"brand_violation","details":"Tone mismatch"}
 ```
 
 ---

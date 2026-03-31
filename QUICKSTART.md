@@ -43,6 +43,9 @@ The client will start on `http://localhost:5173`.
 
 You'll see the A2UI sidebar with the assistant panel.
 
+For deterministic demo content (useful for screenshots and visual tests), open:
+`http://localhost:5173/?demo=1`
+
 ## Configuration Options
 
 ### Environment Variables
@@ -57,6 +60,7 @@ You'll see the A2UI sidebar with the assistant panel.
 | `LLM_PROVIDER` | `ollama` | LLM: openai, anthropic, ollama |
 | `SECURITY_API_KEY_ENABLED` | `false` | Enable API key auth |
 | `SECURITY_API_KEY` | - | Your API key |
+| `AEM_DEMO_ENABLED` | `true` | Enable demo-only endpoints (maps to `aem.demo.enabled`) |
 
 ## API Endpoints
 
@@ -76,6 +80,7 @@ You'll see the A2UI sidebar with the assistant panel.
 | `/stream/advanced` | GET/POST | Full AG-UI with all 17 event types + AEM DAM |
 | `/stream/raw` | GET | Raw LLM token streaming |
 | `/stream/health` | GET | Protocol health with all supported events |
+| `/stream/governance` | GET | Governance streaming with CUSTOM_EVENT + HITL |
 
 ### AEM Integration
 
@@ -84,6 +89,7 @@ You'll see the A2UI sidebar with the assistant panel.
 | `/aem/health` | GET | AEM connection status |
 | `/aem/config` | GET | AEM configuration |
 | `/aem/content` | POST | Save content to AEM |
+| `/aem/content/update` | POST | Update AEM page or fragment |
 | `/dam/browse` | GET | Browse DAM assets |
 | `/dam/search` | GET | Search DAM assets |
 
@@ -93,6 +99,8 @@ You'll see the A2UI sidebar with the assistant panel.
 |----------|--------|-------------|
 | `/brands` | GET | List all brands |
 | `/brands/active` | GET | Get active brand config |
+| `/brands/active/map` | GET | Brand mapping by site |
+| `/brands/active` | PUT | Set active brand for site |
 | `/brands` | POST | Create new brand |
 | `/brands/{id}` | PUT | Update brand |
 
@@ -111,6 +119,19 @@ You'll see the A2UI sidebar with the assistant panel.
 | `/actuator/health` | GET | Health check |
 | `/actuator/metrics` | GET | Application metrics |
 | `/actuator/info` | GET | App info |
+| `/telemetry/summary` | GET | Demo telemetry summary |
+| `/telemetry/events` | GET | Recent telemetry events |
+
+### Demo Endpoints (when enabled)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/demo/governance/check` | POST | Run governance checks |
+| `/demo/component-schema` | GET | Component schema |
+| `/demo/dam-assembly` | POST | DAM assembly suggestions |
+| `/demo/personalize` | POST | Persona variations |
+| `/demo/localize` | POST | Localized variants |
+| `/demo/xf` | POST | Experience fragment suggestions |
 
 ## Testing the Integration
 
@@ -163,6 +184,9 @@ curl -N "http://localhost:10003/stream/advanced?input=summer+hiking&componentTyp
 
 # Check supported events
 curl http://localhost:10003/stream/health
+
+# Governance stream (demo content)
+curl -N "http://localhost:10003/stream/governance?content=eyJ0ZXh0IjoiSGVybw0KIn0=&brandId=default"
 ```
 
 **Expected AG-UI Events:**
@@ -182,6 +206,25 @@ event:TEXT_MESSAGE_DELTA (word by word)
 event:TEXT_MESSAGE_END
 event:STATE_SNAPSHOT
 event:RUN_FINISHED
+```
+
+## Visual Regression Tests (Playwright)
+
+```bash
+cd client
+npm run test:visual
+```
+
+To update snapshots:
+```bash
+npm run test:visual:update
+```
+
+## Java Quality Checks
+
+```bash
+cd agent-java
+mvn test
 ```
 
 ## Running with Docker

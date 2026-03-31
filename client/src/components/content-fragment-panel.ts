@@ -262,6 +262,7 @@ export class ContentFragmentPanel extends LitElement {
   `;
 
   @property({ type: Object }) content: ContentSuggestion | null = null;
+  @property({ type: String }) agentUrl = 'http://localhost:10003';
   @property({ type: String }) aemUrl = 'http://localhost:4502';
   @property({ type: Boolean }) aemConnected = false;
 
@@ -269,6 +270,9 @@ export class ContentFragmentPanel extends LitElement {
   @state() private selectedVariations: string[] = [];
   @state() private activeTab: 'jcr' | 'graphql' | 'model' = 'jcr';
   @state() private copied = false;
+  @state() private deployStatus: 'idle' | 'saving' | 'updating' | 'success' | 'error' = 'idle';
+  @state() private deployMessage = '';
+  @state() private savedPath: string | null = null;
 
   private variationOptions = ['Mobile', 'Tablet', 'Holiday', 'Sale', 'A/B Test'];
   private modelIcons: Record<string, string> = {
@@ -382,7 +386,19 @@ export class ContentFragmentPanel extends LitElement {
             <button class="action-btn primary" @click=${this.downloadFile}>
               ⬇️ Download
             </button>
+            <button class="action-btn primary" ?disabled=${!this.aemConnected || this.deployStatus === 'saving'} @click=${this.saveToAem}>
+              ${this.deployStatus === 'saving' ? '⏳ Saving...' : 'Save to AEM'}
+            </button>
+            <button class="action-btn secondary" ?disabled=${!this.aemConnected || !this.savedPath || this.deployStatus === 'updating'} @click=${this.updateInAem}>
+              ${this.deployStatus === 'updating' ? '⏳ Updating...' : 'Update in AEM'}
+            </button>
           </div>
+          ${this.deployStatus !== 'idle' ? html`
+            <div class="field-preview" style="margin-top: 12px;">
+              <div class="field-preview-title">${this.deployStatus === 'success' ? '✓' : this.deployStatus === 'error' ? '✗' : 'ℹ️'} ${this.deployMessage}</div>
+              ${this.savedPath ? html`<div class="field-row"><span class="field-name">Path</span><span class="field-value">${this.savedPath}</span></div>` : ''}
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -465,6 +481,80 @@ export class ContentFragmentPanel extends LitElement {
         return `${this.selectedModel}-model.json`;
       default:
         return `${baseName}.json`;
+    }
+  }
+
+  private async saveToAem() {
+    if (!this.content || !this.aemConnected) return;
+    const model = CF_MODELS.find(m => m.id === this.selectedModel);
+    const fragment = contentToFragment(this.content, this.selectedModel, {
+      variations: this.selectedVariations,
+    });
+
+    this.deployStatus = 'saving';
+    this.deployMessage = 'Saving Content Fragment to AEM...';
+
+    try {
+      const response = await fetch(`${this.agentUrl}/aem/content`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'fragment',
+          name: this.content.title || 'fragment',
+          folder: '/content/dam/aem-demo/generated',
+          model: model?.modelPath,
+          properties: fragment.data,
+          content: this.content,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        this.savedPath = data.path;
+        this.deployStatus = 'success';
+        this.deployMessage = 'Saved successfully';
+        logger.info('Saved Content Fragment to AEM', 'ContentFragment', data);
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (err) {
+      this.deployStatus = 'error';
+      this.deployMessage = `Save failed: ${err}`;
+      logger.error('Failed to save Content Fragment', 'ContentFragment', err);
+    }
+  }
+
+  private async updateInAem() {
+    if (!this.content || !this.aemConnected || !this.savedPath) return;
+    const fragment = contentToFragment(this.content, this.selectedModel, {
+      variations: this.selectedVariations,
+    });
+
+    this.deployStatus = 'updating';
+    this.deployMessage = 'Updating Content Fragment in AEM...';
+
+    try {
+      const response = await fetch(`${this.agentUrl}/aem/content/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'fragment',
+          path: this.savedPath,
+          properties: fragment.data,
+          content: this.content,
+        }),
+      });
+
+      if (response.ok) {
+        this.deployStatus = 'success';
+        this.deployMessage = 'Updated successfully';
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (err) {
+      this.deployStatus = 'error';
+      this.deployMessage = `Update failed: ${err}`;
+      logger.error('Failed to update Content Fragment', 'ContentFragment', err);
     }
   }
 }

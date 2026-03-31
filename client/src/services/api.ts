@@ -238,6 +238,19 @@ class ApiService {
     });
   }
 
+  // Content Versioning
+  async recordContentVersion(
+    contentId: string,
+    content: ContentSuggestion,
+    createdBy: string,
+    changeNote: string
+  ): Promise<{ id: string }> {
+    return this.fetch(`/content/${contentId}/versions`, {
+      method: 'POST',
+      body: JSON.stringify({ content, createdBy, changeNote }),
+    });
+  }
+
   // DAM Operations
   async browseDam(folder: string = '/content/dam'): Promise<DamBrowseResponse> {
     const params = new URLSearchParams({ folder });

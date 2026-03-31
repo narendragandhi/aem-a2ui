@@ -1,9 +1,13 @@
 package com.example.aema2ui.controller;
 
 import com.example.aema2ui.service.AemIntegrationService;
+import com.example.aema2ui.service.BrandConfigService;
+import com.example.aema2ui.service.BrandValidationService;
 import com.example.aema2ui.service.StreamingContentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -38,8 +42,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StreamingController {
 
+    @Value("${aem.demo.enabled:true}")
+    private boolean demoEnabled;
+
     private final StreamingContentService streamingService;
     private final AemIntegrationService aemIntegrationService;
+    private final BrandConfigService brandConfigService;
+    private final BrandValidationService brandValidationService;
+    private final ObjectMapper objectMapper;
 
     /**
      * Stream content generation with SSE.
@@ -175,5 +185,25 @@ public class StreamingController {
                 "raw", "/stream/raw"
             )
         );
+    }
+
+    /**
+     * Governance streaming - brand + SEO policy copilot.
+     * Accepts base64-encoded content JSON in the "content" query param.
+     */
+    @GetMapping(value = "/governance", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamGovernance(
+            @RequestParam String content,
+            @RequestParam(required = false) String brandId) {
+
+        if (!demoEnabled) {
+            SseEmitter emitter = new SseEmitter();
+            emitter.complete();
+            return emitter;
+        }
+
+        SseEmitter emitter = streamingService.createEmitter();
+        streamingService.streamGovernance(content, brandId, emitter, brandConfigService, brandValidationService, objectMapper);
+        return emitter;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.aema2ui.controller;
 
 import com.example.aema2ui.model.*;
+import com.example.aema2ui.service.TelemetryService;
 import com.example.aema2ui.service.WorkflowService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +17,11 @@ import java.util.Map;
 public class WorkflowController {
 
     private final WorkflowService workflowService;
+    private final TelemetryService telemetryService;
 
-    public WorkflowController(WorkflowService workflowService) {
+    public WorkflowController(WorkflowService workflowService, TelemetryService telemetryService) {
         this.workflowService = workflowService;
+        this.telemetryService = telemetryService;
     }
 
     /**
@@ -54,6 +57,10 @@ public class WorkflowController {
                 request.getInitiatedBy(),
                 request.getMetadata()
         );
+        telemetryService.record("workflow.submit", Map.of(
+            "contentId", request.getContentId(),
+            "workflowModelId", request.getWorkflowModelId()
+        ));
         return ResponseEntity.ok(instance);
     }
 
@@ -113,6 +120,7 @@ public class WorkflowController {
             @RequestBody(required = false) Map<String, String> request) {
         String comment = request != null ? request.get("comment") : null;
         WorkflowInstance instance = workflowService.advanceWorkflow(id, comment);
+        telemetryService.record("workflow.advance", Map.of("workflowId", id));
         return ResponseEntity.ok(instance);
     }
 
@@ -125,6 +133,7 @@ public class WorkflowController {
             @PathVariable String id,
             @RequestParam(defaultValue = "Cancelled by user") String reason) {
         WorkflowInstance instance = workflowService.cancelWorkflow(id, reason);
+        telemetryService.record("workflow.cancel", Map.of("workflowId", id));
         return ResponseEntity.ok(instance);
     }
 

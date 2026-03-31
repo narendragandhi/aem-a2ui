@@ -30,8 +30,28 @@ public class BrandConfigController {
     }
 
     @GetMapping("/active")
-    public BrandConfig getActiveBrand() {
-        return brandConfigService.getActiveBrandConfig();
+    public BrandConfig getActiveBrand(@RequestParam(required = false) String siteKey) {
+        return siteKey != null
+            ? brandConfigService.getActiveBrandConfig(siteKey)
+            : brandConfigService.getActiveBrandConfig();
+    }
+
+    @PutMapping("/active")
+    public ResponseEntity<?> setActiveBrand(@RequestBody ActiveBrandRequest request) {
+        if (request.getBrandId() == null || request.getBrandId().isBlank()) {
+            return ResponseEntity.badRequest().body("brandId is required");
+        }
+        if (request.getSiteKey() != null && !request.getSiteKey().isBlank()) {
+            brandConfigService.setActiveBrandForSite(request.getSiteKey(), request.getBrandId());
+        } else {
+            brandConfigService.setActiveBrand(request.getBrandId());
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/active/map")
+    public ResponseEntity<?> getActiveBrandMap() {
+        return ResponseEntity.ok(brandConfigService.getSiteBrandMap());
     }
 
     @PostMapping
@@ -50,5 +70,11 @@ public class BrandConfigController {
         return brandConfigService.deleteBrandConfig(id)
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
+    }
+
+    @lombok.Data
+    public static class ActiveBrandRequest {
+        private String brandId;
+        private String siteKey;
     }
 }

@@ -220,6 +220,13 @@ public class ReviewService {
     }
 
     /**
+     * Record a new content version outside of a review.
+     */
+    public ContentVersion recordVersion(String contentId, ContentSuggestion content, String createdBy, String changeNote) {
+        return saveContentVersion(contentId, content, createdBy, changeNote);
+    }
+
+    /**
      * Get version history for content.
      */
     public List<ContentVersion> getVersionHistory(String contentId) {

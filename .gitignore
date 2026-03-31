@@ -66,6 +66,11 @@ npm-debug.log*
 *.min.js
 *.min.css
 
+# Playwright
+playwright-report/
+test-results/
+tests/.cache/
+
 # Test coverage
 coverage/
 .nyc_output/

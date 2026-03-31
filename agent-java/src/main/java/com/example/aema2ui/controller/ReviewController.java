@@ -2,6 +2,7 @@ package com.example.aema2ui.controller;
 
 import com.example.aema2ui.model.*;
 import com.example.aema2ui.service.ReviewService;
+import com.example.aema2ui.service.TelemetryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +17,11 @@ import java.util.Map;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final TelemetryService telemetryService;
 
-    public ReviewController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService, TelemetryService telemetryService) {
         this.reviewService = reviewService;
+        this.telemetryService = telemetryService;
     }
 
     /**
@@ -185,6 +188,52 @@ public class ReviewController {
     }
 
     /**
+     * Record a new version for content (outside review workflow).
+     * POST /content/{contentId}/versions
+     */
+    @PostMapping("/content/{contentId}/versions")
+    public ResponseEntity<ContentVersion> recordVersion(
+            @PathVariable String contentId,
+            @RequestBody RecordVersionRequest request) {
+        ContentVersion version = reviewService.recordVersion(
+                contentId,
+                request.getContent(),
+                request.getCreatedBy(),
+                request.getChangeNote()
+        );
+        telemetryService.record("content.version.recorded", Map.of(
+            "contentId", contentId,
+            "version", version.getVersion()
+        ));
+        return ResponseEntity.ok(version);
+    }
+
+    /**
+     * Restore a version and create a new version with restored content.
+     * POST /content/{contentId}/versions/restore
+     */
+    @PostMapping("/content/{contentId}/versions/restore")
+    public ResponseEntity<ContentSuggestion> restoreVersion(
+            @PathVariable String contentId,
+            @RequestBody RestoreVersionRequest request) {
+        return reviewService.getVersion(contentId, request.getVersion())
+                .map(version -> {
+                    reviewService.recordVersion(
+                            contentId,
+                            version.getContent(),
+                            request.getUpdatedBy(),
+                            request.getChangeNote()
+                    );
+                    telemetryService.record("content.version.restored", Map.of(
+                        "contentId", contentId,
+                        "version", request.getVersion()
+                    ));
+                    return ResponseEntity.ok(version.getContent());
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
      * Mark reviewer as having reviewed.
      * POST /reviews/{id}/reviewers/{reviewerId}/mark-reviewed
      */
@@ -229,6 +278,20 @@ public class ReviewController {
     @lombok.Data
     public static class UpdateContentRequest {
         private ContentSuggestion content;
+        private String updatedBy;
+        private String changeNote;
+    }
+
+    @lombok.Data
+    public static class RecordVersionRequest {
+        private ContentSuggestion content;
+        private String createdBy;
+        private String changeNote;
+    }
+
+    @lombok.Data
+    public static class RestoreVersionRequest {
+        private int version;
         private String updatedBy;
         private String changeNote;
     }

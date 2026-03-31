@@ -1,6 +1,8 @@
 package com.example.aema2ui.service;
 
 import com.example.aema2ui.agent.AemContentAgent;
+import com.example.aema2ui.model.BrandConfig;
+import com.example.aema2ui.model.BrandValidationResult;
 import com.example.aema2ui.model.ContentSuggestion;
 import com.example.aema2ui.model.UserInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +16,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
+import com.example.aema2ui.service.BrandConfigService;
+import com.example.aema2ui.service.BrandValidationService;
 
 /**
  * SSE Streaming service for real-time content generation.
@@ -511,6 +517,133 @@ public class StreamingContentService {
     }
 
     /**
+     * Stream governance checks (brand + SEO) for a content suggestion.
+     * Input content is base64-encoded JSON string.
+     */
+    public void streamGovernance(
+            String contentBase64,
+            String brandId,
+            SseEmitter emitter,
+            BrandConfigService brandConfigService,
+            BrandValidationService brandValidationService,
+            ObjectMapper mapper) {
+
+        String runId = UUID.randomUUID().toString();
+        final java.util.concurrent.atomic.AtomicBoolean emitterCompleted = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        emitter.onCompletion(() -> emitterCompleted.set(true));
+        emitter.onTimeout(() -> emitterCompleted.set(true));
+        emitter.onError(e -> emitterCompleted.set(true));
+
+        executor.execute(() -> {
+            try {
+                ContentSuggestion content = decodeContent(contentBase64, mapper);
+                BrandConfig brandConfig = brandId != null
+                    ? brandConfigService.getBrandConfig(brandId).orElse(brandConfigService.getActiveBrandConfig())
+                    : brandConfigService.getActiveBrandConfig();
+
+                emitEvent(emitter, RUN_STARTED, Map.of(
+                    "runId", runId,
+                    "agentName", "Policy Copilot",
+                    "version", "1.0"
+                ));
+
+                String stepId1 = "step-1";
+                emitEvent(emitter, STEP_STARTED, Map.of(
+                    "runId", runId,
+                    "stepId", stepId1,
+                    "stepIndex", 1,
+                    "stepName", "brand_check",
+                    "stepTitle", "Brand Compliance Check",
+                    "icon", "🛡️"
+                ));
+
+                String toolCallId = UUID.randomUUID().toString();
+                emitEvent(emitter, TOOL_CALL_START, Map.of(
+                    "runId", runId,
+                    "stepId", stepId1,
+                    "toolCallId", toolCallId,
+                    "toolName", "brand_rules",
+                    "toolDescription", "Load active brand rules"
+                ));
+                emitEvent(emitter, TOOL_CALL_RESULT, Map.of(
+                    "runId", runId,
+                    "toolCallId", toolCallId,
+                    "result", Map.of("brandId", brandConfig.getId(), "brandName", brandConfig.getName())
+                ));
+                emitEvent(emitter, TOOL_CALL_END, Map.of(
+                    "runId", runId,
+                    "toolCallId", toolCallId,
+                    "status", "completed"
+                ));
+
+                BrandValidationResult brandValidation = brandValidationService.validate(content, brandConfig);
+                emitEvent(emitter, STEP_FINISHED, Map.of(
+                    "runId", runId,
+                    "stepId", stepId1,
+                    "status", "completed"
+                ));
+
+                String stepId2 = "step-2";
+                emitEvent(emitter, STEP_STARTED, Map.of(
+                    "runId", runId,
+                    "stepId", stepId2,
+                    "stepIndex", 2,
+                    "stepName", "seo_check",
+                    "stepTitle", "SEO Quality Check",
+                    "icon", "🔎"
+                ));
+
+                Map<String, Object> seo = simpleSeoScore(content);
+                emitEvent(emitter, STEP_FINISHED, Map.of(
+                    "runId", runId,
+                    "stepId", stepId2,
+                    "status", "completed"
+                ));
+
+                emitEvent(emitter, CUSTOM_EVENT, Map.of(
+                    "runId", runId,
+                    "eventType", "governance.result",
+                    "payload", Map.of(
+                        "brand", brandValidation,
+                        "seo", seo
+                    )
+                ));
+
+                if (brandValidation.hasErrors()) {
+                    emitEvent(emitter, INTERRUPT_REQUESTED, Map.of(
+                        "runId", runId,
+                        "interruptId", UUID.randomUUID().toString(),
+                        "type", "approval",
+                        "title", "Compliance Issues Detected",
+                        "description", "Resolve issues before publishing.",
+                        "options", java.util.List.of(
+                            Map.of("id", "fix", "label", "Fix Issues", "style", "primary"),
+                            Map.of("id", "override", "label", "Override", "style", "danger")
+                        )
+                    ));
+                }
+
+                emitEvent(emitter, RUN_FINISHED, Map.of(
+                    "runId", runId,
+                    "status", "completed"
+                ));
+                emitter.complete();
+            } catch (Exception e) {
+                if (!emitterCompleted.get()) {
+                    try {
+                        emitEvent(emitter, RUN_ERROR, Map.of(
+                            "runId", runId,
+                            "error", e.getMessage()
+                        ));
+                        emitter.completeWithError(e);
+                    } catch (Exception ignored) {}
+                }
+            }
+        });
+    }
+
+    /**
      * Advanced streaming with Human-in-the-Loop and real AEM DAM tool calls.
      * Demonstrates full AG-UI protocol including:
      * - Multi-step workflow with visible progress
@@ -915,5 +1048,38 @@ public class StreamingContentService {
             current = current.getCause();
         }
         return false;
+    }
+
+    private ContentSuggestion decodeContent(String contentBase64, ObjectMapper mapper) throws Exception {
+        byte[] decoded = Base64.getDecoder().decode(contentBase64);
+        String json = new String(decoded, StandardCharsets.UTF_8);
+        return mapper.readValue(json, ContentSuggestion.class);
+    }
+
+    private Map<String, Object> simpleSeoScore(ContentSuggestion content) {
+        int score = 100;
+        java.util.List<String> issues = new java.util.ArrayList<>();
+        String title = content != null ? content.getTitle() : null;
+        String desc = content != null ? content.getDescription() : null;
+        if (title == null || title.length() < 10) {
+            score -= 15;
+            issues.add("Title too short");
+        }
+        if (title != null && title.length() > 60) {
+            score -= 10;
+            issues.add("Title too long");
+        }
+        if (desc == null || desc.length() < 50) {
+            score -= 15;
+            issues.add("Description too short");
+        }
+        if (desc != null && desc.length() > 160) {
+            score -= 10;
+            issues.add("Description too long");
+        }
+        return Map.of(
+            "score", Math.max(0, score),
+            "issues", issues
+        );
     }
 }

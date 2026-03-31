@@ -4,13 +4,15 @@
 
 | Area | Status | Notes |
 |------|--------|-------|
-| **Code Quality** | ✅ Ready | All 68 tests passing (30 Python + 38 Java) |
+| **Code Quality** | ✅ Ready | Checkstyle + JaCoCo configured for Java quality gates |
 | **Architecture** | ✅ Ready | Clean separation, A2UI v0.8 compliant |
 | **Embabel Integration** | ✅ Ready | Annotations + LLM support (OpenAI/Anthropic/Ollama) |
-| **Security** | ⚠️ Review needed | CORS configured for demo, needs hardening for prod |
+| **Security** | ⚠️ Review needed | Demo-friendly auth, IMS stub, and CORS require production hardening |
 | **Scalability** | ✅ Ready | Stateless agents, horizontally scalable |
-| **Documentation** | ✅ Ready | Comprehensive README with examples |
+| **Documentation** | ✅ Ready | README + protocol, architecture, quickstart, story docs updated |
 | **AEM Integration** | ⚠️ Partial | Client code ready, needs AEM deployment |
+| **Observability** | ✅ Ready | Telemetry endpoints + UI summary panel |
+| **UI Regression** | ✅ Ready | Playwright visual regression suite |
 
 **Verdict**: Ready for **pilot/POC** deployments. For full production, you'd need:
 - AEM clientlib packaging
@@ -59,6 +61,9 @@ AEM authors spend **60-70% of their time** on repetitive content tasks:
 | **Asset Selection** | Browse DAM manually | AI suggests relevant assets |
 | **Brand Voice** | Style guides (often ignored) | Enforced via LLM prompts |
 | **Updates** | Deploy new clientlibs | Update agent prompts |
+| **Governance** | Post-hoc review | Live compliance streaming with HITL |
+| **Observability** | Ad hoc logs | Built-in telemetry feed |
+| **Demos** | Static slides | Guided narrative mode with deterministic data |
 
 ## ROI Metrics
 
@@ -100,6 +105,8 @@ Think of it as decoupling AEM's brain (content, logic, workflow) from its face (
 - **Enterprise Ready**: Java/Spring Boot, testable, scalable
 - **Flexible LLM Support**: OpenAI, Anthropic, or local Ollama models
 - **Privacy Option**: Run entirely on-premise with Ollama
+- **Governance-First**: Streaming compliance with human approvals
+- **Observable Demos**: Telemetry-backed walkthroughs and replayable flows
 
 ## LLM Provider Options
 

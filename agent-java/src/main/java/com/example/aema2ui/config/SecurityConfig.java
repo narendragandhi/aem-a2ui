@@ -55,6 +55,12 @@ public class SecurityConfig {
     @Value("${security.rate-limit.enabled:true}")
     private boolean rateLimitEnabled;
 
+    @Value("${security.ims.enabled:false}")
+    private boolean imsEnabled;
+
+    @Value("${security.ims.require-jwt:true}")
+    private boolean imsRequireJwt;
+
     /**
      * Filter for security headers and request logging.
      */
@@ -75,6 +81,18 @@ public class SecurityConfig {
         FilterRegistrationBean<ApiKeyFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ApiKeyFilter(apiKeyEnabled, apiKeyValue));
         registration.addUrlPatterns("/tasks", "/advanced/tasks", "/stream/*", "/recommend");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
+        return registration;
+    }
+
+    /**
+     * Optional IMS authentication filter (stub).
+     */
+    @Bean
+    public FilterRegistrationBean<ImsAuthFilter> imsAuthFilter() {
+        FilterRegistrationBean<ImsAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new ImsAuthFilter(imsEnabled, imsRequireJwt));
+        registration.addUrlPatterns("/tasks", "/advanced/tasks", "/stream/*", "/recommend", "/aem/*", "/workflows/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;
     }
@@ -87,7 +105,7 @@ public class SecurityConfig {
         FilterRegistrationBean<RateLimitFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new RateLimitFilter(rateLimitEnabled, rateLimitRequestsPerMinute));
         registration.addUrlPatterns("/tasks", "/advanced/tasks", "/stream/*");
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 3);
         return registration;
     }
 
@@ -230,6 +248,55 @@ public class SecurityConfig {
                 return forwarded.split(",")[0].trim();
             }
             return request.getRemoteAddr();
+        }
+    }
+
+    /**
+     * IMS authentication filter (stub).
+     * Accepts any bearer token when enabled, optionally requiring JWT format.
+     */
+    public static class ImsAuthFilter implements Filter {
+        private static final Logger logger = LoggerFactory.getLogger(ImsAuthFilter.class);
+        private static final String AUTH_HEADER = "Authorization";
+
+        private final boolean enabled;
+        private final boolean requireJwt;
+
+        public ImsAuthFilter(boolean enabled, boolean requireJwt) {
+            this.enabled = enabled;
+            this.requireJwt = requireJwt;
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+
+            if (!enabled) {
+                chain.doFilter(request, response);
+                return;
+            }
+
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+            String auth = httpRequest.getHeader(AUTH_HEADER);
+            if (auth == null || !auth.startsWith("Bearer ")) {
+                httpResponse.setStatus(401);
+                httpResponse.setContentType("application/json");
+                httpResponse.getWriter().write("{\"error\":\"Missing IMS bearer token\"}");
+                return;
+            }
+
+            String token = auth.substring("Bearer ".length()).trim();
+            if (requireJwt && token.split("\\.").length != 3) {
+                logger.warn("IMS token is not in JWT format");
+                httpResponse.setStatus(401);
+                httpResponse.setContentType("application/json");
+                httpResponse.getWriter().write("{\"error\":\"Invalid IMS token format\"}");
+                return;
+            }
+
+            chain.doFilter(request, response);
         }
     }
 

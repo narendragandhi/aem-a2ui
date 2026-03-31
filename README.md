@@ -77,6 +77,15 @@ The client is a feature-rich application built with Adobe's Spectrum design syst
 - **Multiple Input Modes:** Switch between a guided wizard, a quick-entry text field, and a full page builder.
 - **Inline Editing:** Click to edit text directly in the live preview.
 - **Component Library:** A rich library of 20 component types across 7 categories.
+- **AG-UI Demo Hub:** Curated demos for workflow orchestration, governance, component config, DAM assembly, personalization, and experience fragments.
+- **Guided Narrative Mode:** Story-driven stepper with progress tracking and event log.
+- **Telemetry Panel:** Live view of demo/agent events with a summary feed.
+- **Content Fragment Sync:** Save and update content fragments directly from the assistant.
+- **Deterministic Demo Mode:** Use `/?demo=1` for stable demo content and visual tests.
+
+### Demo Feature Flag
+
+Set `aem.demo.enabled=false` to disable demo-only endpoints (e.g., `/demo/*`, `/stream/governance`).
 
 ### Sophisticated Agent Backend
 
@@ -84,6 +93,9 @@ The Java-based agent leverages the Embabel AI framework and provides features su
 
 - **Multiple Variation Generation:** Generates three variations for each content request: "original," "bold and impactful," and "friendly and conversational."
 - **Pluggable LLM Providers:** Easily switch between different LLM providers with graceful fallback to template-based generation.
+- **Governance Streaming:** SSE stream for compliance checks with HITL interrupt signals.
+- **Component Mapping:** Maps AI suggestions to AEM component properties for apply/update flows.
+- **Telemetry Capture:** Aggregates agent activity for demo observability.
 
 ## Project Structure
 
@@ -174,6 +186,7 @@ The project provides multiple streaming endpoints for real-time content generati
 | `/stream/advanced` | Full AG-UI with AEM DAM integration | All 17 event types |
 | `/stream/raw` | Raw LLM token streaming | Raw tokens as generated |
 | `/stream/health` | Protocol health check | Lists all supported events |
+| `/stream/governance` | Governance streaming for compliance checks | CUSTOM_EVENT + HITL |
 
 ### Example: Advanced Streaming Workflow
 
@@ -199,6 +212,24 @@ Real integration with local AEM SDK:
 | **GraphQL** | ✅ | Content Fragment queries |
 | **Webhooks** | ✅ | AEM event handlers |
 
+## Demo Endpoints
+
+Demo-only endpoints (controlled by `aem.demo.enabled`) provide curated, deterministic responses:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/demo/governance/check` | POST | Run governance checks on sample content |
+| `/demo/component-schema` | GET | Return component configuration schema |
+| `/demo/dam-assembly` | POST | Suggest DAM asset assembly |
+| `/demo/personalize` | POST | Provide persona-based variations |
+| `/demo/localize` | POST | Localize content variants |
+| `/demo/xf` | POST | Generate experience fragment proposals |
+
+## Quality & Testing
+
+- **Checkstyle + JaCoCo:** Enforced for Java code style and coverage reporting.
+- **Playwright Visual Regression:** Screenshot-based UI regression tests in `client/tests/visual`.
+
 ## Features Implemented
 
 - [x] Full AG-UI Protocol (17 event types)
@@ -213,6 +244,10 @@ Real integration with local AEM SDK:
 - [x] Universal Editor integration
 - [x] AI-driven component recommendations
 - [x] Multi-LLM support (OpenAI, Anthropic, Ollama)
+- [x] Governance streaming with HITL interrupts
+- [x] Guided narrative demo mode
+- [x] Telemetry panel
+- [x] Visual regression tests (Playwright)
 
 ## Future Enhancements
 

@@ -40,6 +40,8 @@ export * from './review-panel.js';
 export * from './review-comments.js';
 export * from './workflow-panel.js';
 export * from './version-history.js';
+export * from './demo-hub.js';
+export * from './telemetry-panel.js';
 
 // Collaboration
 export * from './live-presence.js';

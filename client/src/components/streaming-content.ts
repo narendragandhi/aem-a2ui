@@ -650,12 +650,28 @@ export class StreamingContent extends LitElement {
   @state() private useAdvanced = false;
   @state() private progressMessage = '';
   @state() private hitlInterrupt: HitlInterrupt | null = null;
+  @state() private guidedEvents: Array<{ type: string; label: string; timestamp?: string }> = [];
+  @state() private governanceResult: { brand?: unknown; seo?: unknown } | null = null;
 
   private eventSource: EventSource | null = null;
   private fieldOrder = ['title', 'subtitle', 'description', 'ctaText', 'price', 'imageUrl'];
+  private guidedListener = (e: Event) => {
+    const detail = (e as CustomEvent).detail as { type: string; data: { label?: string; timestamp?: string } };
+    if (!detail) return;
+    this.guidedEvents = [
+      { type: detail.type, label: detail.data?.label || '', timestamp: detail.data?.timestamp },
+      ...this.guidedEvents,
+    ].slice(0, 10);
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('aem-guided-event', this.guidedListener as EventListener);
+  }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    window.removeEventListener('aem-guided-event', this.guidedListener as EventListener);
     this.cancelStream();
   }
 
@@ -710,6 +726,52 @@ export class StreamingContent extends LitElement {
 
       this.eventSource.onerror = (e) => {
         console.error('SSE Error:', e);
+        if (this.status === 'streaming') {
+          this.status = 'error';
+          this.error = 'Connection lost. Please try again.';
+        }
+        this.eventSource?.close();
+      };
+    } catch (err) {
+      this.status = 'error';
+      this.error = err instanceof Error ? err.message : 'Failed to connect';
+    }
+  }
+
+  /**
+   * Start governance streaming for an existing content object (AG-UI policy copilot).
+   */
+  public async startGovernanceStreaming(content: ContentSuggestion, brandId?: string) {
+    this.cancelStream();
+    this.reset();
+    this.status = 'streaming';
+    this.progress = 5;
+
+    const payload = btoa(unescape(encodeURIComponent(JSON.stringify(content))));
+    const params = new URLSearchParams({
+      content: payload,
+      ...(brandId ? { brandId } : {}),
+    });
+
+    try {
+      this.eventSource = new EventSource(`${this.agentUrl}/stream/governance?${params}`);
+      const eventTypes: AgUiEventType[] = [
+        'RUN_STARTED', 'RUN_FINISHED', 'RUN_ERROR',
+        'STEP_STARTED', 'STEP_FINISHED',
+        'TEXT_MESSAGE_START', 'TEXT_MESSAGE_DELTA', 'TEXT_MESSAGE_END',
+        'TOOL_CALL_START', 'TOOL_CALL_ARGS', 'TOOL_CALL_END', 'TOOL_CALL_RESULT',
+        'STATE_DELTA', 'STATE_SNAPSHOT', 'MESSAGES_SNAPSHOT',
+        'RAW_EVENT', 'CUSTOM_EVENT',
+        'INTERRUPT_REQUESTED', 'INTERRUPT_RESOLVED',
+      ];
+
+      eventTypes.forEach((eventType) => {
+        this.eventSource!.addEventListener(eventType, (e: MessageEvent) => {
+          this.handleEvent(eventType, JSON.parse(e.data));
+        });
+      });
+
+      this.eventSource.onerror = () => {
         if (this.status === 'streaming') {
           this.status = 'error';
           this.error = 'Connection lost. Please try again.';
@@ -877,6 +939,9 @@ export class StreamingContent extends LitElement {
             })
           );
         }
+        if (data.eventType === 'governance.result') {
+          this.governanceResult = data.payload as { brand?: unknown; seo?: unknown };
+        }
         break;
 
       // ═══════════════════════════════════════════════════════════
@@ -1027,6 +1092,8 @@ export class StreamingContent extends LitElement {
         ${this.status === 'idle' ? this.renderIdleState() : ''}
         ${this.status === 'error' ? this.renderError() : ''}
         ${this.steps.length > 0 ? this.renderSteps() : ''}
+        ${this.guidedEvents.length > 0 ? this.renderGuidedEvents() : ''}
+        ${this.governanceResult ? this.renderGovernanceResult() : ''}
         ${this.hitlInterrupt ? this.renderHitlPanel() : ''}
         ${this.toolCalls.length > 0 ? this.renderToolCalls() : ''}
         ${this.status === 'streaming' || this.status === 'completed'
@@ -1086,6 +1153,43 @@ export class StreamingContent extends LitElement {
             </div>
           `
         )}
+      </div>
+    `;
+  }
+
+  private renderGuidedEvents() {
+    return html`
+      <div class="tool-calls-container">
+        <div class="tool-header">
+          <span class="tool-icon">🧭</span>
+          <span class="tool-name">Guided Narrative</span>
+        </div>
+        <div class="tool-result">
+          <pre>${JSON.stringify(this.guidedEvents, null, 2)}</pre>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderGovernanceResult() {
+    const brandScore = (this.governanceResult as any)?.brand?.score ?? '-';
+    const seoScore = (this.governanceResult as any)?.seo?.score ?? '-';
+    const brandIssues = (this.governanceResult as any)?.brand?.issues || [];
+    const seoIssues = (this.governanceResult as any)?.seo?.issues || [];
+    return html`
+      <div class="tool-calls-container">
+        <div class="tool-header">
+          <span class="tool-icon">🛡️</span>
+          <span class="tool-name">Governance Results</span>
+        </div>
+        <div class="tool-result">
+          <div><strong>Brand Score:</strong> ${brandScore}</div>
+          <div><strong>SEO Score:</strong> ${seoScore}</div>
+          <div style="margin-top: 6px;"><strong>Brand Issues:</strong></div>
+          <pre>${JSON.stringify(brandIssues, null, 2)}</pre>
+          <div style="margin-top: 6px;"><strong>SEO Issues:</strong></div>
+          <pre>${JSON.stringify(seoIssues, null, 2)}</pre>
+        </div>
       </div>
     `;
   }

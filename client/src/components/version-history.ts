@@ -304,20 +304,20 @@ export class VersionHistory extends LitElement {
 
     this.loading = true;
     try {
-      const response = await fetch(`${API_BASE}/reviews/${this.contentId}/content`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE}/content/${this.contentId}/versions/restore`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: this.selectedVersion.content,
+          version: this.selectedVersion.version,
           updatedBy: this.currentUser,
           changeNote: `Restored to version ${this.selectedVersion.version}`
         })
       });
 
       if (response.ok) {
-        const updatedReview = await response.json();
+        const restoredContent = await response.json();
         this.dispatchEvent(new CustomEvent('version-restored', {
-          detail: { content: updatedReview.content },
+          detail: { content: restoredContent },
           bubbles: true,
           composed: true
         }));

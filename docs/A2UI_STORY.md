@@ -45,6 +45,16 @@ This takes 12 seconds.
 
 ---
 
+## Chapter 2.5: Guided Narrative and Governance
+
+Sarah now has a guided story mode that explains what the agent is doing as it happens. Each step is shown with progress, and she can review a timeline of agent decisions.
+
+When content needs to pass governance checks, the assistant streams compliance results in real time. If something violates brand rules, the UI pauses and requests a human approval before it applies changes.
+
+This turns hidden AI logic into an auditable, step-by-step narrative.
+
+---
+
 ## Chapter 3: What is A2UI?
 
 **A2UI** (Agent-to-User Interface) is a protocol developed by Google that enables AI agents to generate rich, interactive user interfaces dynamically.
@@ -294,6 +304,9 @@ The client starts on `http://localhost:5173`.
 ### Step 3: Open the Assistant
 
 Navigate to `http://localhost:5173`. You'll see the A2UI sidebar with the assistant panel.
+
+For deterministic demo content (useful for walkthroughs and visuals), open:
+`http://localhost:5173/?demo=1`
 
 ### Step 4: Make Your First Request
 
