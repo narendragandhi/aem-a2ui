@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ContentSuggestion {
 
+    @JsonPropertyDescription("Unique identifier for this suggestion")
+    private String id;
+
     @JsonPropertyDescription("The type of AEM component (hero, product, teaser, banner)")
     private String componentType;
 
@@ -45,4 +48,13 @@ public class ContentSuggestion {
 
     @JsonPropertyDescription("Additional CSS class for styling")
     private String styleClass;
+
+    @JsonPropertyDescription("SEO metadata as a JSON object")
+    private String seo;
+
+    @JsonPropertyDescription("SEO score (0-100)")
+    private Integer seoScore;
+
+    @JsonPropertyDescription("Visual quality score (0-100)")
+    private Integer visualScore;
 }

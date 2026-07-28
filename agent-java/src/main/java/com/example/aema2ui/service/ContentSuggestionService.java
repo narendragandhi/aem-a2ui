@@ -1,36 +1,42 @@
 package com.example.aema2ui.service;
 
+import com.embabel.agent.api.invocation.AgentInvocation;
+import com.embabel.agent.core.AgentPlatform;
 import com.example.aema2ui.agent.AemContentAgent;
 import com.example.aema2ui.model.ContentSuggestion;
-import com.example.aema2ui.model.UserInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 /**
- * Service that generates content suggestions and A2UI responses.
- * Uses the AemContentAgent for content generation, with AI integration ready for future use.
+ * Service that generates content suggestions using the Embabel Agent runtime.
+ *
+ * Uses AgentInvocation to run the AemContentAgent through the GOAP planner.
+ * The planner automatically chains: parseUserIntent -> generateContent
  */
 @Slf4j
 @Service
 public class ContentSuggestionService {
 
     private final A2UIMessageBuilder builder;
-    private final AemContentAgent contentAgent;
+    private final AgentPlatform agentPlatform;
     private final ObjectMapper objectMapper;
+    private final AemContentAgent contentAgent;
 
     @Value("${aem.agent.ai.enabled:false}")
     private boolean aiEnabled;
 
-    @Autowired
-    public ContentSuggestionService(A2UIMessageBuilder builder, AemContentAgent contentAgent, ObjectMapper objectMapper) {
+    @Value("${aem.agent.suggestions.count:1}")
+    private int suggestionsCount;
+
+    public ContentSuggestionService(A2UIMessageBuilder builder, AgentPlatform agentPlatform, ObjectMapper objectMapper, AemContentAgent contentAgent) {
         this.builder = builder;
-        this.contentAgent = contentAgent;
+        this.agentPlatform = agentPlatform;
         this.objectMapper = objectMapper;
+        this.contentAgent = contentAgent;
     }
 
     /**
@@ -39,26 +45,36 @@ public class ContentSuggestionService {
     public record SuggestionsResult(List<Map<String, Object>> messages, List<Map<String, Object>> artifacts) {}
 
     /**
-     * Generates multiple content suggestions with variations.
+     * Generates multiple content suggestions using the Embabel Agent runtime.
+     * The GOAP planner orchestrates: parseUserIntent -> generateContent
      */
     public SuggestionsResult generateMultipleSuggestions(String userInput, int count) {
         List<Map<String, Object>> messages = new ArrayList<>();
         List<Map<String, Object>> artifacts = new ArrayList<>();
 
-        // Parse user intent once
-        UserInput parsed = contentAgent.parseUserIntent(userInput);
-        String componentType = parsed.getDetectedComponentType();
+        // Use Embabel Agent runtime to generate the first suggestion
+        ContentSuggestion firstSuggestion = generateContentViaAgent(userInput);
 
-        // Generate multiple variations
-        List<ContentSuggestion> suggestions = generateVariations(parsed, count);
+        // Generate additional variations with different styles
+        List<ContentSuggestion> suggestions = new ArrayList<>();
+        suggestions.add(firstSuggestion);
 
-        // Create artifacts with the suggestions data for client consumption
-        for (int i = 0; i < suggestions.size(); i++) {
-            ContentSuggestion suggestion = suggestions.get(i);
-            artifacts.add(createArtifact(suggestion, i + 1));
+        String[] styles = {"bold and impactful", "friendly and conversational", "professional and elegant"};
+        for (int i = 1; i < count && i < styles.length; i++) {
+            try {
+                String variantInput = userInput + " (Style: " + styles[i] + ")";
+                suggestions.add(generateContentViaAgent(variantInput));
+            } catch (Exception e) {
+                log.warn("Failed to generate variation {}: {}", i, e.getMessage());
+            }
         }
 
-        // Also include A2UI messages for the first suggestion
+        // Create artifacts
+        for (int i = 0; i < suggestions.size(); i++) {
+            artifacts.add(createArtifact(suggestions.get(i), i + 1));
+        }
+
+        // Build A2UI messages for the first suggestion
         if (!suggestions.isEmpty()) {
             String surfaceId = "suggestion_" + UUID.randomUUID().toString().substring(0, 8);
             messages.add(builder.beginRendering(surfaceId, "root"));
@@ -70,30 +86,40 @@ public class ContentSuggestionService {
     }
 
     /**
-     * Generate multiple variations of content.
+     * Generate a single content suggestion via the Embabel Agent runtime.
+     * The GOAP planner handles: parseUserIntent(String) -> generateContent(UserInput)
+     * Falls back to template-based generation if agent invocation fails.
      */
-    private List<ContentSuggestion> generateVariations(UserInput parsed, int count) {
-        List<ContentSuggestion> variations = new ArrayList<>();
-
-        // First variation from the agent
-        variations.add(contentAgent.generateContent(parsed));
-
-        // Generate additional variations with different styles
-        String[] styles = {"bold and impactful", "friendly and conversational", "professional and elegant"};
-
-        for (int i = 1; i < count && i < styles.length; i++) {
-            UserInput variantInput = UserInput.builder()
-                .rawText(parsed.getRawText() + ". Style: " + styles[i])
-                .detectedComponentType(parsed.getDetectedComponentType())
-                .targetAudience(parsed.getTargetAudience())
-                .brandStyle(styles[i])
-                .toneOfVoice(parsed.getToneOfVoice())
-                .build();
-
-            variations.add(contentAgent.generateContent(variantInput));
+    private ContentSuggestion generateContentViaAgent(String userInput) {
+        log.info("Invoking Embabel agent for content generation");
+        try {
+            ContentSuggestion result = AgentInvocation.create(agentPlatform, ContentSuggestion.class)
+                .invoke(userInput);
+            if (result != null) {
+                return result;
+            }
+        } catch (Exception e) {
+            log.warn("Embabel agent invocation failed, falling back to templates: {}", e.getMessage());
         }
+        return contentAgent.generateTemplateContent(userInput, null);
+    }
 
-        return variations;
+    /**
+     * Generates A2UI messages based on user input.
+     */
+    public List<Map<String, Object>> generateSuggestion(String userInput) {
+        String surfaceId = "suggestion_" + UUID.randomUUID().toString().substring(0, 8);
+
+        // Generate content via agent runtime
+        ContentSuggestion suggestion = generateContentViaAgent(userInput);
+
+        // Build A2UI messages
+        List<Map<String, Object>> messages = new ArrayList<>();
+        messages.add(builder.beginRendering(surfaceId, "root"));
+        messages.add(builder.surfaceUpdate(surfaceId, buildComponents(suggestion)));
+        messages.add(builder.dataModelUpdate(surfaceId, "suggestion", buildDataModel(suggestion)));
+
+        return messages;
     }
 
     /**
@@ -117,60 +143,19 @@ public class ContentSuggestionService {
     }
 
     /**
-     * Generates A2UI messages based on user input.
-     */
-    public List<Map<String, Object>> generateSuggestion(String userInput) {
-        String surfaceId = "suggestion_" + UUID.randomUUID().toString().substring(0, 8);
-
-        // Generate content using the agent
-        ContentSuggestion suggestion = generateContent(userInput);
-
-        // Build A2UI messages
-        List<Map<String, Object>> messages = new ArrayList<>();
-
-        // 1. Begin Rendering
-        messages.add(builder.beginRendering(surfaceId, "root"));
-
-        // 2. Surface Update with components
-        messages.add(builder.surfaceUpdate(surfaceId, buildComponents(suggestion)));
-
-        // 3. Data Model Update
-        messages.add(builder.dataModelUpdate(surfaceId, "suggestion", buildDataModel(suggestion)));
-
-        return messages;
-    }
-
-    /**
-     * Generate content using the AemContentAgent.
-     */
-    private ContentSuggestion generateContent(String userInput) {
-        if (aiEnabled) {
-            log.info("AI mode enabled - using AemContentAgent (template-based, AI ready)");
-        }
-
-        // Parse user intent and generate content
-        UserInput parsed = contentAgent.parseUserIntent(userInput);
-        return contentAgent.generateContent(parsed);
-    }
-
-    /**
      * Builds the component tree for the suggestion UI.
      */
     private List<Map<String, Object>> buildComponents(ContentSuggestion suggestion) {
         List<Map<String, Object>> components = new ArrayList<>();
 
-        // Root column
         components.add(builder.column("root", List.of("header", "preview", "form", "actions")));
 
-        // Header with component type
         String headerText = "Content Suggestion" +
             (suggestion.getComponentType() != null ? " (" + suggestion.getComponentType() + ")" : "");
         components.add(builder.text("header", headerText, "h2"));
 
-        // Image preview
         components.add(builder.image("preview", "/suggestion/imageUrl", "Preview image"));
 
-        // Form column
         List<String> formFields = new ArrayList<>(List.of("title_field", "subtitle_field", "desc_field"));
         if (suggestion.getPrice() != null) {
             formFields.add("price_field");
@@ -178,30 +163,17 @@ public class ContentSuggestionService {
         formFields.add("cta_field");
         components.add(builder.column("form", formFields));
 
-        // Title field
         components.add(builder.textField("title_field", "Title", "/suggestion/title", null));
-
-        // Subtitle field
         components.add(builder.textField("subtitle_field", "Subtitle", "/suggestion/subtitle", null));
-
-        // Description field
         components.add(builder.textField("desc_field", "Description", "/suggestion/description", 3));
 
-        // Price field (optional)
         if (suggestion.getPrice() != null) {
             components.add(builder.textField("price_field", "Price", "/suggestion/price", null));
         }
 
-        // CTA field
         components.add(builder.textField("cta_field", "Button Text", "/suggestion/ctaText", null));
-
-        // Actions row
         components.add(builder.row("actions", List.of("apply_btn", "regenerate_btn")));
-
-        // Apply button
         components.add(builder.button("apply_btn", "Apply to Component", "apply_suggestion"));
-
-        // Regenerate button
         components.add(builder.button("regenerate_btn", "Try Again", "regenerate"));
 
         return components;
@@ -209,7 +181,6 @@ public class ContentSuggestionService {
 
     /**
      * Builds the data model for the suggestion.
-     * Returns A2UI-compliant list of key-value entries.
      */
     private List<Map<String, Object>> buildDataModel(ContentSuggestion suggestion) {
         List<Map<String, Object>> data = new ArrayList<>();

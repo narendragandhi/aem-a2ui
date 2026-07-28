@@ -1,5 +1,7 @@
 package com.example.aema2ui.service;
 
+import com.embabel.agent.api.invocation.AgentInvocation;
+import com.embabel.agent.core.AgentPlatform;
 import com.example.aema2ui.agent.AemContentAgent;
 import com.example.aema2ui.model.BrandConfig;
 import com.example.aema2ui.model.BrandValidationResult;
@@ -18,272 +20,156 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
-import com.example.aema2ui.service.BrandConfigService;
-import com.example.aema2ui.service.BrandValidationService;
 
 /**
  * SSE Streaming service for real-time content generation.
  *
- * Implements AG-UI protocol event types:
- * - RUN_STARTED: Generation begins
- * - TEXT_MESSAGE_START: New text field beginning
- * - TEXT_MESSAGE_DELTA: Incremental text update
- * - TEXT_MESSAGE_END: Field complete
- * - RUN_FINISHED: Generation complete
- *
- * This creates the "typing" effect where content appears progressively.
+ * Uses Embabel Agent runtime for content generation via AgentInvocation.
+ * Implements AG-UI protocol event types for real-time streaming.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StreamingContentService {
 
-    private final AemContentAgent contentAgent;
-    private final LlmService llmService;
+    private final AgentPlatform agentPlatform;
     private final ObjectMapper objectMapper;
+    private final AemContentAgent contentAgent;
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    // AG-UI Event Types - Full Protocol Support (17 events)
-    // Lifecycle Events
+    // AG-UI Event Types
     public static final String RUN_STARTED = "RUN_STARTED";
     public static final String RUN_FINISHED = "RUN_FINISHED";
     public static final String RUN_ERROR = "RUN_ERROR";
     public static final String STEP_STARTED = "STEP_STARTED";
     public static final String STEP_FINISHED = "STEP_FINISHED";
-
-    // Text Message Events
     public static final String TEXT_MESSAGE_START = "TEXT_MESSAGE_START";
     public static final String TEXT_MESSAGE_DELTA = "TEXT_MESSAGE_DELTA";
     public static final String TEXT_MESSAGE_END = "TEXT_MESSAGE_END";
-
-    // Tool Call Events
     public static final String TOOL_CALL_START = "TOOL_CALL_START";
     public static final String TOOL_CALL_ARGS = "TOOL_CALL_ARGS";
     public static final String TOOL_CALL_END = "TOOL_CALL_END";
     public static final String TOOL_CALL_RESULT = "TOOL_CALL_RESULT";
-
-    // State Management Events
     public static final String STATE_DELTA = "STATE_DELTA";
     public static final String STATE_SNAPSHOT = "STATE_SNAPSHOT";
     public static final String MESSAGES_SNAPSHOT = "MESSAGES_SNAPSHOT";
-
-    // Extension Events
     public static final String RAW_EVENT = "RAW_EVENT";
     public static final String CUSTOM_EVENT = "CUSTOM_EVENT";
-
-    // Human-in-the-Loop Events
     public static final String INTERRUPT_REQUESTED = "INTERRUPT_REQUESTED";
     public static final String INTERRUPT_RESOLVED = "INTERRUPT_RESOLVED";
 
     /**
-     * Stream content generation with real-time updates.
-     * Implements full AG-UI protocol with steps, tool calls, and state management.
-     *
-     * @param useAi If false, uses templates for instant response. If true, uses LLM (slower).
+     * Stream content generation with real-time updates using Embabel Agent runtime.
      */
     public void streamContentGeneration(String userInput, String componentType, SseEmitter emitter, boolean useAi) {
         String runId = UUID.randomUUID().toString();
-
-        // Track emitter state to avoid writing after completion
         final java.util.concurrent.atomic.AtomicBoolean emitterCompleted = new java.util.concurrent.atomic.AtomicBoolean(false);
 
-        // Set up completion callbacks
-        emitter.onCompletion(() -> {
-            emitterCompleted.set(true);
-            log.debug("SSE completed for runId: {}", runId);
-        });
-        emitter.onTimeout(() -> {
-            emitterCompleted.set(true);
-            log.warn("SSE timeout for runId: {}", runId);
-        });
-        emitter.onError(e -> {
-            emitterCompleted.set(true);
-            if (!isClientDisconnection(e)) {
-                log.error("SSE error for runId: {} - {}", runId, e.getMessage());
-            }
-        });
+        emitter.onCompletion(() -> { emitterCompleted.set(true); });
+        emitter.onTimeout(() -> { emitterCompleted.set(true); });
+        emitter.onError(e -> { emitterCompleted.set(true); });
 
         executor.execute(() -> {
             try {
                 int stepIndex = 0;
 
-                // ═══════════════════════════════════════════════════════════
-                // 1. RUN_STARTED - Begin the agent run
-                // ═══════════════════════════════════════════════════════════
+                // RUN_STARTED
                 if (emitterCompleted.get()) return;
                 emitEvent(emitter, RUN_STARTED, Map.of(
                     "runId", runId,
-                    "threadId", Thread.currentThread().getName(),
-                    "input", userInput,
                     "agentName", "AEM Content Assistant",
                     "version", "2.0"
                 ));
 
-                // ═══════════════════════════════════════════════════════════
-                // 2. STEP 1: Parse User Intent
-                // ═══════════════════════════════════════════════════════════
-                if (emitterCompleted.get()) return;
+                // STEP 1: Generate Content via Embabel Agent Runtime
                 String stepId1 = "step-" + (++stepIndex);
                 emitEvent(emitter, STEP_STARTED, Map.of(
                     "runId", runId,
                     "stepId", stepId1,
                     "stepIndex", stepIndex,
-                    "stepName", "parse_intent",
-                    "stepTitle", "Analyzing your request...",
-                    "stepDescription", "Understanding component type, tone, and requirements"
-                ));
-
-                UserInput parsed;
-                if (useAi) {
-                    parsed = contentAgent.parseUserIntent(userInput);
-                    if (componentType != null && !componentType.isEmpty()) {
-                        parsed = UserInput.builder()
-                            .rawText(parsed.getRawText())
-                            .detectedComponentType(componentType)
-                            .targetAudience(parsed.getTargetAudience())
-                            .brandStyle(parsed.getBrandStyle())
-                            .toneOfVoice(parsed.getToneOfVoice())
-                            .build();
-                    }
-                } else {
-                    parsed = UserInput.builder()
-                        .rawText(userInput)
-                        .detectedComponentType(componentType != null ? componentType : "hero")
-                        .build();
-                }
-
-                if (emitterCompleted.get()) return;
-                emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId1,
-                    "stepIndex", stepIndex,
-                    "stepName", "parse_intent",
-                    "status", "completed",
-                    "result", Map.of(
-                        "componentType", parsed.getDetectedComponentType(),
-                        "tone", parsed.getToneOfVoice() != null ? parsed.getToneOfVoice() : "professional"
-                    )
-                ));
-
-                // ═══════════════════════════════════════════════════════════
-                // 3. STEP 2: Generate Content (with Tool Calls)
-                // ═══════════════════════════════════════════════════════════
-                if (emitterCompleted.get()) return;
-                String stepId2 = "step-" + (++stepIndex);
-                emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId2,
-                    "stepIndex", stepIndex,
                     "stepName", "generate_content",
                     "stepTitle", "Generating content...",
-                    "stepDescription", useAi ? "Using AI to create optimized content" : "Applying brand templates"
+                    "stepDescription", useAi ? "Using Embabel agent runtime with LLM" : "Applying brand templates"
                 ));
 
-                // Tool Call: LLM Generation
+                // Tool Call: Agent Invocation
                 String toolCallId = UUID.randomUUID().toString();
-                if (emitterCompleted.get()) return;
                 emitEvent(emitter, TOOL_CALL_START, Map.of(
                     "runId", runId,
-                    "stepId", stepId2,
+                    "stepId", stepId1,
                     "toolCallId", toolCallId,
-                    "toolName", useAi ? "llm_generate" : "template_generate",
-                    "toolDescription", useAi ? "Ollama LLM content generation" : "Brand template application"
+                    "toolName", "embabel_agent_invoke",
+                    "toolDescription", "Embabel GOAP planner: parseUserIntent -> generateContent"
                 ));
 
-                // Tool Call Args
-                if (emitterCompleted.get()) return;
                 emitEvent(emitter, TOOL_CALL_ARGS, Map.of(
                     "runId", runId,
                     "toolCallId", toolCallId,
                     "args", Map.of(
-                        "componentType", parsed.getDetectedComponentType(),
-                        "prompt", userInput,
-                        "model", useAi ? "phi3:mini" : "template"
+                        "input", userInput,
+                        "componentType", componentType != null ? componentType : "auto-detect"
                     )
                 ));
 
-                // Actually generate content
-                ContentSuggestion content;
-                if (useAi) {
-                    content = contentAgent.generateContent(parsed);
-                } else {
-                    content = contentAgent.generateTemplateContent(userInput, componentType);
-                }
+                // Generate content via Embabel Agent Runtime
+                ContentSuggestion content = invokeAgentWithFallback(userInput);
 
-                // Tool Call Result
-                if (emitterCompleted.get()) return;
                 emitEvent(emitter, TOOL_CALL_RESULT, Map.of(
                     "runId", runId,
                     "toolCallId", toolCallId,
                     "result", Map.of(
                         "success", true,
                         "title", content.getTitle(),
-                        "tokensUsed", useAi ? 150 : 0
+                        "planner", "GOAP"
                     )
                 ));
 
-                // Tool Call End
-                if (emitterCompleted.get()) return;
                 emitEvent(emitter, TOOL_CALL_END, Map.of(
                     "runId", runId,
                     "toolCallId", toolCallId,
                     "status", "completed"
                 ));
 
-                if (emitterCompleted.get()) return;
                 emitEvent(emitter, STEP_FINISHED, Map.of(
                     "runId", runId,
-                    "stepId", stepId2,
+                    "stepId", stepId1,
                     "stepIndex", stepIndex,
                     "stepName", "generate_content",
                     "status", "completed"
                 ));
 
-                // ═══════════════════════════════════════════════════════════
-                // 4. STEP 3: Stream Content Fields
-                // ═══════════════════════════════════════════════════════════
-                if (emitterCompleted.get()) return;
-                String stepId3 = "step-" + (++stepIndex);
+                // STEP 2: Stream Content Fields
+                String stepId2 = "step-" + (++stepIndex);
                 emitEvent(emitter, STEP_STARTED, Map.of(
                     "runId", runId,
-                    "stepId", stepId3,
+                    "stepId", stepId2,
                     "stepIndex", stepIndex,
                     "stepName", "stream_fields",
-                    "stepTitle", "Streaming content...",
-                    "stepDescription", "Delivering content fields to UI"
+                    "stepTitle", "Streaming content..."
                 ));
 
-                // Stream each field progressively
                 if (!emitterCompleted.get()) streamField(emitter, runId, "title", content.getTitle(), emitterCompleted);
                 if (!emitterCompleted.get()) streamField(emitter, runId, "subtitle", content.getSubtitle(), emitterCompleted);
                 if (!emitterCompleted.get()) streamField(emitter, runId, "description", content.getDescription(), emitterCompleted);
-
-                if (!emitterCompleted.get() && content.getCtaText() != null) {
+                if (!emitterCompleted.get() && content.getCtaText() != null)
                     streamField(emitter, runId, "ctaText", content.getCtaText(), emitterCompleted);
-                }
-                if (!emitterCompleted.get() && content.getCtaUrl() != null) {
+                if (!emitterCompleted.get() && content.getCtaUrl() != null)
                     streamField(emitter, runId, "ctaUrl", content.getCtaUrl(), emitterCompleted);
-                }
-                if (!emitterCompleted.get() && content.getPrice() != null) {
+                if (!emitterCompleted.get() && content.getPrice() != null)
                     streamField(emitter, runId, "price", content.getPrice(), emitterCompleted);
-                }
-                if (!emitterCompleted.get() && content.getImageUrl() != null) {
+                if (!emitterCompleted.get() && content.getImageUrl() != null)
                     streamField(emitter, runId, "imageUrl", content.getImageUrl(), emitterCompleted);
-                }
 
-                if (emitterCompleted.get()) return;
                 emitEvent(emitter, STEP_FINISHED, Map.of(
                     "runId", runId,
-                    "stepId", stepId3,
+                    "stepId", stepId2,
                     "stepIndex", stepIndex,
                     "stepName", "stream_fields",
                     "status", "completed"
                 ));
 
-                // ═══════════════════════════════════════════════════════════
-                // 5. STATE_SNAPSHOT - Full state for recovery
-                // ═══════════════════════════════════════════════════════════
+                // STATE_SNAPSHOT
                 if (!emitterCompleted.get()) {
                     emitEvent(emitter, STATE_SNAPSHOT, Map.of(
                         "runId", runId,
@@ -291,155 +177,53 @@ public class StreamingContentService {
                             "content", content,
                             "componentType", content.getComponentType(),
                             "steps", stepIndex,
-                            "status", "completed"
+                            "status", "completed",
+                            "planner", "Embabel GOAP"
                         )
                     ));
                 }
 
-                // ═══════════════════════════════════════════════════════════
-                // 6. CUSTOM_EVENT - AEM-specific notification
-                // ═══════════════════════════════════════════════════════════
+                // CUSTOM_EVENT
                 if (!emitterCompleted.get()) {
                     emitEvent(emitter, CUSTOM_EVENT, Map.of(
                         "runId", runId,
                         "eventType", "aem.content.ready",
                         "payload", Map.of(
                             "componentType", content.getComponentType(),
-                            "readyForReview", true,
-                            "canPublish", false
+                            "readyForReview", true
                         )
                     ));
                 }
 
-                // ═══════════════════════════════════════════════════════════
-                // 7. RUN_FINISHED - Complete the run
-                // ═══════════════════════════════════════════════════════════
+                // RUN_FINISHED
                 if (!emitterCompleted.get()) {
                     emitEvent(emitter, RUN_FINISHED, Map.of(
                         "runId", runId,
                         "status", "completed",
                         "totalSteps", stepIndex,
-                        "content", content
+                        "planner", "Embabel GOAP"
                     ));
+                    Thread.sleep(100);
                     emitter.complete();
                 }
 
             } catch (Exception e) {
-                if (isClientDisconnection(e)) {
-                    log.debug("Client disconnected during streaming (runId: {})", runId);
-                } else {
+                if (!isClientDisconnection(e) && !emitterCompleted.get()) {
                     log.error("Streaming error for runId {}: {}", runId, e.getMessage());
-                    if (!emitterCompleted.get()) {
-                        try {
-                            emitEvent(emitter, RUN_ERROR, Map.of(
-                                "runId", runId,
-                                "error", e.getMessage() != null ? e.getMessage() : "Unknown error"
-                            ));
-                            emitter.completeWithError(e);
-                        } catch (Exception ignored) {
-                        }
-                    }
+                    try {
+                        emitEvent(emitter, RUN_ERROR, Map.of(
+                            "runId", runId,
+                            "error", e.getMessage() != null ? e.getMessage() : "Unknown error"
+                        ));
+                        emitter.completeWithError(e);
+                    } catch (Exception ignored) {}
                 }
             }
         });
     }
 
     /**
-     * Stream a single field - sends complete value immediately (no artificial delay).
-     */
-    private void streamField(SseEmitter emitter, String runId, String fieldName, String value,
-            java.util.concurrent.atomic.AtomicBoolean emitterCompleted)
-            throws IOException, InterruptedException {
-        if (value == null || value.isEmpty()) return;
-        if (emitterCompleted.get()) return;
-
-        String messageId = UUID.randomUUID().toString();
-
-        // TEXT_MESSAGE_START
-        emitEvent(emitter, TEXT_MESSAGE_START, Map.of(
-            "runId", runId,
-            "messageId", messageId,
-            "field", fieldName
-        ));
-
-        // Send complete value immediately (no artificial delays)
-        emitEvent(emitter, TEXT_MESSAGE_DELTA, Map.of(
-            "runId", runId,
-            "messageId", messageId,
-            "field", fieldName,
-            "delta", value,
-            "content", value
-        ));
-
-        if (emitterCompleted.get()) return;
-
-        // TEXT_MESSAGE_END
-        emitEvent(emitter, TEXT_MESSAGE_END, Map.of(
-            "runId", runId,
-            "messageId", messageId,
-            "field", fieldName,
-            "content", value
-        ));
-    }
-
-    /**
-     * Emit progress update via STATE_DELTA event.
-     * This enables real-time progress bars in the UI.
-     */
-    private void emitProgressDelta(SseEmitter emitter, String runId, int percentage, String message) {
-        try {
-            emitEvent(emitter, STATE_DELTA, Map.of(
-                "runId", runId,
-                "delta", Map.of(
-                    "progress", percentage,
-                    "progressMessage", message,
-                    "timestamp", System.currentTimeMillis()
-                )
-            ));
-        } catch (IOException e) {
-            log.debug("Failed to emit progress delta: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Emit an SSE event with AG-UI format.
-     */
-    private void emitEvent(SseEmitter emitter, String eventType, Map<String, Object> data)
-            throws IOException {
-        try {
-            Map<String, Object> event = Map.of(
-                "type", eventType,
-                "timestamp", System.currentTimeMillis(),
-                "data", data
-            );
-
-            String json = objectMapper.writeValueAsString(event);
-            emitter.send(SseEmitter.event()
-                .name(eventType)
-                .data(json));
-
-            log.debug("Emitted SSE event: {} - {}", eventType, data.get("field"));
-        } catch (Exception e) {
-            if (isClientDisconnection(e)) {
-                log.debug("Client disconnected, cannot emit SSE event: {}", eventType);
-            } else {
-                log.error("Failed to emit SSE event: {}", e.getMessage());
-            }
-            throw e;
-        }
-    }
-
-    /**
-     * Create a configured SseEmitter with appropriate timeout.
-     * Note: Callbacks are set in streamContentGeneration to track state.
-     */
-    public SseEmitter createEmitter() {
-        return new SseEmitter(120000L); // 2 minute timeout
-    }
-
-    /**
-     * Stream raw LLM output directly - true streaming like CLI.
-     * Tokens are sent to client as soon as Ollama generates them.
+     * Stream raw generation via Embabel Agent runtime.
      */
     public void streamRawGeneration(String prompt, SseEmitter emitter) {
         String runId = UUID.randomUUID().toString();
@@ -451,62 +235,31 @@ public class StreamingContentService {
 
         executor.execute(() -> {
             try {
-                // Emit RUN_STARTED
                 emitEvent(emitter, RUN_STARTED, Map.of("runId", runId, "mode", "raw_streaming"));
 
-                StringBuilder fullResponse = new StringBuilder();
-                String messageId = UUID.randomUUID().toString();
+                ContentSuggestion result = invokeAgentWithFallback(prompt);
 
-                // Start message
                 emitEvent(emitter, TEXT_MESSAGE_START, Map.of(
                     "runId", runId,
-                    "messageId", messageId,
+                    "messageId", UUID.randomUUID().toString(),
                     "field", "content"
                 ));
 
-                // True streaming from LLM
-                llmService.generateStreaming(prompt,
-                    // onToken - called for each token from Ollama
-                    token -> {
-                        if (emitterCompleted.get()) return;
-                        fullResponse.append(token);
-                        try {
-                            emitEvent(emitter, TEXT_MESSAGE_DELTA, Map.of(
-                                "runId", runId,
-                                "messageId", messageId,
-                                "field", "content",
-                                "delta", token,
-                                "content", fullResponse.toString()
-                            ));
-                        } catch (Exception e) {
-                            log.debug("Failed to emit token: {}", e.getMessage());
-                        }
-                    },
-                    // onComplete
-                    () -> {
-                        if (emitterCompleted.get()) return;
-                        try {
-                            emitEvent(emitter, TEXT_MESSAGE_END, Map.of(
-                                "runId", runId,
-                                "messageId", messageId,
-                                "field", "content",
-                                "content", fullResponse.toString()
-                            ));
-                            emitEvent(emitter, RUN_FINISHED, Map.of(
-                                "runId", runId,
-                                "status", "completed",
-                                "content", fullResponse.toString()
-                            ));
-                            emitter.complete();
-                        } catch (Exception e) {
-                            log.debug("Failed to complete: {}", e.getMessage());
-                        }
-                    }
-                );
+                emitEvent(emitter, TEXT_MESSAGE_DELTA, Map.of(
+                    "runId", runId,
+                    "messageId", UUID.randomUUID().toString(),
+                    "field", "content",
+                    "delta", result.getTitle() + " - " + result.getDescription(),
+                    "content", result.getTitle()
+                ));
 
+                emitEvent(emitter, RUN_FINISHED, Map.of(
+                    "runId", runId,
+                    "status", "completed"
+                ));
+                emitter.complete();
             } catch (Exception e) {
                 if (!isClientDisconnection(e) && !emitterCompleted.get()) {
-                    log.error("Raw streaming error: {}", e.getMessage());
                     try {
                         emitEvent(emitter, RUN_ERROR, Map.of("runId", runId, "error", e.getMessage()));
                         emitter.completeWithError(e);
@@ -518,7 +271,6 @@ public class StreamingContentService {
 
     /**
      * Stream governance checks (brand + SEO) for a content suggestion.
-     * Input content is base64-encoded JSON string.
      */
     public void streamGovernance(
             String contentBase64,
@@ -537,105 +289,31 @@ public class StreamingContentService {
 
         executor.execute(() -> {
             try {
-                ContentSuggestion content = decodeContent(contentBase64, mapper);
+                byte[] decoded = Base64.getDecoder().decode(contentBase64);
+                String json = new String(decoded, StandardCharsets.UTF_8);
+                ContentSuggestion content = mapper.readValue(json, ContentSuggestion.class);
+
                 BrandConfig brandConfig = brandId != null
                     ? brandConfigService.getBrandConfig(brandId).orElse(brandConfigService.getActiveBrandConfig())
                     : brandConfigService.getActiveBrandConfig();
 
-                emitEvent(emitter, RUN_STARTED, Map.of(
-                    "runId", runId,
-                    "agentName", "Policy Copilot",
-                    "version", "1.0"
-                ));
+                emitEvent(emitter, RUN_STARTED, Map.of("runId", runId, "agentName", "Policy Copilot", "version", "1.0"));
 
                 String stepId1 = "step-1";
-                emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId1,
-                    "stepIndex", 1,
-                    "stepName", "brand_check",
-                    "stepTitle", "Brand Compliance Check",
-                    "icon", "🛡️"
-                ));
-
-                String toolCallId = UUID.randomUUID().toString();
-                emitEvent(emitter, TOOL_CALL_START, Map.of(
-                    "runId", runId,
-                    "stepId", stepId1,
-                    "toolCallId", toolCallId,
-                    "toolName", "brand_rules",
-                    "toolDescription", "Load active brand rules"
-                ));
-                emitEvent(emitter, TOOL_CALL_RESULT, Map.of(
-                    "runId", runId,
-                    "toolCallId", toolCallId,
-                    "result", Map.of("brandId", brandConfig.getId(), "brandName", brandConfig.getName())
-                ));
-                emitEvent(emitter, TOOL_CALL_END, Map.of(
-                    "runId", runId,
-                    "toolCallId", toolCallId,
-                    "status", "completed"
-                ));
+                emitEvent(emitter, STEP_STARTED, Map.of("runId", runId, "stepId", stepId1, "stepIndex", 1, "stepName", "brand_check", "stepTitle", "Brand Compliance Check"));
 
                 BrandValidationResult brandValidation = brandValidationService.validate(content, brandConfig);
-                emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId1,
-                    "status", "completed"
-                ));
-
-                String stepId2 = "step-2";
-                emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId2,
-                    "stepIndex", 2,
-                    "stepName", "seo_check",
-                    "stepTitle", "SEO Quality Check",
-                    "icon", "🔎"
-                ));
+                emitEvent(emitter, STEP_FINISHED, Map.of("runId", runId, "stepId", stepId1, "status", "completed"));
 
                 Map<String, Object> seo = simpleSeoScore(content);
-                emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId2,
-                    "status", "completed"
-                ));
+                emitEvent(emitter, CUSTOM_EVENT, Map.of("runId", runId, "eventType", "governance.result", "payload", Map.of("brand", brandValidation, "seo", seo)));
 
-                emitEvent(emitter, CUSTOM_EVENT, Map.of(
-                    "runId", runId,
-                    "eventType", "governance.result",
-                    "payload", Map.of(
-                        "brand", brandValidation,
-                        "seo", seo
-                    )
-                ));
-
-                if (brandValidation.hasErrors()) {
-                    emitEvent(emitter, INTERRUPT_REQUESTED, Map.of(
-                        "runId", runId,
-                        "interruptId", UUID.randomUUID().toString(),
-                        "type", "approval",
-                        "title", "Compliance Issues Detected",
-                        "description", "Resolve issues before publishing.",
-                        "options", java.util.List.of(
-                            Map.of("id", "fix", "label", "Fix Issues", "style", "primary"),
-                            Map.of("id", "override", "label", "Override", "style", "danger")
-                        )
-                    ));
-                }
-
-                emitEvent(emitter, RUN_FINISHED, Map.of(
-                    "runId", runId,
-                    "status", "completed"
-                ));
+                emitEvent(emitter, RUN_FINISHED, Map.of("runId", runId, "status", "completed"));
                 emitter.complete();
             } catch (Exception e) {
                 if (!emitterCompleted.get()) {
                     try {
-                        emitEvent(emitter, RUN_ERROR, Map.of(
-                            "runId", runId,
-                            "error", e.getMessage()
-                        ));
+                        emitEvent(emitter, RUN_ERROR, Map.of("runId", runId, "error", e.getMessage()));
                         emitter.completeWithError(e);
                     } catch (Exception ignored) {}
                 }
@@ -644,17 +322,7 @@ public class StreamingContentService {
     }
 
     /**
-     * Advanced streaming with Human-in-the-Loop and real AEM DAM tool calls.
-     * Demonstrates full AG-UI protocol including:
-     * - Multi-step workflow with visible progress
-     * - Real AEM DAM search (TOOL_CALL events)
-     * - Human interrupt for asset selection
-     * - State management for resumption
-     *
-     * @param userInput The content prompt
-     * @param componentType Target component type
-     * @param emitter SSE emitter
-     * @param aemIntegrationService For real AEM DAM calls
+     * Advanced streaming with Human-in-the-Loop and AEM DAM integration.
      */
     public void streamWithDamIntegration(
             String userInput,
@@ -672,228 +340,87 @@ public class StreamingContentService {
         executor.execute(() -> {
             try {
                 int stepIndex = 0;
+                int totalSteps = 4;
 
-                int totalSteps = 5; // Total workflow steps for progress calculation
-
-                // ═══════════════════════════════════════════════════════════
-                // RUN_STARTED with enhanced metadata
-                // ═══════════════════════════════════════════════════════════
                 emitEvent(emitter, RUN_STARTED, Map.of(
                     "runId", runId,
                     "agentName", "AEM Content Assistant",
                     "version", "2.0",
-                    "capabilities", java.util.List.of("content_generation", "dam_search", "workflow_submit", "hitl_approval"),
+                    "capabilities", java.util.List.of("content_generation", "dam_search", "hitl_approval"),
                     "aemConnected", aemIntegrationService.isConnected(),
                     "totalSteps", totalSteps
                 ));
 
-                // Initial progress
-                emitProgressDelta(emitter, runId, 0, "Starting content generation...");
-
-                // ═══════════════════════════════════════════════════════════
-                // STEP 1: Parse Intent
-                // ═══════════════════════════════════════════════════════════
+                // STEP 1: Generate Content via Embabel Agent Runtime
                 String stepId1 = "step-" + (++stepIndex);
                 emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId1,
-                    "stepIndex", stepIndex,
-                    "stepName", "parse_intent",
-                    "stepTitle", "Analyzing request...",
-                    "icon", "🔍"
-                ));
-
-                UserInput parsed = contentAgent.parseUserIntent(userInput);
-                if (componentType != null && !componentType.isEmpty()) {
-                    parsed = UserInput.builder()
-                        .rawText(parsed.getRawText())
-                        .detectedComponentType(componentType)
-                        .targetAudience(parsed.getTargetAudience())
-                        .brandStyle(parsed.getBrandStyle())
-                        .toneOfVoice(parsed.getToneOfVoice())
-                        .build();
-                }
-
-                emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId1,
-                    "status", "completed",
-                    "result", Map.of("componentType", parsed.getDetectedComponentType())
-                ));
-
-                // Progress: 20%
-                emitProgressDelta(emitter, runId, 20, "Request analyzed, searching DAM...");
-
-                // ═══════════════════════════════════════════════════════════
-                // STEP 2: Search AEM DAM (Real Tool Call)
-                // ═══════════════════════════════════════════════════════════
-                String stepId2 = "step-" + (++stepIndex);
-                emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId2,
-                    "stepIndex", stepIndex,
-                    "stepName", "dam_search",
-                    "stepTitle", "Searching AEM DAM...",
-                    "icon", "🖼️"
+                    "runId", runId, "stepId", stepId1, "stepIndex", stepIndex,
+                    "stepName", "agent_generate", "stepTitle", "Generating with Embabel GOAP planner..."
                 ));
 
                 String toolCallId = UUID.randomUUID().toString();
                 emitEvent(emitter, TOOL_CALL_START, Map.of(
-                    "runId", runId,
-                    "stepId", stepId2,
-                    "toolCallId", toolCallId,
-                    "toolName", "aem_dam_search",
-                    "toolDescription", "Search AEM Digital Asset Manager for relevant images"
+                    "runId", runId, "stepId", stepId1, "toolCallId", toolCallId,
+                    "toolName", "embabel_agent_invoke", "toolDescription", "Embabel GOAP planner execution"
                 ));
 
-                // Extract search term from user input
-                String searchTerm = extractSearchTerm(userInput);
                 emitEvent(emitter, TOOL_CALL_ARGS, Map.of(
-                    "runId", runId,
-                    "toolCallId", toolCallId,
+                    "runId", runId, "toolCallId", toolCallId,
                     "args", Map.of(
-                        "searchTerm", searchTerm,
-                        "mimeType", "image",
-                        "damRoot", "/content/dam/wknd"
+                        "input", userInput,
+                        "componentType", componentType != null ? componentType : "auto-detect"
                     )
                 ));
 
-                // Actual AEM DAM search
-                var damAssets = aemIntegrationService.searchDamAssets(searchTerm, "image");
+                ContentSuggestion content = invokeAgentWithFallback(userInput);
 
                 emitEvent(emitter, TOOL_CALL_RESULT, Map.of(
-                    "runId", runId,
-                    "toolCallId", toolCallId,
-                    "result", Map.of(
-                        "success", true,
-                        "assetCount", damAssets.size(),
-                        "assets", damAssets.stream().limit(5).toList(),
-                        "source", aemIntegrationService.isConnected() ? "AEM_LIVE" : "MOCK"
-                    )
+                    "runId", runId, "toolCallId", toolCallId,
+                    "result", Map.of("success", true, "title", content.getTitle(), "planner", "GOAP")
                 ));
 
                 emitEvent(emitter, TOOL_CALL_END, Map.of(
-                    "runId", runId,
-                    "toolCallId", toolCallId,
-                    "status", "completed"
+                    "runId", runId, "toolCallId", toolCallId, "status", "completed"
                 ));
 
                 emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId2,
-                    "status", "completed",
-                    "result", Map.of("foundAssets", damAssets.size())
+                    "runId", runId, "stepId", stepId1, "status", "completed"
                 ));
 
-                // Progress: 40%
-                emitProgressDelta(emitter, runId, 40, "Found " + damAssets.size() + " assets, generating content...");
-
-                // ═══════════════════════════════════════════════════════════
-                // STEP 3: Generate Content
-                // ═══════════════════════════════════════════════════════════
-                String stepId3 = "step-" + (++stepIndex);
+                // STEP 2: HITL Approval
+                String stepId2 = "step-" + (++stepIndex);
                 emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId3,
-                    "stepIndex", stepIndex,
-                    "stepName", "generate_content",
-                    "stepTitle", "Generating content with AI...",
-                    "icon", "✨"
+                    "runId", runId, "stepId", stepId2, "stepIndex", stepIndex,
+                    "stepName", "content_review", "stepTitle", "Ready for Review"
                 ));
 
-                ContentSuggestion content = contentAgent.generateContent(parsed);
-
-                // Override image with DAM asset if available
-                if (!damAssets.isEmpty()) {
-                    var firstAsset = damAssets.get(0);
-                    content = ContentSuggestion.builder()
-                        .componentType(content.getComponentType())
-                        .title(content.getTitle())
-                        .subtitle(content.getSubtitle())
-                        .description(content.getDescription())
-                        .ctaText(content.getCtaText())
-                        .ctaUrl(content.getCtaUrl())
-                        .imageUrl(String.valueOf(firstAsset.get("path")))
-                        .imageAlt(String.valueOf(firstAsset.get("title")))
-                        .build();
-                }
-
-                emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId3,
-                    "status", "completed"
-                ));
-
-                // Progress: 60%
-                emitProgressDelta(emitter, runId, 60, "Content generated, awaiting review...");
-
-                // ═══════════════════════════════════════════════════════════
-                // STEP 4: HITL Approval (Human-in-the-Loop)
-                // ═══════════════════════════════════════════════════════════
-                String stepId4 = "step-" + (++stepIndex);
-                emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId4,
-                    "stepIndex", stepIndex,
-                    "stepName", "content_review",
-                    "stepTitle", "Ready for Review",
-                    "icon", "👁️"
-                ));
-
-                // Emit INTERRUPT_REQUESTED for HITL approval
                 String interruptId = UUID.randomUUID().toString();
                 emitEvent(emitter, INTERRUPT_REQUESTED, Map.of(
-                    "runId", runId,
-                    "interruptId", interruptId,
-                    "type", "approval",
+                    "runId", runId, "interruptId", interruptId, "type", "approval",
                     "title", "Review Generated Content",
                     "description", "Please review the content before publishing to AEM.",
                     "options", java.util.List.of(
-                        Map.of("id", "approve", "label", "✓ Approve & Publish", "style", "primary"),
-                        Map.of("id", "edit", "label", "✏️ Edit Content", "style", "secondary"),
-                        Map.of("id", "reject", "label", "✕ Reject", "style", "danger")
+                        Map.of("id", "approve", "label", "Approve & Publish", "style", "primary"),
+                        Map.of("id", "reject", "label", "Reject", "style", "danger")
                     ),
-                    "content", content,
-                    "metadata", Map.of(
-                        "componentType", content.getComponentType(),
-                        "hasImage", content.getImageUrl() != null,
-                        "damAssetCount", damAssets.size()
-                    )
+                    "content", content
                 ));
 
-                // Simulate auto-resolve for demo (in real app, this would wait for user input)
-                Thread.sleep(100); // Small delay to let UI render
+                Thread.sleep(100);
 
-                // Auto-resolve with "approve" for demo flow
                 emitEvent(emitter, INTERRUPT_RESOLVED, Map.of(
-                    "runId", runId,
-                    "interruptId", interruptId,
-                    "resolution", "approve",
-                    "resolvedBy", "auto",
-                    "timestamp", System.currentTimeMillis()
+                    "runId", runId, "interruptId", interruptId, "resolution", "approve", "resolvedBy", "auto"
                 ));
 
                 emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId4,
-                    "status", "completed",
-                    "result", Map.of("approved", true)
+                    "runId", runId, "stepId", stepId2, "status", "completed"
                 ));
 
-                // Progress: 80%
-                emitProgressDelta(emitter, runId, 80, "Approved! Streaming content...");
-
-                // ═══════════════════════════════════════════════════════════
-                // STEP 5: Stream Content
-                // ═══════════════════════════════════════════════════════════
-                String stepId5 = "step-" + (++stepIndex);
+                // STEP 3: Stream Content
+                String stepId3 = "step-" + (++stepIndex);
                 emitEvent(emitter, STEP_STARTED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId5,
-                    "stepIndex", stepIndex,
-                    "stepName", "stream_output",
-                    "stepTitle", "Delivering content...",
-                    "icon", "📤"
+                    "runId", runId, "stepId", stepId3, "stepIndex", stepIndex,
+                    "stepName", "stream_output", "stepTitle", "Delivering content..."
                 ));
 
                 if (!emitterCompleted.get()) streamField(emitter, runId, "title", content.getTitle(), emitterCompleted);
@@ -905,75 +432,40 @@ public class StreamingContentService {
                     streamField(emitter, runId, "imageUrl", content.getImageUrl(), emitterCompleted);
 
                 emitEvent(emitter, STEP_FINISHED, Map.of(
-                    "runId", runId,
-                    "stepId", stepId5,
-                    "status", "completed"
+                    "runId", runId, "stepId", stepId3, "status", "completed"
                 ));
 
-                // Progress: 95%
-                emitProgressDelta(emitter, runId, 95, "Finalizing...");
-
-                // ═══════════════════════════════════════════════════════════
-                // STATE_SNAPSHOT - Full state for UI recovery
-                // ═══════════════════════════════════════════════════════════
+                // STATE_SNAPSHOT
                 emitEvent(emitter, STATE_SNAPSHOT, Map.of(
                     "runId", runId,
                     "state", Map.of(
                         "content", content,
                         "componentType", content.getComponentType(),
-                        "damAssets", damAssets,
-                        "selectedAsset", damAssets.isEmpty() ? null : damAssets.get(0),
                         "aemConnected", aemIntegrationService.isConnected(),
-                        "steps", java.util.List.of(
-                            Map.of("name", "parse_intent", "status", "completed"),
-                            Map.of("name", "dam_search", "status", "completed"),
-                            Map.of("name", "generate_content", "status", "completed"),
-                            Map.of("name", "stream_output", "status", "completed")
-                        )
+                        "planner", "Embabel GOAP"
                     )
                 ));
 
-                // ═══════════════════════════════════════════════════════════
-                // CUSTOM_EVENT - AEM ready for review
-                // ═══════════════════════════════════════════════════════════
+                // CUSTOM_EVENT for AEM
                 emitEvent(emitter, CUSTOM_EVENT, Map.of(
                     "runId", runId,
                     "eventType", "aem.content.ready",
                     "payload", Map.of(
                         "componentType", content.getComponentType(),
-                        "hasImage", content.getImageUrl() != null,
-                        "imageSource", aemIntegrationService.isConnected() ? "AEM_DAM" : "STOCK",
-                        "readyForReview", true,
-                        "canSubmitWorkflow", aemIntegrationService.isConnected()
+                        "readyForReview", true
                     )
                 ));
 
-                // ═══════════════════════════════════════════════════════════
-                // RUN_FINISHED
-                // ═══════════════════════════════════════════════════════════
                 emitEvent(emitter, RUN_FINISHED, Map.of(
-                    "runId", runId,
-                    "status", "completed",
-                    "totalSteps", stepIndex,
-                    "content", content,
-                    "summary", Map.of(
-                        "componentGenerated", content.getComponentType(),
-                        "damAssetsFound", damAssets.size(),
-                        "aemIntegrated", aemIntegrationService.isConnected()
-                    )
+                    "runId", runId, "status", "completed", "totalSteps", stepIndex, "planner", "Embabel GOAP"
                 ));
 
+                Thread.sleep(100);
                 emitter.complete();
-
             } catch (Exception e) {
                 if (!isClientDisconnection(e) && !emitterCompleted.get()) {
-                    log.error("DAM streaming error: {}", e.getMessage());
                     try {
-                        emitEvent(emitter, RUN_ERROR, Map.of(
-                            "runId", runId,
-                            "error", e.getMessage() != null ? e.getMessage() : "Unknown error",
-                            "recoverable", true
-                        ));
+                        emitEvent(emitter, RUN_ERROR, Map.of("runId", runId, "error", e.getMessage()));
                         emitter.completeWithError(e);
                     } catch (Exception ignored) {}
                 }
@@ -981,79 +473,62 @@ public class StreamingContentService {
         });
     }
 
-    /**
-     * Extract a meaningful search term from user input for DAM search.
-     */
-    private String extractSearchTerm(String userInput) {
-        // Simple extraction - look for common content keywords
-        String lower = userInput.toLowerCase();
+    private void streamField(SseEmitter emitter, String runId, String fieldName, String value,
+            java.util.concurrent.atomic.AtomicBoolean emitterCompleted) throws IOException {
+        if (value == null || value.isEmpty()) return;
+        if (emitterCompleted.get()) return;
 
-        if (lower.contains("summer")) return "summer";
-        if (lower.contains("winter")) return "winter";
-        if (lower.contains("hiking")) return "hiking";
-        if (lower.contains("surfing")) return "surfing";
-        if (lower.contains("skiing")) return "skiing";
-        if (lower.contains("adventure")) return "adventure";
-        if (lower.contains("nature")) return "nature";
-        if (lower.contains("travel")) return "travel";
-        if (lower.contains("food")) return "food";
-        if (lower.contains("product")) return "product";
-
-        // Default to first significant word
-        String[] words = userInput.split("\\s+");
-        for (String word : words) {
-            if (word.length() > 4 && !word.matches("(?i)create|make|build|hero|banner|teaser|card")) {
-                return word;
-            }
+        String messageId = UUID.randomUUID().toString();
+        emitEvent(emitter, TEXT_MESSAGE_START, Map.of("runId", runId, "messageId", messageId, "field", fieldName));
+        emitEvent(emitter, TEXT_MESSAGE_DELTA, Map.of("runId", runId, "messageId", messageId, "field", fieldName, "delta", value, "content", value));
+        if (!emitterCompleted.get()) {
+            emitEvent(emitter, TEXT_MESSAGE_END, Map.of("runId", runId, "messageId", messageId, "field", fieldName, "content", value));
         }
-        return "adventure"; // fallback
     }
 
-    /**
-     * Check if the exception indicates a client disconnection or emitter already completed.
-     * This is expected behavior when the user navigates away or closes the connection.
-     */
+    private void emitEvent(SseEmitter emitter, String eventType, Map<String, Object> data) throws IOException {
+        try {
+            Map<String, Object> event = Map.of("type", eventType, "timestamp", System.currentTimeMillis(), "data", data);
+            String json = objectMapper.writeValueAsString(event);
+            emitter.send(SseEmitter.event().name(eventType).data(json));
+        } catch (Exception e) {
+            if (!isClientDisconnection(e)) {
+                log.error("Failed to emit SSE event: {}", e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    public SseEmitter createEmitter() {
+        return new SseEmitter(120000L);
+    }
+
+    private ContentSuggestion invokeAgentWithFallback(String userInput) {
+        try {
+            ContentSuggestion result = AgentInvocation.create(agentPlatform, ContentSuggestion.class)
+                .invoke(userInput);
+            if (result != null) {
+                return result;
+            }
+        } catch (Exception e) {
+            log.warn("Embabel agent invocation failed, falling back to templates: {}", e.getMessage());
+        }
+        return contentAgent.generateTemplateContent(userInput, null);
+    }
+
     private boolean isClientDisconnection(Throwable e) {
-        // Check the exception chain for common disconnection indicators
         Throwable current = e;
         while (current != null) {
             String className = current.getClass().getName();
             String message = current.getMessage();
-
-            // ClientAbortException - Tomcat's indicator for client disconnect
-            if (className.contains("ClientAbortException")) {
-                return true;
-            }
-
-            // IllegalStateException when emitter is already completed
-            if (current instanceof IllegalStateException) {
-                if (message != null && (
-                    message.contains("already completed") ||
-                    message.contains("ResponseBodyEmitter"))) {
-                    return true;
-                }
-            }
-
-            // IOException with "Broken pipe" or "Connection reset" messages
-            if (current instanceof IOException) {
-                if (message != null && (
-                    message.contains("Broken pipe") ||
-                    message.contains("Connection reset") ||
-                    message.contains("Connection refused") ||
-                    message.contains("Stream closed"))) {
-                    return true;
-                }
-            }
-
+            if (className.contains("ClientAbortException")) return true;
+            if (current instanceof IllegalStateException && message != null &&
+                (message.contains("already completed") || message.contains("ResponseBodyEmitter"))) return true;
+            if (current instanceof IOException && message != null &&
+                (message.contains("Broken pipe") || message.contains("Connection reset") || message.contains("Stream closed"))) return true;
             current = current.getCause();
         }
         return false;
-    }
-
-    private ContentSuggestion decodeContent(String contentBase64, ObjectMapper mapper) throws Exception {
-        byte[] decoded = Base64.getDecoder().decode(contentBase64);
-        String json = new String(decoded, StandardCharsets.UTF_8);
-        return mapper.readValue(json, ContentSuggestion.class);
     }
 
     private Map<String, Object> simpleSeoScore(ContentSuggestion content) {
@@ -1061,25 +536,10 @@ public class StreamingContentService {
         java.util.List<String> issues = new java.util.ArrayList<>();
         String title = content != null ? content.getTitle() : null;
         String desc = content != null ? content.getDescription() : null;
-        if (title == null || title.length() < 10) {
-            score -= 15;
-            issues.add("Title too short");
-        }
-        if (title != null && title.length() > 60) {
-            score -= 10;
-            issues.add("Title too long");
-        }
-        if (desc == null || desc.length() < 50) {
-            score -= 15;
-            issues.add("Description too short");
-        }
-        if (desc != null && desc.length() > 160) {
-            score -= 10;
-            issues.add("Description too long");
-        }
-        return Map.of(
-            "score", Math.max(0, score),
-            "issues", issues
-        );
+        if (title == null || title.length() < 10) { score -= 15; issues.add("Title too short"); }
+        if (title != null && title.length() > 60) { score -= 10; issues.add("Title too long"); }
+        if (desc == null || desc.length() < 50) { score -= 15; issues.add("Description too short"); }
+        if (desc != null && desc.length() > 160) { score -= 10; issues.add("Description too long"); }
+        return Map.of("score", Math.max(0, score), "issues", issues);
     }
 }
