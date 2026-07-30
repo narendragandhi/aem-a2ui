@@ -296,8 +296,8 @@ export class ReviewComments extends LitElement {
           author: this.currentUser,
           authorName: this.currentUserName,
           content: this.newComment,
-          field: this.selectedField || null
-        })
+          field: this.selectedField || null,
+        }),
       });
 
       if (response.ok) {
@@ -305,11 +305,13 @@ export class ReviewComments extends LitElement {
         this.review = updatedReview;
         this.newComment = '';
         this.selectedField = '';
-        this.dispatchEvent(new CustomEvent('comment-added', {
-          detail: { review: updatedReview },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('comment-added', {
+            detail: { review: updatedReview },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       }
     } catch (error) {
       console.error('Failed to add comment:', error);
@@ -320,14 +322,11 @@ export class ReviewComments extends LitElement {
     if (!this.review) return;
 
     try {
-      const response = await fetch(
-        `${API_BASE}/reviews/${this.review.id}/comments/${commentId}/resolve`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resolvedBy: this.currentUserName })
-        }
-      );
+      const response = await fetch(`${API_BASE}/reviews/${this.review.id}/comments/${commentId}/resolve`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolvedBy: this.currentUserName }),
+      });
 
       if (response.ok) {
         this.review = await response.json();
@@ -341,10 +340,9 @@ export class ReviewComments extends LitElement {
     if (!this.review) return;
 
     try {
-      const response = await fetch(
-        `${API_BASE}/reviews/${this.review.id}/comments/${commentId}/unresolve`,
-        { method: 'PATCH' }
-      );
+      const response = await fetch(`${API_BASE}/reviews/${this.review.id}/comments/${commentId}/unresolve`, {
+        method: 'PATCH',
+      });
 
       if (response.ok) {
         this.review = await response.json();
@@ -363,7 +361,7 @@ export class ReviewComments extends LitElement {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -373,26 +371,27 @@ export class ReviewComments extends LitElement {
     let comments = [...this.review.comments];
 
     if (this.filter === 'unresolved') {
-      comments = comments.filter(c => !c.resolved);
+      comments = comments.filter((c) => !c.resolved);
     } else if (this.filter === 'resolved') {
-      comments = comments.filter(c => c.resolved);
+      comments = comments.filter((c) => c.resolved);
     }
 
-    return comments.sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
+    return comments.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 
   render() {
     if (!this.open) return null;
 
     const comments = this.getFilteredComments();
-    const unresolvedCount = this.review?.comments.filter(c => !c.resolved).length || 0;
+    const unresolvedCount = this.review?.comments.filter((c) => !c.resolved).length || 0;
 
     return html`
-      <div class="overlay" @click=${(e: Event) => {
+      <div
+        class="overlay"
+        @click=${(e: Event) => {
         if (e.target === e.currentTarget) this.close();
-      }}>
+      }}
+      >
         <div class="panel">
           <div class="panel-header">
             <span class="panel-title">Comments (${this.review?.comments.length || 0})</span>
@@ -400,50 +399,51 @@ export class ReviewComments extends LitElement {
           </div>
 
           <div class="filter-bar">
-            <button
-              class="filter-chip ${this.filter === 'all' ? 'active' : ''}"
-              @click=${() => this.filter = 'all'}
-            >
+            <button class="filter-chip ${this.filter === 'all' ? 'active' : ''}" @click=${() => (this.filter = 'all')}>
               All
             </button>
             <button
               class="filter-chip ${this.filter === 'unresolved' ? 'active' : ''}"
-              @click=${() => this.filter = 'unresolved'}
+              @click=${() => (this.filter = 'unresolved')}
             >
               Unresolved (${unresolvedCount})
             </button>
             <button
               class="filter-chip ${this.filter === 'resolved' ? 'active' : ''}"
-              @click=${() => this.filter = 'resolved'}
+              @click=${() => (this.filter = 'resolved')}
             >
               Resolved
             </button>
           </div>
 
           <div class="comments-list">
-            ${comments.length === 0 ? html`
-              <div class="empty-state">
-                <div class="empty-icon">💬</div>
-                <div>No comments yet</div>
-                <div style="font-size: 12px; margin-top: 8px;">
-                  Add a comment below to start the discussion
-                </div>
-              </div>
-            ` : comments.map(comment => this.renderComment(comment))}
+            ${
+              comments.length === 0
+                ? html`
+                    <div class="empty-state">
+                      <div class="empty-icon">💬</div>
+                      <div>No comments yet</div>
+                      <div style="font-size: 12px; margin-top: 8px;">Add a comment below to start the discussion</div>
+                    </div>
+                  `
+                : comments.map((comment) => this.renderComment(comment))
+            }
           </div>
 
           <div class="add-comment-form">
             <div class="form-row">
               <label class="form-label">Comment on field (optional)</label>
               <div class="field-selector">
-                ${this.fields.map(field => html`
-                  <button
-                    class="field-chip ${this.selectedField === field ? 'selected' : ''}"
-                    @click=${() => this.selectedField = this.selectedField === field ? '' : field}
-                  >
-                    ${field}
-                  </button>
-                `)}
+                ${this.fields.map(
+                  (field) => html`
+                    <button
+                      class="field-chip ${this.selectedField === field ? 'selected' : ''}"
+                      @click=${() => (this.selectedField = this.selectedField === field ? '' : field)}
+                    >
+                      ${field}
+                    </button>
+                  `,
+                )}
               </div>
             </div>
 
@@ -451,16 +451,12 @@ export class ReviewComments extends LitElement {
               <textarea
                 placeholder="Add your comment..."
                 .value=${this.newComment}
-                @input=${(e: Event) => this.newComment = (e.target as HTMLTextAreaElement).value}
+                @input=${(e: Event) => (this.newComment = (e.target as HTMLTextAreaElement).value)}
               ></textarea>
             </div>
 
             <div class="form-actions">
-              <sp-button
-                variant="primary"
-                ?disabled=${!this.newComment.trim()}
-                @click=${this.addComment}
-              >
+              <sp-button variant="primary" ?disabled=${!this.newComment.trim()} @click=${this.addComment}>
                 Add Comment
               </sp-button>
             </div>
@@ -487,18 +483,14 @@ export class ReviewComments extends LitElement {
         <div class="comment-content">${comment.content}</div>
 
         <div class="comment-actions">
-          ${comment.resolved ? html`
-            <span class="resolved-badge">
-              ✓ Resolved by ${comment.resolvedBy}
-            </span>
-            <button class="resolve-btn" @click=${() => this.unresolveComment(comment.id)}>
-              Reopen
-            </button>
-          ` : html`
-            <button class="resolve-btn" @click=${() => this.resolveComment(comment.id)}>
-              Resolve
-            </button>
-          `}
+          ${
+            comment.resolved
+              ? html`
+                  <span class="resolved-badge"> ✓ Resolved by ${comment.resolvedBy} </span>
+                  <button class="resolve-btn" @click=${() => this.unresolveComment(comment.id)}>Reopen</button>
+                `
+              : html` <button class="resolve-btn" @click=${() => this.resolveComment(comment.id)}>Resolve</button> `
+          }
         </div>
       </div>
     `;

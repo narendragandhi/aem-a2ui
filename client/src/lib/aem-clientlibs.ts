@@ -358,10 +358,13 @@ function generateBaseComponentCss(componentType: string): string {
 }`,
   };
 
-  return baseStyles[componentType] || `/* ${componentType} Component Base Styles */
+  return (
+    baseStyles[componentType] ||
+    `/* ${componentType} Component Base Styles */
 .cmp-${componentType} {
   /* Add component styles here */
-}`;
+}`
+  );
 }
 
 /**
@@ -561,7 +564,9 @@ function generateComponentJs(componentType: string): string {
 })();`,
   };
 
-  return jsTemplates[componentType] || `/* ${componentType} Component JS */
+  return (
+    jsTemplates[componentType] ||
+    `/* ${componentType} Component JS */
 (function() {
   'use strict';
 
@@ -570,7 +575,8 @@ function generateComponentJs(componentType: string): string {
   }
 
   document.querySelectorAll('.cmp-${componentType}').forEach(init${componentType.charAt(0).toUpperCase() + componentType.slice(1)});
-})();`;
+})();`
+  );
 }
 
 /**
@@ -614,13 +620,13 @@ export function generateComponentClientLib(componentType: string, config: Partia
   }
 
   // Add css.txt and js.txt
-  const cssFiles = files.filter(f => f.type === 'css').map(f => f.path);
-  const jsFiles = files.filter(f => f.type === 'js').map(f => f.path);
+  const cssFiles = files.filter((f) => f.type === 'css').map((f) => f.path);
+  const jsFiles = files.filter((f) => f.type === 'js').map((f) => f.path);
 
   if (cssFiles.length > 0) {
     files.push({
       path: 'css.txt',
-      content: '#base=css\n' + cssFiles.map(f => f.replace('css/', '')).join('\n'),
+      content: '#base=css\n' + cssFiles.map((f) => f.replace('css/', '')).join('\n'),
       type: 'txt',
     });
   }
@@ -628,7 +634,7 @@ export function generateComponentClientLib(componentType: string, config: Partia
   if (jsFiles.length > 0) {
     files.push({
       path: 'js.txt',
-      content: '#base=js\n' + jsFiles.map(f => f.replace('js/', '')).join('\n'),
+      content: '#base=js\n' + jsFiles.map((f) => f.replace('js/', '')).join('\n'),
       type: 'txt',
     });
   }
@@ -640,9 +646,9 @@ export function generateComponentClientLib(componentType: string, config: Partia
  * Generate clientlib .content.xml
  */
 export function generateClientLibContentXml(config: ClientLibConfig): string {
-  const categories = config.categories.map(c => `"${c}"`).join(',');
-  const dependencies = config.dependencies?.map(d => `"${d}"`).join(',') || '';
-  const embeds = config.embeds?.map(e => `"${e}"`).join(',') || '';
+  const categories = config.categories.map((c) => `"${c}"`).join(',');
+  const dependencies = config.dependencies?.map((d) => `"${d}"`).join(',') || '';
+  const embeds = config.embeds?.map((e) => `"${e}"`).join(',') || '';
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0"

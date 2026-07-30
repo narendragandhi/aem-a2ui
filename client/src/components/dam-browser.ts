@@ -344,7 +344,7 @@ export class DamBrowser extends LitElement {
 
         // Apply type filter
         if (this.typeFilter !== 'all') {
-          this.assets = this.assets.filter(a => a.type === this.typeFilter);
+          this.assets = this.assets.filter((a) => a.type === this.typeFilter);
         }
       }
     } catch (error) {
@@ -406,11 +406,13 @@ export class DamBrowser extends LitElement {
         thumbnailUrl: this.getProxiedUrl(this.selectedAsset.thumbnailUrl),
         originalUrl: this.getProxiedUrl(this.selectedAsset.originalUrl),
       };
-      this.dispatchEvent(new CustomEvent('asset-selected', {
-        detail: { asset: assetWithProxiedUrls },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('asset-selected', {
+          detail: { asset: assetWithProxiedUrls },
+          bubbles: true,
+          composed: true,
+        }),
+      );
       this.close();
     }
   }
@@ -422,7 +424,7 @@ export class DamBrowser extends LitElement {
   private getBreadcrumbs(): { name: string; path: string }[] {
     if (!this.currentPath) return [];
 
-    const parts = this.currentPath.split('/').filter(p => p);
+    const parts = this.currentPath.split('/').filter((p) => p);
     const crumbs: { name: string; path: string }[] = [];
     let path = '';
 
@@ -437,11 +439,16 @@ export class DamBrowser extends LitElement {
   private getAssetIcon(asset: DamAsset): string {
     if (asset.folder) return '📁';
     switch (asset.type) {
-      case 'image': return '🖼️';
-      case 'video': return '🎬';
-      case 'document': return '📄';
-      case 'audio': return '🎵';
-      default: return '📎';
+      case 'image':
+        return '🖼️';
+      case 'video':
+        return '🎬';
+      case 'document':
+        return '📄';
+      case 'audio':
+        return '🎵';
+      default:
+        return '📎';
     }
   }
 
@@ -479,117 +486,140 @@ export class DamBrowser extends LitElement {
     if (!this.open) return null;
 
     return html`
-      <div class="overlay" @click=${(e: Event) => {
+      <div
+        class="overlay"
+        @click=${(e: Event) => {
         if (e.target === e.currentTarget) this.close();
-      }}>
+      }}
+      >
         <div class="modal" @click=${(e: Event) => e.stopPropagation()}>
           <div class="modal-header">
             <span class="modal-title">Select Asset from DAM</span>
             <button class="close-btn" @click=${this.close}>×</button>
           </div>
 
-          ${!this.connected ? this.renderDisconnected() : html`
-            <div class="toolbar">
-              <sp-textfield
-                class="search-box"
-                placeholder="Search assets..."
-                .value=${this.searchQuery}
-                @input=${(e: Event) => this.searchQuery = (e.target as HTMLInputElement).value}
-                @keyup=${(e: KeyboardEvent) => e.key === 'Enter' && this.searchAssets()}
-              ></sp-textfield>
-              <div class="filter-chips">
-                ${['all', 'image', 'video', 'document'].map(type => html`
-                  <button
-                    class="filter-chip ${this.typeFilter === type ? 'active' : ''}"
-                    @click=${() => this.setTypeFilter(type)}
-                  >
-                    ${type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}s
-                  </button>
-                `)}
-              </div>
-            </div>
-
-            <div class="breadcrumb">
-              <span class="breadcrumb-item" @click=${() => this.loadAssets(this.damRoot)}>
-                DAM
-              </span>
-              ${this.getBreadcrumbs().slice(3).map((crumb, i, arr) => html`
-                <span class="breadcrumb-separator">/</span>
-                <span
-                  class="breadcrumb-item"
-                  @click=${() => this.loadAssets(crumb.path)}
-                >
-                  ${crumb.name}
-                </span>
-              `)}
-            </div>
-
-            <div class="content">
-              ${this.loading ? html`
-                <div class="loading">
-                  <sp-progress-circle indeterminate size="l"></sp-progress-circle>
-                </div>
-              ` : html`
-                ${this.folders.length > 0 ? html`
-                  <div class="sidebar">
-                    <div class="folder-tree">
-                      ${this.folders.map(folder => html`
-                        <div
-                          class="folder-item"
-                          @click=${() => this.selectAsset(folder)}
-                        >
-                          <span class="folder-icon">📁</span>
-                          <span>${folder.name}</span>
-                        </div>
-                      `)}
+          ${
+            !this.connected
+              ? this.renderDisconnected()
+              : html`
+                  <div class="toolbar">
+                    <sp-textfield
+                      class="search-box"
+                      placeholder="Search assets..."
+                      .value=${this.searchQuery}
+                      @input=${(e: Event) => (this.searchQuery = (e.target as HTMLInputElement).value)}
+                      @keyup=${(e: KeyboardEvent) => e.key === 'Enter' && this.searchAssets()}
+                    ></sp-textfield>
+                    <div class="filter-chips">
+                      ${['all', 'image', 'video', 'document'].map(
+                  (type) => html`
+                    <button
+                      class="filter-chip ${this.typeFilter === type ? 'active' : ''}"
+                      @click=${() => this.setTypeFilter(type)}
+                    >
+                      ${type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}s
+                    </button>
+                  `,
+                )}
                     </div>
                   </div>
-                ` : ''}
 
-                <div class="asset-grid">
-                  ${this.assets.length === 0 ? html`
-                    <div class="empty-state">
-                      <div class="empty-icon">📂</div>
-                      <div>No assets found</div>
-                    </div>
-                  ` : this.assets.map(asset => html`
-                    <div
-                      class="asset-card ${this.selectedAsset?.path === asset.path ? 'selected' : ''}"
-                      @click=${() => this.selectAsset(asset)}
-                    >
-                      <div class="asset-thumbnail">
-                        ${asset.thumbnailUrl ? html`
-                          <img src="${this.getProxiedUrl(asset.thumbnailUrl)}" alt="${asset.name}" @error=${(e: Event) => this.handleImageError(e, asset)} />
-                        ` : html`
-                          <span class="asset-placeholder">${this.getAssetIcon(asset)}</span>
-                        `}
-                      </div>
-                      <div class="asset-info">
-                        <div class="asset-name">${asset.title || asset.name}</div>
-                        <div class="asset-type">${asset.type} ${asset.mimeType ? `• ${asset.mimeType}` : ''}</div>
-                      </div>
-                    </div>
-                  `)}
-                </div>
-              `}
-            </div>
+                  <div class="breadcrumb">
+                    <span class="breadcrumb-item" @click=${() => this.loadAssets(this.damRoot)}> DAM </span>
+                    ${this.getBreadcrumbs()
+                .slice(3)
+                .map(
+                  (crumb, i, arr) => html`
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item" @click=${() => this.loadAssets(crumb.path)}> ${crumb.name} </span>
+                  `,
+                )}
+                  </div>
 
-            <div class="modal-footer">
-              <span class="selection-info">
-                ${this.selectedAsset ? `Selected: ${this.selectedAsset.name}` : 'No asset selected'}
-              </span>
-              <div class="footer-actions">
-                <sp-button variant="secondary" @click=${this.close}>Cancel</sp-button>
-                <sp-button
-                  variant="primary"
-                  ?disabled=${!this.selectedAsset}
-                  @click=${this.confirm}
-                >
-                  Select Asset
-                </sp-button>
-              </div>
-            </div>
-          `}
+                  <div class="content">
+                    ${
+                this.loading
+                  ? html`
+                      <div class="loading">
+                        <sp-progress-circle indeterminate size="l"></sp-progress-circle>
+                      </div>
+                    `
+                  : html`
+                      ${
+                  this.folders.length > 0
+                    ? html`
+                        <div class="sidebar">
+                          <div class="folder-tree">
+                            ${this.folders.map(
+                        (folder) => html`
+                          <div class="folder-item" @click=${() => this.selectAsset(folder)}>
+                            <span class="folder-icon">📁</span>
+                            <span>${folder.name}</span>
+                          </div>
+                        `,
+                      )}
+                          </div>
+                        </div>
+                      `
+                    : ''
+                }
+
+                      <div class="asset-grid">
+                        ${
+                    this.assets.length === 0
+                      ? html`
+                          <div class="empty-state">
+                            <div class="empty-icon">📂</div>
+                            <div>No assets found</div>
+                          </div>
+                        `
+                      : this.assets.map(
+                          (asset) => html`
+                            <div
+                              class="asset-card ${this.selectedAsset?.path === asset.path ? 'selected' : ''}"
+                              @click=${() => this.selectAsset(asset)}
+                            >
+                              <div class="asset-thumbnail">
+                                ${
+                          asset.thumbnailUrl
+                            ? html`
+                                <img
+                                  src="${this.getProxiedUrl(asset.thumbnailUrl)}"
+                                  alt="${asset.name}"
+                                  @error=${(e: Event) => this.handleImageError(e, asset)}
+                                />
+                              `
+                            : html` <span class="asset-placeholder">${this.getAssetIcon(asset)}</span> `
+                        }
+                              </div>
+                              <div class="asset-info">
+                                <div class="asset-name">${asset.title || asset.name}</div>
+                                <div class="asset-type">
+                                  ${asset.type} ${asset.mimeType ? `• ${asset.mimeType}` : ''}
+                                </div>
+                              </div>
+                            </div>
+                          `,
+                        )
+                  }
+                      </div>
+                    `
+              }
+                  </div>
+
+                  <div class="modal-footer">
+                    <span class="selection-info">
+                      ${this.selectedAsset ? `Selected: ${this.selectedAsset.name}` : 'No asset selected'}
+                    </span>
+                    <div class="footer-actions">
+                      <sp-button variant="secondary" @click=${this.close}>Cancel</sp-button>
+                      <sp-button variant="primary" ?disabled=${!this.selectedAsset} @click=${this.confirm}>
+                        Select Asset
+                      </sp-button>
+                    </div>
+                  </div>
+                `
+          }
         </div>
       </div>
     `;

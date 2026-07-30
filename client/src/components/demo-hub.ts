@@ -144,13 +144,7 @@ export class DemoHub extends LitElement {
   @property({ type: String }) agentUrl = 'http://localhost:10003';
   @property({ type: Object }) content: ContentSuggestion | null = null;
 
-  @state() private activeDemo:
-    | 'workflow'
-    | 'governance'
-    | 'component'
-    | 'dam'
-    | 'personalize'
-    | 'xf' = 'workflow';
+  @state() private activeDemo: 'workflow' | 'governance' | 'component' | 'dam' | 'personalize' | 'xf' = 'workflow';
 
   @state() private prompt = 'Hero banner for summer sale';
   @state() private governanceResult: any = null;
@@ -183,17 +177,12 @@ export class DemoHub extends LitElement {
         <div class="panel-header">AG‑UI / A2UI Demo Hub</div>
         <div class="panel-body">
           <div class="tabs">
-            ${this.renderTab('workflow', 'Workflow Orchestration')}
-            ${this.renderTab('governance', 'Governance')}
-            ${this.renderTab('component', 'Component Config')}
-            ${this.renderTab('dam', 'DAM Assembly')}
-            ${this.renderTab('personalize', 'Personalization')}
-            ${this.renderTab('xf', 'Experience Fragments')}
+            ${this.renderTab('workflow', 'Workflow Orchestration')} ${this.renderTab('governance', 'Governance')}
+            ${this.renderTab('component', 'Component Config')} ${this.renderTab('dam', 'DAM Assembly')}
+            ${this.renderTab('personalize', 'Personalization')} ${this.renderTab('xf', 'Experience Fragments')}
           </div>
 
-          ${this.renderGuidedStory()}
-
-          ${this.activeDemo === 'workflow' ? this.renderWorkflow() : ''}
+          ${this.renderGuidedStory()} ${this.activeDemo === 'workflow' ? this.renderWorkflow() : ''}
           ${this.activeDemo === 'governance' ? this.renderGovernance() : ''}
           ${this.activeDemo === 'component' ? this.renderComponentSchema() : ''}
           ${this.activeDemo === 'dam' ? this.renderDamAssembly() : ''}
@@ -206,10 +195,7 @@ export class DemoHub extends LitElement {
 
   private renderTab(id: DemoHub['activeDemo'], label: string) {
     return html`
-      <button
-        class="tab ${this.activeDemo === id ? 'active' : ''}"
-        @click=${() => (this.activeDemo = id)}
-      >
+      <button class="tab ${this.activeDemo === id ? 'active' : ''}" @click=${() => (this.activeDemo = id)}>
         ${label}
       </button>
     `;
@@ -235,26 +221,27 @@ export class DemoHub extends LitElement {
         <button class="btn" @click=${this.runGovernance}>Run Check</button>
         <button class="btn" @click=${this.startGovernanceStream}>Stream Compliance</button>
       </div>
-      ${this.governanceStreaming ? html`
-        <streaming-content
-          id="governance-stream"
-          .agentUrl=${this.agentUrl}
-        ></streaming-content>
-      ` : ''}
-      ${this.governanceResult
-        ? html`
-            <div class="grid">
-              <div class="card">
-                <div><strong>Brand Score:</strong> ${this.governanceResult.brand?.score ?? '-'}</div>
-                <div class="mono">${JSON.stringify(this.governanceResult.brand?.issues || [], null, 2)}</div>
+      ${
+        this.governanceStreaming
+          ? html` <streaming-content id="governance-stream" .agentUrl=${this.agentUrl}></streaming-content> `
+          : ''
+      }
+      ${
+        this.governanceResult
+          ? html`
+              <div class="grid">
+                <div class="card">
+                  <div><strong>Brand Score:</strong> ${this.governanceResult.brand?.score ?? '-'}</div>
+                  <div class="mono">${JSON.stringify(this.governanceResult.brand?.issues || [], null, 2)}</div>
+                </div>
+                <div class="card">
+                  <div><strong>SEO Score:</strong> ${this.governanceResult.seo?.score ?? '-'}</div>
+                  <div class="mono">${JSON.stringify(this.governanceResult.seo?.issues || [], null, 2)}</div>
+                </div>
               </div>
-              <div class="card">
-                <div><strong>SEO Score:</strong> ${this.governanceResult.seo?.score ?? '-'}</div>
-                <div class="mono">${JSON.stringify(this.governanceResult.seo?.issues || [], null, 2)}</div>
-              </div>
-            </div>
-          `
-        : html`<div class="card">Provide content and run a check.</div>`}
+            `
+          : html`<div class="card">Provide content and run a check.</div>`
+      }
     `;
   }
 
@@ -264,9 +251,11 @@ export class DemoHub extends LitElement {
         <input class="input" .value=${this.componentType} @input=${this.onComponentTypeInput} />
         <button class="btn" @click=${this.loadComponentSchema}>Load Schema</button>
       </div>
-      ${this.componentSchema
-        ? html`<div class="card mono">${JSON.stringify(this.componentSchema, null, 2)}</div>`
-        : html`<div class="card">Load the schema for a component type.</div>`}
+      ${
+        this.componentSchema
+          ? html`<div class="card mono">${JSON.stringify(this.componentSchema, null, 2)}</div>`
+          : html`<div class="card">Load the schema for a component type.</div>`
+      }
     `;
   }
 
@@ -276,9 +265,11 @@ export class DemoHub extends LitElement {
         <input class="input" .value=${this.damQuery} @input=${this.onDamQueryInput} />
         <button class="btn" @click=${this.loadDamAssembly}>Search</button>
       </div>
-      ${this.damResult
-        ? html`<div class="card mono">${JSON.stringify(this.damResult, null, 2)}</div>`
-        : html`<div class="card">Search DAM assets and view selection.</div>`}
+      ${
+        this.damResult
+          ? html`<div class="card mono">${JSON.stringify(this.damResult, null, 2)}</div>`
+          : html`<div class="card">Search DAM assets and view selection.</div>`
+      }
     `;
   }
 
@@ -288,12 +279,12 @@ export class DemoHub extends LitElement {
         <input class="input" .value=${this.personas} @input=${this.onPersonasInput} />
         <button class="btn" @click=${this.runPersonalization}>Generate</button>
       </div>
-      ${this.personalization
-        ? html`<div class="card mono">${JSON.stringify(this.personalization, null, 2)}</div>`
-        : html`<div class="card">Generate persona variants from content.</div>`}
-      ${this.localization
-        ? html`<div class="card mono">${JSON.stringify(this.localization, null, 2)}</div>`
-        : ''}
+      ${
+        this.personalization
+          ? html`<div class="card mono">${JSON.stringify(this.personalization, null, 2)}</div>`
+          : html`<div class="card">Generate persona variants from content.</div>`
+      }
+      ${this.localization ? html`<div class="card mono">${JSON.stringify(this.localization, null, 2)}</div>` : ''}
     `;
   }
 
@@ -302,9 +293,11 @@ export class DemoHub extends LitElement {
       <div class="row">
         <button class="btn" @click=${this.generateXf}>Generate XF</button>
       </div>
-      ${this.xfResult
-        ? html`<div class="card mono">${JSON.stringify(this.xfResult, null, 2)}</div>`
-        : html`<div class="card">Generate a demo XF entry.</div>`}
+      ${
+        this.xfResult
+          ? html`<div class="card mono">${JSON.stringify(this.xfResult, null, 2)}</div>`
+          : html`<div class="card">Generate a demo XF entry.</div>`
+      }
     `;
   }
 
@@ -315,9 +308,7 @@ export class DemoHub extends LitElement {
         <div style="display:flex; justify-content: space-between; align-items:center;">
           <strong>Guided Story</strong>
           <div>
-            <button class="btn" @click=${this.toggleGuided}>
-              ${this.guidedMode ? 'Stop' : 'Start'} Guided
-            </button>
+            <button class="btn" @click=${this.toggleGuided}>${this.guidedMode ? 'Stop' : 'Start'} Guided</button>
           </div>
         </div>
         <div class="mono" style="margin-top: 8px;">
@@ -330,22 +321,20 @@ export class DemoHub extends LitElement {
           <button class="btn" @click=${this.runGuidedStep} ?disabled=${!this.guidedMode || this.guidedRunning}>
             ${this.guidedRunning ? 'Running...' : 'Run Step'}
           </button>
-          <button class="btn" @click=${this.nextGuidedStep} ?disabled=${!this.guidedMode}>
-            Next
-          </button>
-          <button class="btn" @click=${this.resetGuided} ?disabled=${!this.guidedMode}>
-            Reset
-          </button>
+          <button class="btn" @click=${this.nextGuidedStep} ?disabled=${!this.guidedMode}>Next</button>
+          <button class="btn" @click=${this.resetGuided} ?disabled=${!this.guidedMode}>Reset</button>
         </div>
         <div class="event-log" style="margin-top: 10px;">
           ${this.guidedEvents.length === 0 ? 'No guided events yet.' : ''}
-          ${this.guidedEvents.map((e) => html`
-            <div class="event-row">
-              <span class="event-type">${e.type}</span>
-              <span>${e.label}</span>
-              <span>${e.ts}</span>
-            </div>
-          `)}
+          ${this.guidedEvents.map(
+            (e) => html`
+              <div class="event-row">
+                <span class="event-type">${e.type}</span>
+                <span>${e.label}</span>
+                <span>${e.ts}</span>
+              </div>
+            `,
+          )}
         </div>
       </div>
     `;
@@ -403,7 +392,9 @@ export class DemoHub extends LitElement {
   }
 
   private async loadComponentSchema() {
-    const response = await fetch(`${this.agentUrl}/demo/component-schema?type=${encodeURIComponent(this.componentType)}`);
+    const response = await fetch(
+      `${this.agentUrl}/demo/component-schema?type=${encodeURIComponent(this.componentType)}`,
+    );
     if (response.ok) {
       this.componentSchema = await response.json();
     }
@@ -418,7 +409,10 @@ export class DemoHub extends LitElement {
 
   private async runPersonalization() {
     if (!this.content) return;
-    const personaList = this.personas.split(',').map((p) => p.trim()).filter(Boolean);
+    const personaList = this.personas
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
     const response = await fetch(`${this.agentUrl}/demo/personalize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -538,31 +532,32 @@ export class DemoHub extends LitElement {
 
   private emitGuidedEvent(type: string, data: Record<string, unknown>) {
     const ts = new Date().toLocaleTimeString();
-    this.guidedEvents = [
-      { type, label: this.guidedSteps[this.guidedStep], ts },
-      ...this.guidedEvents,
-    ].slice(0, 20);
-    window.dispatchEvent(new CustomEvent('aem-guided-event', {
-      detail: {
-        type,
-        data: {
-          ...data,
-          label: this.guidedSteps[this.guidedStep],
-          timestamp: ts,
+    this.guidedEvents = [{ type, label: this.guidedSteps[this.guidedStep], ts }, ...this.guidedEvents].slice(0, 20);
+    window.dispatchEvent(
+      new CustomEvent('aem-guided-event', {
+        detail: {
+          type,
+          data: {
+            ...data,
+            label: this.guidedSteps[this.guidedStep],
+            timestamp: ts,
+          },
         },
-      },
-    }));
-    this.dispatchEvent(new CustomEvent('guided-event', {
-      detail: {
-        type,
-        data: {
-          ...data,
-          label: this.guidedSteps[this.guidedStep],
+      }),
+    );
+    this.dispatchEvent(
+      new CustomEvent('guided-event', {
+        detail: {
+          type,
+          data: {
+            ...data,
+            label: this.guidedSteps[this.guidedStep],
+          },
         },
-      },
-      bubbles: true,
-      composed: true,
-    }));
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private delay(ms: number) {

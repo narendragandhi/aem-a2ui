@@ -1,7 +1,5 @@
 package com.example.aema2ui.service;
 
-import com.embabel.agent.api.invocation.AgentInvocation;
-import com.embabel.agent.core.AgentPlatform;
 import com.example.aema2ui.agent.AemContentAgent;
 import com.example.aema2ui.model.ContentSuggestion;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +20,7 @@ import java.util.*;
 public class ContentSuggestionService {
 
     private final A2UIMessageBuilder builder;
-    private final AgentPlatform agentPlatform;
+    private final LlmService llmService;
     private final ObjectMapper objectMapper;
     private final AemContentAgent contentAgent;
 
@@ -32,9 +30,9 @@ public class ContentSuggestionService {
     @Value("${aem.agent.suggestions.count:1}")
     private int suggestionsCount;
 
-    public ContentSuggestionService(A2UIMessageBuilder builder, AgentPlatform agentPlatform, ObjectMapper objectMapper, AemContentAgent contentAgent) {
+    public ContentSuggestionService(A2UIMessageBuilder builder, LlmService llmService, ObjectMapper objectMapper, AemContentAgent contentAgent) {
         this.builder = builder;
-        this.agentPlatform = agentPlatform;
+        this.llmService = llmService;
         this.objectMapper = objectMapper;
         this.contentAgent = contentAgent;
     }
@@ -91,15 +89,18 @@ public class ContentSuggestionService {
      * Falls back to template-based generation if agent invocation fails.
      */
     private ContentSuggestion generateContentViaAgent(String userInput) {
-        log.info("Invoking Embabel agent for content generation");
-        try {
-            ContentSuggestion result = AgentInvocation.create(agentPlatform, ContentSuggestion.class)
-                .invoke(userInput);
-            if (result != null) {
-                return result;
+        if (llmService.isEnabled()) {
+            log.info("Generating content via LLM");
+            try {
+                String prompt = AemContentAgent.BRAND_GUIDELINES + "\n\nGenerate " + userInput +
+                    " content. Reply ONLY with JSON: {\"title\":\"...\",\"subtitle\":\"...\",\"description\":\"...\",\"ctaText\":\"...\",\"ctaUrl\":\"/...\",\"imageUrl\":\"...\",\"componentType\":\"...\"}";
+                ContentSuggestion result = llmService.generateObject(prompt, ContentSuggestion.class);
+                if (result != null) {
+                    return result;
+                }
+            } catch (Exception e) {
+                log.warn("LLM invocation failed, falling back to templates: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Embabel agent invocation failed, falling back to templates: {}", e.getMessage());
         }
         return contentAgent.generateTemplateContent(userInput, null);
     }

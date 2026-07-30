@@ -1,0 +1,30 @@
+application:
+  project: aem-a2ui
+  runtime:
+    name: aem-a2ui-ai-agent
+  events:
+    registrations:
+      aem-ue-extension:
+        description: AEM A2UI AI Content Assistant Extension
+        provider: aem/universal-editor
+        events_of_interest:
+          - event_code: aem.sites.editor.component.selection
+          - event_code: aem.sites.editor.component.modified
+  extensions:
+    - extension_point_id: aem/universal-edror-sidepanel
+      id: aem-a2ui
+      url: /build/index.html
+      title: AI Content Assistant
+      description: Generate and optimize AEM content with AI
+      icon: Copy
+      params:
+        componentTypes:
+          - hero
+          - product
+          - teaser
+          - banner
+          - cta
+          - navigation
+          - footer
+          - quote
+        brandConfigPath: /content/dam/aem-a2ui/brand-config.json

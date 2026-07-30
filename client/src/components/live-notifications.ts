@@ -27,11 +27,21 @@ export class LiveNotifications extends LitElement {
       border-left: 4px solid;
     }
 
-    .notification.info { border-color: var(--spectrum-blue-500); }
-    .notification.success { border-color: var(--spectrum-green-500); }
-    .notification.warning { border-color: var(--spectrum-orange-500); }
-    .notification.error { border-color: var(--spectrum-red-500); }
-    .notification.review { border-color: var(--spectrum-purple-500); }
+    .notification.info {
+      border-color: var(--spectrum-blue-500);
+    }
+    .notification.success {
+      border-color: var(--spectrum-green-500);
+    }
+    .notification.warning {
+      border-color: var(--spectrum-orange-500);
+    }
+    .notification.error {
+      border-color: var(--spectrum-red-500);
+    }
+    .notification.review {
+      border-color: var(--spectrum-purple-500);
+    }
 
     @keyframes slideIn {
       from {
@@ -70,11 +80,21 @@ export class LiveNotifications extends LitElement {
       flex-shrink: 0;
     }
 
-    .info .notification-icon { background: var(--spectrum-blue-100); }
-    .success .notification-icon { background: var(--spectrum-green-100); }
-    .warning .notification-icon { background: var(--spectrum-orange-100); }
-    .error .notification-icon { background: var(--spectrum-red-100); }
-    .review .notification-icon { background: var(--spectrum-purple-100); }
+    .info .notification-icon {
+      background: var(--spectrum-blue-100);
+    }
+    .success .notification-icon {
+      background: var(--spectrum-green-100);
+    }
+    .warning .notification-icon {
+      background: var(--spectrum-orange-100);
+    }
+    .error .notification-icon {
+      background: var(--spectrum-red-100);
+    }
+    .review .notification-icon {
+      background: var(--spectrum-purple-100);
+    }
 
     .notification-content {
       flex: 1;
@@ -126,8 +146,15 @@ export class LiveNotifications extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.8; }
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
     }
   `;
 
@@ -148,7 +175,7 @@ export class LiveNotifications extends LitElement {
       success: '✅',
       warning: '⚠️',
       error: '❌',
-      review: '📝'
+      review: '📝',
     };
     return icons[type] || 'ℹ️';
   }
@@ -158,7 +185,7 @@ export class LiveNotifications extends LitElement {
     this.requestUpdate();
 
     setTimeout(() => {
-      this.notifications = this.notifications.filter(n => n.id !== id);
+      this.notifications = this.notifications.filter((n) => n.id !== id);
       this.exitingIds.delete(id);
     }, 300);
   }
@@ -166,27 +193,33 @@ export class LiveNotifications extends LitElement {
   private formatTime(timestamp: string): string {
     return new Date(timestamp).toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
   render() {
     return html`
-      ${this.notifications.map(notification => html`
-        <div
-          class="notification ${notification.type} ${this.exitingIds.has(notification.id) ? 'exit' : ''}"
-        >
-          <div class="notification-icon">${this.getIcon(notification.type)}</div>
-          <div class="notification-content">
-            <div class="notification-title">${notification.title}</div>
-            <div class="notification-message">${notification.message}</div>
-            ${notification.fromUser ? html`
-              <div class="notification-meta">From ${notification.fromUser} · ${this.formatTime(notification.timestamp)}</div>
-            ` : ''}
+      ${this.notifications.map(
+        (notification) => html`
+          <div class="notification ${notification.type} ${this.exitingIds.has(notification.id) ? 'exit' : ''}">
+            <div class="notification-icon">${this.getIcon(notification.type)}</div>
+            <div class="notification-content">
+              <div class="notification-title">${notification.title}</div>
+              <div class="notification-message">${notification.message}</div>
+              ${
+              notification.fromUser
+                ? html`
+                    <div class="notification-meta">
+                      From ${notification.fromUser} · ${this.formatTime(notification.timestamp)}
+                    </div>
+                  `
+                : ''
+            }
+            </div>
+            <button class="close-btn" @click=${() => this.close(notification.id)}>×</button>
           </div>
-          <button class="close-btn" @click=${() => this.close(notification.id)}>×</button>
-        </div>
-      `)}
+        `,
+      )}
     `;
   }
 }

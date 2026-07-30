@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="appName" source="spring.application.name" defaultValue="aem-a2ui-agent"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="prod">
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>requestId</includeMdcKeyName>
+                <includeContext>false</includeContext>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <level>level</level>
+                    <logger>logger</logger>
+                    <thread>thread</thread>
+                    <message>message</message>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="JSON"/>
+        </root>
+        <logger name="com.example.aema2ui" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="!prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.example.aema2ui" level="DEBUG"/>
+    </springProfile>
+</configuration>

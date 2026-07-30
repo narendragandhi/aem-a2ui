@@ -120,9 +120,9 @@ export function contentToExperienceFragment(
     path?: string;
     variations?: string[];
     title?: string;
-  } = {}
+  } = {},
 ): ExperienceFragment {
-  const template = XF_TEMPLATES.find(t => t.id === templateId);
+  const template = XF_TEMPLATES.find((t) => t.id === templateId);
   if (!template) {
     throw new Error(`Unknown XF template: ${templateId}`);
   }
@@ -144,9 +144,9 @@ export function contentToExperienceFragment(
   };
 
   // Create variations
-  const selectedVariations = options.variations || template.variations.map(v => v.id);
-  const variations: ExperienceFragmentVariationContent[] = selectedVariations.map(varId => {
-    const varDef = template.variations.find(v => v.id === varId);
+  const selectedVariations = options.variations || template.variations.map((v) => v.id);
+  const variations: ExperienceFragmentVariationContent[] = selectedVariations.map((varId) => {
+    const varDef = template.variations.find((v) => v.id === varId);
     return {
       name: varId,
       title: varDef?.name || varId,
@@ -171,7 +171,7 @@ export function contentToExperienceFragment(
  */
 function adaptComponentForVariation(
   component: ExperienceFragmentComponent,
-  variationType: string
+  variationType: string,
 ): ExperienceFragmentComponent {
   const adapted = { ...component, content: { ...component.content } };
 
@@ -224,7 +224,7 @@ export function experienceFragmentToJcr(xf: ExperienceFragment): Record<string, 
         'jcr:title': variation.title,
         'sling:resourceType': 'cq/experience-fragments/components/xfpage',
         'cq:xfVariantType': variation.type,
-        'root': createComponentStructure(variation.components),
+        root: createComponentStructure(variation.components),
       },
     };
   }
@@ -255,23 +255,21 @@ function createComponentStructure(components: ExperienceFragmentComponent[]): Re
 /**
  * Generate XF HTML export (for publishing)
  */
-export function experienceFragmentToHtml(
-  xf: ExperienceFragment,
-  variationId: string
-): string {
-  const variation = xf.variations.find(v => v.name === variationId);
+export function experienceFragmentToHtml(xf: ExperienceFragment, variationId: string): string {
+  const variation = xf.variations.find((v) => v.name === variationId);
   if (!variation) {
     throw new Error(`Variation not found: ${variationId}`);
   }
 
-  const components = variation.components.map(comp => {
-    const content = comp.content;
-    const type = comp.resourceType.split('/').pop() || 'component';
+  const components = variation.components
+    .map((comp) => {
+      const content = comp.content;
+      const type = comp.resourceType.split('/').pop() || 'component';
 
-    switch (type) {
-      case 'teaser':
-      case 'hero':
-        return `<div class="xf-${type}" data-xf-component="${type}">
+      switch (type) {
+        case 'teaser':
+        case 'hero':
+          return `<div class="xf-${type}" data-xf-component="${type}">
   ${content['imageUrl'] ? `<img src="${content['imageUrl']}" alt="${content['title'] || ''}" class="xf-${type}__image" />` : ''}
   <div class="xf-${type}__content">
     <h2 class="xf-${type}__title">${content['title'] || ''}</h2>
@@ -280,17 +278,18 @@ export function experienceFragmentToHtml(
   </div>
 </div>`;
 
-      case 'button':
-      case 'cta':
-        return `<a href="${content['ctaUrl'] || '#'}" class="xf-cta-button">${content['ctaText'] || 'Click Here'}</a>`;
+        case 'button':
+        case 'cta':
+          return `<a href="${content['ctaUrl'] || '#'}" class="xf-cta-button">${content['ctaText'] || 'Click Here'}</a>`;
 
-      default:
-        return `<div class="xf-${type}" data-xf-component="${type}">
+        default:
+          return `<div class="xf-${type}" data-xf-component="${type}">
   <h3>${content['title'] || ''}</h3>
   <p>${content['description'] || ''}</p>
 </div>`;
-    }
-  }).join('\n');
+      }
+    })
+    .join('\n');
 
   // Wrap based on variation type
   if (variation.type === 'email') {
@@ -323,5 +322,5 @@ ${components}
  * Get template by ID
  */
 export function getXfTemplateById(id: string): ExperienceFragmentModel | undefined {
-  return XF_TEMPLATES.find(t => t.id === id);
+  return XF_TEMPLATES.find((t) => t.id === id);
 }

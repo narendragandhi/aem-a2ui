@@ -116,10 +116,7 @@ export class BacklinkAnalyzerService {
   /**
    * Analyze competitor backlink gap
    */
-  async analyzeCompetitorGap(
-    yourDomain: string,
-    competitorDomains: string[]
-  ): Promise<CompetitorBacklinkGap[]> {
+  async analyzeCompetitorGap(yourDomain: string, competitorDomains: string[]): Promise<CompetitorBacklinkGap[]> {
     const gaps: CompetitorBacklinkGap[] = [];
 
     for (const competitor of competitorDomains) {
@@ -127,17 +124,13 @@ export class BacklinkAnalyzerService {
       const yourProfile = await this.getBacklinkProfile(yourDomain);
 
       // Find domains linking to competitor but not to you
-      const competitorDomains = new Set(
-        competitorProfile.topLinkingDomains.map(d => d.domain)
-      );
-      const yourDomains = new Set(
-        yourProfile.topLinkingDomains.map(d => d.domain)
-      );
+      const competitorDomains = new Set(competitorProfile.topLinkingDomains.map((d) => d.domain));
+      const yourDomains = new Set(yourProfile.topLinkingDomains.map((d) => d.domain));
 
-      const exclusiveDomains = [...competitorDomains].filter(d => !yourDomains.has(d));
-      const sharedDomains = [...competitorDomains].filter(d => yourDomains.has(d));
+      const exclusiveDomains = [...competitorDomains].filter((d) => !yourDomains.has(d));
+      const sharedDomains = [...competitorDomains].filter((d) => yourDomains.has(d));
 
-      const opportunities: LinkBuildingOpportunity[] = exclusiveDomains.slice(0, 10).map(domain => ({
+      const opportunities: LinkBuildingOpportunity[] = exclusiveDomains.slice(0, 10).map((domain) => ({
         type: 'competitor_link',
         domain,
         url: `https://${domain}`,
@@ -162,10 +155,7 @@ export class BacklinkAnalyzerService {
   /**
    * Find link building opportunities
    */
-  async findLinkOpportunities(
-    domain: string,
-    niche: string
-  ): Promise<LinkBuildingOpportunity[]> {
+  async findLinkOpportunities(domain: string, niche: string): Promise<LinkBuildingOpportunity[]> {
     const opportunities: LinkBuildingOpportunity[] = [];
 
     // Resource page opportunities
@@ -299,7 +289,8 @@ export class BacklinkAnalyzerService {
       return {
         trend: 'declining',
         monthlyAverage: profile.newLinks30Days,
-        recommendation: 'Losing links faster than acquiring. Investigate lost links and increase link building efforts.',
+        recommendation:
+          'Losing links faster than acquiring. Investigate lost links and increase link building efforts.',
       };
     }
   }
@@ -314,7 +305,7 @@ export class BacklinkAnalyzerService {
     try {
       const response = await fetch(
         `https://apiv2.ahrefs.com?token=${this.config.apiKey}&target=${domain}&mode=domain&output=json`,
-        { method: 'GET' }
+        { method: 'GET' },
       );
       const data = await response.json();
       // Transform Ahrefs response to our format
@@ -390,15 +381,27 @@ export class BacklinkAnalyzerService {
    */
   private generateMockBacklinks(targetUrl: string, count: number): Backlink[] {
     const domains = [
-      'techblog.com', 'industry-news.org', 'marketing-weekly.com',
-      'digital-trends.io', 'business-insider.net', 'startup-hub.co',
-      'innovation-daily.com', 'tech-review.org', 'web-magazine.io',
-      'online-journal.net'
+      'techblog.com',
+      'industry-news.org',
+      'marketing-weekly.com',
+      'digital-trends.io',
+      'business-insider.net',
+      'startup-hub.co',
+      'innovation-daily.com',
+      'tech-review.org',
+      'web-magazine.io',
+      'online-journal.net',
     ];
 
     const anchors = [
-      'click here', 'learn more', 'visit site', 'read more',
-      'official website', 'check it out', 'see details', 'discover more'
+      'click here',
+      'learn more',
+      'visit site',
+      'read more',
+      'official website',
+      'check it out',
+      'see details',
+      'discover more',
     ];
 
     return Array.from({ length: count }, (_, i) => {
@@ -425,10 +428,16 @@ export class BacklinkAnalyzerService {
    */
   private generateMockLinkingDomains(count: number): DomainStats[] {
     const domains = [
-      'news-site.com', 'industry-blog.org', 'tech-publication.com',
-      'business-journal.net', 'startup-news.io', 'digital-magazine.com',
-      'web-weekly.org', 'innovation-hub.net', 'trends-daily.com',
-      'market-watch.io'
+      'news-site.com',
+      'industry-blog.org',
+      'tech-publication.com',
+      'business-journal.net',
+      'startup-news.io',
+      'digital-magazine.com',
+      'web-weekly.org',
+      'innovation-hub.net',
+      'trends-daily.com',
+      'market-watch.io',
     ];
 
     return Array.from({ length: count }, (_, i) => ({

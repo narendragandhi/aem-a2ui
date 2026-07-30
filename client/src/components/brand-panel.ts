@@ -41,7 +41,7 @@ export class BrandPanel extends LitElement {
     .brand-icon {
       width: 32px;
       height: 32px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -71,8 +71,13 @@ export class BrandPanel extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .expand-icon {
@@ -87,7 +92,9 @@ export class BrandPanel extends LitElement {
       padding: 0;
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
+      transition:
+        max-height 0.3s ease,
+        padding 0.3s ease;
     }
 
     .brand-content.expanded {
@@ -204,7 +211,7 @@ export class BrandPanel extends LitElement {
 
     return html`
       <div class="brand-panel">
-        <div class="brand-header" @click=${() => this.expanded = !this.expanded}>
+        <div class="brand-header" @click=${() => (this.expanded = !this.expanded)}>
           <div class="brand-title">
             <span class="brand-icon">🎨</span>
             <div>
@@ -221,9 +228,7 @@ export class BrandPanel extends LitElement {
         <div class="brand-content ${this.expanded ? 'expanded' : ''}">
           <div class="brand-section">
             <div class="section-title">Voice & Tone</div>
-            <div class="tone-tags">
-              ${brand.voice.tone.map(t => html`<span class="tone-tag">${t}</span>`)}
-            </div>
+            <div class="tone-tags">${brand.voice.tone.map((t) => html`<span class="tone-tag">${t}</span>`)}</div>
           </div>
 
           <div class="brand-section">
@@ -239,38 +244,40 @@ export class BrandPanel extends LitElement {
           <div class="brand-section">
             <div class="section-title">Value Pillars</div>
             <div class="value-pillars">
-              ${brand.messaging.valuePillars.map(p => html`
-                <div class="pillar">
-                  <span class="pillar-icon">✓</span>
-                  ${p}
-                </div>
-              `)}
+              ${brand.messaging.valuePillars.map(
+                (p) => html`
+                  <div class="pillar">
+                    <span class="pillar-icon">✓</span>
+                    ${p}
+                  </div>
+                `,
+              )}
             </div>
           </div>
 
           <div class="brand-section">
             <div class="section-title">Visual Style</div>
             <div class="tone-tags">
-              ${brand.visuals.styleKeywords.map(k => html`<span class="tone-tag">${k}</span>`)}
+              ${brand.visuals.styleKeywords.map((k) => html`<span class="tone-tag">${k}</span>`)}
             </div>
             <div class="color-swatches" style="margin-top: 12px;">
-              ${Object.entries(brand.visuals.brandColors).map(([name, color]) => html`
-                <div class="color-swatch" style="background: ${color}" data-name=${name}></div>
-              `)}
+              ${Object.entries(brand.visuals.brandColors).map(
+                ([name, color]) => html`
+                  <div class="color-swatch" style="background: ${color}" data-name=${name}></div>
+                `,
+              )}
             </div>
           </div>
 
           <div class="brand-section">
             <div class="section-title">Avoid</div>
-            <div class="avoid-list">
-              ${brand.voice.avoid.map(a => html`<span class="avoid-tag">✕ ${a}</span>`)}
-            </div>
+            <div class="avoid-list">${brand.voice.avoid.map((a) => html`<span class="avoid-tag">✕ ${a}</span>`)}</div>
           </div>
 
           <div class="brand-section">
             <div class="section-title">Example Headlines</div>
             <div class="examples-list">
-              ${brand.examples.goodHeadlines.map(h => html`<div class="example">"${h}"</div>`)}
+              ${brand.examples.goodHeadlines.map((h) => html`<div class="example">"${h}"</div>`)}
             </div>
           </div>
         </div>
@@ -292,17 +299,17 @@ MUST AVOID: ${brand.voice.avoid.join(', ')}
 Target Audience: ${brand.messaging.targetAudience}
 
 Value Pillars (incorporate these themes):
-${brand.messaging.valuePillars.map(p => `- ${p}`).join('\n')}
+${brand.messaging.valuePillars.map((p) => `- ${p}`).join('\n')}
 
 Headline Style: ${brand.typography.headingStyle}
 Body Copy Style: ${brand.typography.bodyStyle}
 CTA Style: ${brand.messaging.ctaStyle}
 
 Example Good Headlines:
-${brand.examples.goodHeadlines.map(h => `- "${h}"`).join('\n')}
+${brand.examples.goodHeadlines.map((h) => `- "${h}"`).join('\n')}
 
 Example Good CTAs:
-${brand.examples.goodCTAs.map(c => `- "${c}"`).join('\n')}
+${brand.examples.goodCTAs.map((c) => `- "${c}"`).join('\n')}
 `;
   }
 }

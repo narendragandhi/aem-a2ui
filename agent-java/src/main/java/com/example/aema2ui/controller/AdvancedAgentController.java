@@ -4,6 +4,7 @@ import com.example.aema2ui.model.TaskRequest;
 import com.example.aema2ui.model.TaskResponse;
 import com.example.aema2ui.service.AdvancedA2UIService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Controller for advanced A2UI demos.
- * Runs on port 10005 (configured in application-advanced.properties).
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/advanced")
+@ConditionalOnProperty(name = "aem.demo.enabled", havingValue = "true", matchIfMissing = true)
 public class AdvancedAgentController {
 
     private final AdvancedA2UIService advancedService;

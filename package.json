@@ -26,7 +26,7 @@
     "clean": "rm -rf client/node_modules client/dist agent-java/target"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^10.0.2"
   },
   "engines": {
     "node": ">=18.0.0"

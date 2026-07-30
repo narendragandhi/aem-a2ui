@@ -7,7 +7,15 @@ import { ContentSuggestion } from '../lib/types.js';
 
 describe('AssistantPreview', () => {
   let element: AssistantPreview;
-  const content: ContentSuggestion = { id: '1', title: 'Suggestion 1', description: 'Description 1', ctaText: 'CTA 1', ctaUrl: '#', imageUrl: '#', componentType: 'hero' };
+  const content: ContentSuggestion = {
+    id: '1',
+    title: 'Suggestion 1',
+    description: 'Description 1',
+    ctaText: 'CTA 1',
+    ctaUrl: '#',
+    imageUrl: '#',
+    componentType: 'hero',
+  };
 
   beforeEach(async () => {
     element = await fixture(html`<assistant-preview .appliedContent=${content}></assistant-preview>`);
@@ -34,7 +42,8 @@ describe('AssistantPreview', () => {
     const spy = sinon.spy();
     element.addEventListener('copy-content', spy);
     const buttons = element.shadowRoot?.querySelectorAll('.preview-action-btn');
-    if (buttons && buttons.length > 1) { // Added null check and length check
+    if (buttons && buttons.length > 1) {
+      // Added null check and length check
       (buttons[1] as HTMLElement)?.click();
     }
     await waitUntil(() => spy.called);

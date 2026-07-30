@@ -15,8 +15,8 @@ dev = [
     "httpx>=0.25.0",
 ]
 
-[tool.uv]
-dev-dependencies = ["pytest>=7.4.0", "pytest-cov>=4.1.0", "httpx>=0.25.0"]
+[dependency-groups]
+dev = ["pytest>=7.4.0", "pytest-cov>=4.1.0", "httpx>=0.25.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

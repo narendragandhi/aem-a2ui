@@ -66,8 +66,13 @@ export class AemStatus extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .status-text {
@@ -226,7 +231,7 @@ export class AemStatus extends LitElement {
         connected: false,
         authorUrl: 'http://localhost:4502',
         status: 'ERROR',
-        message: 'Cannot reach backend server'
+        message: 'Cannot reach backend server',
       };
     } finally {
       this.checking = false;
@@ -259,18 +264,18 @@ export class AemStatus extends LitElement {
   render() {
     return html`
       <div class="wrapper">
-        <div
-          class="status-indicator"
-          @click=${this.toggleDropdown}
-          title="AEM Connection Status"
-        >
+        <div class="status-indicator" @click=${this.toggleDropdown} title="AEM Connection Status">
           <span class="status-dot ${this.getStatusClass()}"></span>
-          ${this.showLabel ? html`
-            <div>
-              <div class="status-text">AEM</div>
-              <div class="status-label">${this.getStatusText()}</div>
-            </div>
-          ` : ''}
+          ${
+            this.showLabel
+              ? html`
+                  <div>
+                    <div class="status-text">AEM</div>
+                    <div class="status-label">${this.getStatusText()}</div>
+                  </div>
+                `
+              : ''
+          }
         </div>
 
         ${this.showDropdown ? this.renderDropdown() : ''}
@@ -285,17 +290,17 @@ export class AemStatus extends LitElement {
       <div class="dropdown" @click=${(e: Event) => e.stopPropagation()}>
         <div class="dropdown-header">
           <div class="dropdown-title">AEM Connection</div>
-          <div class="dropdown-subtitle">
-            ${this.health?.enabled ? 'Real AEM Integration' : 'Mock Mode (No AEM)'}
-          </div>
+          <div class="dropdown-subtitle">${this.health?.enabled ? 'Real AEM Integration' : 'Mock Mode (No AEM)'}</div>
         </div>
 
         <div class="dropdown-body">
-          ${this.health?.message ? html`
-            <div class="message-box ${this.health.connected ? 'success' : 'error'}">
-              ${this.health.message}
-            </div>
-          ` : ''}
+          ${
+            this.health?.message
+              ? html`
+                  <div class="message-box ${this.health.connected ? 'success' : 'error'}">${this.health.message}</div>
+                `
+              : ''
+          }
 
           <div class="info-row">
             <span class="info-label">Status</span>
@@ -312,34 +317,35 @@ export class AemStatus extends LitElement {
             <span class="url-value">${this.health?.authorUrl || 'N/A'}</span>
           </div>
 
-          ${!this.health?.enabled ? html`
-            <div class="message-box info">
-              Running in mock mode. Set AEM_ENABLED=true and ensure AEM SDK is running to enable real integration.
-            </div>
-          ` : ''}
+          ${
+            !this.health?.enabled
+              ? html`
+                  <div class="message-box info">
+                    Running in mock mode. Set AEM_ENABLED=true and ensure AEM SDK is running to enable real integration.
+                  </div>
+                `
+              : ''
+          }
         </div>
 
         <div class="dropdown-actions">
-          <sp-button
-            variant="secondary"
-            size="s"
-            @click=${this.testConnection}
-            ?disabled=${this.checking}
-          >
-            ${this.checking ? html`
-              <sp-progress-circle indeterminate size="s"></sp-progress-circle>
-            ` : 'Test Connection'}
+          <sp-button variant="secondary" size="s" @click=${this.testConnection} ?disabled=${this.checking}>
+            ${
+              this.checking
+                ? html` <sp-progress-circle indeterminate size="s"></sp-progress-circle> `
+                : 'Test Connection'
+            }
           </sp-button>
 
-          ${this.health?.connected ? html`
-            <sp-button
-              variant="primary"
-              size="s"
-              @click=${() => window.open(this.health?.authorUrl, '_blank')}
-            >
-              Open AEM
-            </sp-button>
-          ` : ''}
+          ${
+            this.health?.connected
+              ? html`
+                  <sp-button variant="primary" size="s" @click=${() => window.open(this.health?.authorUrl, '_blank')}>
+                    Open AEM
+                  </sp-button>
+                `
+              : ''
+          }
         </div>
       </div>
     `;

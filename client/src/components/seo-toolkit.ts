@@ -64,17 +64,25 @@ export class SeoToolkit extends LitElement {
     }
 
     .score-badge {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       padding: 4px 12px;
       border-radius: 12px;
       font-size: 14px;
       font-weight: 700;
     }
 
-    .score-badge.excellent { background: rgba(255,255,255,0.3); }
-    .score-badge.good { background: rgba(255,255,255,0.25); }
-    .score-badge.needs-work { background: rgba(255,200,100,0.4); }
-    .score-badge.poor { background: rgba(255,100,100,0.4); }
+    .score-badge.excellent {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .score-badge.good {
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .score-badge.needs-work {
+      background: rgba(255, 200, 100, 0.4);
+    }
+    .score-badge.poor {
+      background: rgba(255, 100, 100, 0.4);
+    }
 
     .expand-icon {
       transition: transform 0.2s;
@@ -148,10 +156,22 @@ export class SeoToolkit extends LitElement {
       margin: 0 auto;
     }
 
-    .score-circle.excellent { background: linear-gradient(135deg, #059669, #10b981); color: white; }
-    .score-circle.good { background: linear-gradient(135deg, #0891b2, #06b6d4); color: white; }
-    .score-circle.needs-work { background: linear-gradient(135deg, #d97706, #f59e0b); color: white; }
-    .score-circle.poor { background: linear-gradient(135deg, #dc2626, #ef4444); color: white; }
+    .score-circle.excellent {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+    }
+    .score-circle.good {
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      color: white;
+    }
+    .score-circle.needs-work {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: white;
+    }
+    .score-circle.poor {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: white;
+    }
 
     .score-value {
       font-size: 32px;
@@ -196,10 +216,18 @@ export class SeoToolkit extends LitElement {
       transition: width 0.3s ease;
     }
 
-    .category-fill.excellent { background: #10b981; }
-    .category-fill.good { background: #06b6d4; }
-    .category-fill.needs-work { background: #f59e0b; }
-    .category-fill.poor { background: #ef4444; }
+    .category-fill.excellent {
+      background: #10b981;
+    }
+    .category-fill.good {
+      background: #06b6d4;
+    }
+    .category-fill.needs-work {
+      background: #f59e0b;
+    }
+    .category-fill.poor {
+      background: #ef4444;
+    }
 
     .category-score {
       width: 40px;
@@ -237,9 +265,18 @@ export class SeoToolkit extends LitElement {
       font-size: 12px;
     }
 
-    .issue-item.error { background: #fef2f2; border-left: 3px solid #ef4444; }
-    .issue-item.warning { background: #fffbeb; border-left: 3px solid #f59e0b; }
-    .issue-item.info { background: #f0f9ff; border-left: 3px solid #0ea5e9; }
+    .issue-item.error {
+      background: #fef2f2;
+      border-left: 3px solid #ef4444;
+    }
+    .issue-item.warning {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+    }
+    .issue-item.info {
+      background: #f0f9ff;
+      border-left: 3px solid #0ea5e9;
+    }
 
     .issue-icon {
       font-size: 14px;
@@ -350,9 +387,15 @@ export class SeoToolkit extends LitElement {
       flex: 1;
     }
 
-    .density-zone.low { background: #fef3c7; }
-    .density-zone.optimal { background: #d1fae5; }
-    .density-zone.high { background: #fee2e2; }
+    .density-zone.low {
+      background: #fef3c7;
+    }
+    .density-zone.optimal {
+      background: #d1fae5;
+    }
+    .density-zone.high {
+      background: #fee2e2;
+    }
 
     .density-marker {
       position: absolute;
@@ -488,9 +531,15 @@ export class SeoToolkit extends LitElement {
       white-space: pre-wrap;
     }
 
-    .code-block .key { color: #93c5fd; }
-    .code-block .string { color: #86efac; }
-    .code-block .number { color: #fde68a; }
+    .code-block .key {
+      color: #93c5fd;
+    }
+    .code-block .string {
+      color: #86efac;
+    }
+    .code-block .number {
+      color: #fde68a;
+    }
 
     .validation-result {
       margin-top: 12px;
@@ -671,48 +720,63 @@ export class SeoToolkit extends LitElement {
 
     return html`
       <div class="panel">
-        <div class="panel-header" @click=${() => this.expanded = !this.expanded}>
+        <div class="panel-header" @click=${() => (this.expanded = !this.expanded)}>
           <span class="panel-title">
             <span>🔍</span>
             SEO Toolkit
           </span>
           <div style="display: flex; align-items: center; gap: 12px;">
-            ${this.content ? html`
-              <span class="score-badge ${scoreClass}">${overallScore}/100</span>
-            ` : ''}
+            ${this.content ? html` <span class="score-badge ${scoreClass}">${overallScore}/100</span> ` : ''}
             <span class="expand-icon ${this.expanded ? 'expanded' : ''}">▼</span>
           </div>
         </div>
 
         <div class="panel-body ${this.expanded ? 'expanded' : ''}">
-          ${this.content ? html`
-            <div class="tabs">
-              <button class="tab ${this.activeTab === 'score' ? 'active' : ''}" @click=${() => this.activeTab = 'score'}>
-                📊 Score
-              </button>
-              <button class="tab ${this.activeTab === 'keywords' ? 'active' : ''}" @click=${() => this.activeTab = 'keywords'}>
-                🔑 Keywords
-              </button>
-              <button class="tab ${this.activeTab === 'meta' ? 'active' : ''}" @click=${() => this.activeTab = 'meta'}>
-                🏷️ Meta
-              </button>
-              <button class="tab ${this.activeTab === 'schema' ? 'active' : ''}" @click=${() => this.activeTab = 'schema'}>
-                📝 Schema
-              </button>
-              <button class="tab ${this.activeTab === 'readability' ? 'active' : ''}" @click=${() => this.activeTab = 'readability'}>
-                📖 Readability
-              </button>
-            </div>
+          ${
+            this.content
+              ? html`
+                  <div class="tabs">
+                    <button
+                      class="tab ${this.activeTab === 'score' ? 'active' : ''}"
+                      @click=${() => (this.activeTab = 'score')}
+                    >
+                      📊 Score
+                    </button>
+                    <button
+                      class="tab ${this.activeTab === 'keywords' ? 'active' : ''}"
+                      @click=${() => (this.activeTab = 'keywords')}
+                    >
+                      🔑 Keywords
+                    </button>
+                    <button
+                      class="tab ${this.activeTab === 'meta' ? 'active' : ''}"
+                      @click=${() => (this.activeTab = 'meta')}
+                    >
+                      🏷️ Meta
+                    </button>
+                    <button
+                      class="tab ${this.activeTab === 'schema' ? 'active' : ''}"
+                      @click=${() => (this.activeTab = 'schema')}
+                    >
+                      📝 Schema
+                    </button>
+                    <button
+                      class="tab ${this.activeTab === 'readability' ? 'active' : ''}"
+                      @click=${() => (this.activeTab = 'readability')}
+                    >
+                      📖 Readability
+                    </button>
+                  </div>
 
-            <div class="tab-content">
-              ${this.renderActiveTab()}
-            </div>
-          ` : html`
-            <div class="empty-state">
-              <div class="empty-state-icon">🔍</div>
-              <p>Select content to analyze SEO</p>
-            </div>
-          `}
+                  <div class="tab-content">${this.renderActiveTab()}</div>
+                `
+              : html`
+                  <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <p>Select content to analyze SEO</p>
+                  </div>
+                `
+          }
         </div>
       </div>
     `;
@@ -720,11 +784,16 @@ export class SeoToolkit extends LitElement {
 
   private renderActiveTab() {
     switch (this.activeTab) {
-      case 'score': return this.renderScoreTab();
-      case 'keywords': return this.renderKeywordsTab();
-      case 'meta': return this.renderMetaTab();
-      case 'schema': return this.renderSchemaTab();
-      case 'readability': return this.renderReadabilityTab();
+      case 'score':
+        return this.renderScoreTab();
+      case 'keywords':
+        return this.renderKeywordsTab();
+      case 'meta':
+        return this.renderMetaTab();
+      case 'schema':
+        return this.renderSchemaTab();
+      case 'readability':
+        return this.renderReadabilityTab();
     }
   }
 
@@ -735,8 +804,8 @@ export class SeoToolkit extends LitElement {
     const scoreClass = this.getScoreClass(overall);
 
     // Collect all issues
-    const allIssues = Object.values(categories).flatMap(cat => cat.issues);
-    const allPassed = Object.values(categories).flatMap(cat => cat.passed);
+    const allIssues = Object.values(categories).flatMap((cat) => cat.issues);
+    const allPassed = Object.values(categories).flatMap((cat) => cat.passed);
 
     return html`
       <div class="score-overview">
@@ -762,33 +831,40 @@ export class SeoToolkit extends LitElement {
         </div>
       </div>
 
-      ${allIssues.length > 0 ? html`
-        <div class="issues-section">
-          <div class="section-title">⚠️ Issues to Fix (${allIssues.length})</div>
-          <div class="issue-list">
-            ${allIssues.slice(0, 5).map(issue => html`
-              <div class="issue-item ${issue.severity}">
-                <span class="issue-icon">
-                  ${issue.severity === 'error' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'}
-                </span>
-                <div class="issue-content">
-                  <div class="issue-message">${issue.message}</div>
-                  <div class="issue-suggestion">${issue.suggestion}</div>
+      ${
+        allIssues.length > 0
+          ? html`
+              <div class="issues-section">
+                <div class="section-title">⚠️ Issues to Fix (${allIssues.length})</div>
+                <div class="issue-list">
+                  ${allIssues.slice(0, 5).map(
+              (issue) => html`
+                <div class="issue-item ${issue.severity}">
+                  <span class="issue-icon">
+                    ${issue.severity === 'error' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'}
+                  </span>
+                  <div class="issue-content">
+                    <div class="issue-message">${issue.message}</div>
+                    <div class="issue-suggestion">${issue.suggestion}</div>
+                  </div>
+                </div>
+              `,
+            )}
                 </div>
               </div>
-            `)}
-          </div>
-        </div>
-      ` : ''}
-
-      ${allPassed.length > 0 ? html`
-        <div class="section-title" style="margin-top: 16px;">✅ Passed Checks</div>
-        <div class="passed-list">
-          ${allPassed.map(item => html`
-            <span class="passed-item">✓ ${item}</span>
-          `)}
-        </div>
-      ` : ''}
+            `
+          : ''
+      }
+      ${
+        allPassed.length > 0
+          ? html`
+              <div class="section-title" style="margin-top: 16px;">✅ Passed Checks</div>
+              <div class="passed-list">
+                ${allPassed.map((item) => html` <span class="passed-item">✓ ${item}</span> `)}
+              </div>
+            `
+          : ''
+      }
     `;
   }
 
@@ -799,53 +875,57 @@ export class SeoToolkit extends LitElement {
           type="text"
           placeholder="Enter target keyword..."
           .value=${this.targetKeyword}
-          @input=${(e: Event) => this.targetKeyword = (e.target as HTMLInputElement).value}
+          @input=${(e: Event) => (this.targetKeyword = (e.target as HTMLInputElement).value)}
           @keypress=${(e: KeyboardEvent) => e.key === 'Enter' && this.analyzeKeyword()}
         />
         <button @click=${this.analyzeKeyword}>Analyze</button>
       </div>
 
-      ${this.keywordAnalysis ? html`
-        <div class="keyword-stats">
-          <div class="stat-card">
-            <div class="stat-value">${this.keywordAnalysis.count}</div>
-            <div class="stat-label">Occurrences</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${this.keywordAnalysis.density.toFixed(1)}%</div>
-            <div class="stat-label">Density</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${this.keywordAnalysis.prominence.toFixed(0)}%</div>
-            <div class="stat-label">Prominence</div>
-          </div>
-        </div>
+      ${
+        this.keywordAnalysis
+          ? html`
+              <div class="keyword-stats">
+                <div class="stat-card">
+                  <div class="stat-value">${this.keywordAnalysis.count}</div>
+                  <div class="stat-label">Occurrences</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${this.keywordAnalysis.density.toFixed(1)}%</div>
+                  <div class="stat-label">Density</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${this.keywordAnalysis.prominence.toFixed(0)}%</div>
+                  <div class="stat-label">Prominence</div>
+                </div>
+              </div>
 
-        <div class="density-bar">
-          <div class="section-title">Keyword Density</div>
-          <div class="density-scale">
-            <div class="density-zone low"></div>
-            <div class="density-zone optimal"></div>
-            <div class="density-zone high"></div>
-            <div class="density-marker" style="left: ${Math.min(this.keywordAnalysis.density * 20, 100)}%"></div>
-          </div>
-          <div class="density-labels">
-            <span>0%</span>
-            <span>1-2% (Optimal)</span>
-            <span>5%+</span>
-          </div>
-        </div>
+              <div class="density-bar">
+                <div class="section-title">Keyword Density</div>
+                <div class="density-scale">
+                  <div class="density-zone low"></div>
+                  <div class="density-zone optimal"></div>
+                  <div class="density-zone high"></div>
+                  <div class="density-marker" style="left: ${Math.min(this.keywordAnalysis.density * 20, 100)}%"></div>
+                </div>
+                <div class="density-labels">
+                  <span>0%</span>
+                  <span>1-2% (Optimal)</span>
+                  <span>5%+</span>
+                </div>
+              </div>
 
-        <div class="passed-list" style="margin-top: 16px;">
-          ${this.keywordAnalysis.inTitle ? html`<span class="passed-item">✓ In Title</span>` : ''}
-          ${this.keywordAnalysis.inDescription ? html`<span class="passed-item">✓ In Description</span>` : ''}
-          ${this.keywordAnalysis.prominence > 50 ? html`<span class="passed-item">✓ Early Placement</span>` : ''}
-        </div>
-      ` : html`
-        <div class="empty-state">
-          <p>Enter a keyword to analyze its optimization</p>
-        </div>
-      `}
+              <div class="passed-list" style="margin-top: 16px;">
+                ${this.keywordAnalysis.inTitle ? html`<span class="passed-item">✓ In Title</span>` : ''}
+                ${this.keywordAnalysis.inDescription ? html`<span class="passed-item">✓ In Description</span>` : ''}
+                ${this.keywordAnalysis.prominence > 50 ? html`<span class="passed-item">✓ Early Placement</span>` : ''}
+              </div>
+            `
+          : html`
+              <div class="empty-state">
+                <p>Enter a keyword to analyze its optimization</p>
+              </div>
+            `
+      }
     `;
   }
 
@@ -910,16 +990,28 @@ export class SeoToolkit extends LitElement {
 
     return html`
       <div class="schema-selector">
-        <button class="schema-chip ${this.selectedSchemaType === 'auto' ? 'selected' : ''}" @click=${() => this.selectedSchemaType = 'auto'}>
+        <button
+          class="schema-chip ${this.selectedSchemaType === 'auto' ? 'selected' : ''}"
+          @click=${() => (this.selectedSchemaType = 'auto')}
+        >
           Auto-detect
         </button>
-        <button class="schema-chip ${this.selectedSchemaType === 'Article' ? 'selected' : ''}" @click=${() => this.selectedSchemaType = 'Article'}>
+        <button
+          class="schema-chip ${this.selectedSchemaType === 'Article' ? 'selected' : ''}"
+          @click=${() => (this.selectedSchemaType = 'Article')}
+        >
           Article
         </button>
-        <button class="schema-chip ${this.selectedSchemaType === 'Product' ? 'selected' : ''}" @click=${() => this.selectedSchemaType = 'Product'}>
+        <button
+          class="schema-chip ${this.selectedSchemaType === 'Product' ? 'selected' : ''}"
+          @click=${() => (this.selectedSchemaType = 'Product')}
+        >
           Product
         </button>
-        <button class="schema-chip ${this.selectedSchemaType === 'WebPage' ? 'selected' : ''}" @click=${() => this.selectedSchemaType = 'WebPage'}>
+        <button
+          class="schema-chip ${this.selectedSchemaType === 'WebPage' ? 'selected' : ''}"
+          @click=${() => (this.selectedSchemaType = 'WebPage')}
+        >
           WebPage
         </button>
       </div>
@@ -931,7 +1023,7 @@ export class SeoToolkit extends LitElement {
 
       <div class="validation-result ${validation.valid ? 'valid' : 'invalid'}">
         ${validation.valid ? '✅ Schema is valid' : `❌ ${validation.errors.join(', ')}`}
-        ${validation.warnings.length > 0 ? html`<br>⚠️ ${validation.warnings.join(', ')}` : ''}
+        ${validation.warnings.length > 0 ? html`<br />⚠️ ${validation.warnings.join(', ')}` : ''}
       </div>
 
       <div class="actions">
@@ -944,7 +1036,8 @@ export class SeoToolkit extends LitElement {
   private renderReadabilityTab() {
     if (!this.readabilityMetrics) return html``;
 
-    const { fleschReadingEase, fleschKincaid, wordCount, sentenceCount, avgSentenceLength, readingTime, gradeLevel } = this.readabilityMetrics;
+    const { fleschReadingEase, fleschKincaid, wordCount, sentenceCount, avgSentenceLength, readingTime, gradeLevel } =
+      this.readabilityMetrics;
 
     return html`
       <div class="reading-level">
@@ -957,7 +1050,10 @@ export class SeoToolkit extends LitElement {
           <div class="metric-value">${fleschReadingEase.toFixed(0)}</div>
           <div class="metric-label">Flesch Reading Ease</div>
           <div class="metric-bar">
-            <div class="metric-bar-fill" style="width: ${fleschReadingEase}%; background: ${this.getReadabilityColor(fleschReadingEase)}"></div>
+            <div
+              class="metric-bar-fill"
+              style="width: ${fleschReadingEase}%; background: ${this.getReadabilityColor(fleschReadingEase)}"
+            ></div>
           </div>
         </div>
         <div class="metric-card">
@@ -984,9 +1080,9 @@ export class SeoToolkit extends LitElement {
 
       <div class="section-title">Readability Scale</div>
       <div style="font-size: 12px; color: var(--spectrum-gray-600); line-height: 1.6;">
-        <strong>90-100:</strong> Very easy (5th grade)<br>
-        <strong>60-70:</strong> Standard (8th-9th grade) - Ideal for web<br>
-        <strong>30-50:</strong> Difficult (College level)<br>
+        <strong>90-100:</strong> Very easy (5th grade)<br />
+        <strong>60-70:</strong> Standard (8th-9th grade) - Ideal for web<br />
+        <strong>30-50:</strong> Difficult (College level)<br />
         <strong>0-30:</strong> Very difficult (Graduate level)
       </div>
     `;

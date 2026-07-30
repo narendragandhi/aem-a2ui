@@ -136,7 +136,10 @@ class Logger {
 }
 
 class ScopedLogger {
-  constructor(private logger: Logger, private context: string) {}
+  constructor(
+    private logger: Logger,
+    private context: string,
+  ) {}
 
   debug(message: string, data?: unknown): void {
     this.logger.debug(message, this.context, data);

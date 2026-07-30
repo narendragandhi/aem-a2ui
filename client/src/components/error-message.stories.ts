@@ -23,20 +23,12 @@ export default meta;
 type Story = StoryObj;
 
 export const Default: Story = {
-  render: (args) => html`
-    <error-message
-      .message=${args.message}
-    ></error-message>
-  `,
+  render: (args) => html` <error-message .message=${args.message}></error-message> `,
 };
 
 export const WithMessage: Story = {
   args: {
     message: 'This is an example error message.',
   },
-  render: (args) => html`
-    <error-message
-      .message=${args.message}
-    ></error-message>
-  `,
+  render: (args) => html` <error-message .message=${args.message}></error-message> `,
 };

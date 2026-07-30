@@ -8,7 +8,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { ContentSuggestion } from '../lib/types.js';
 import { SerpAnalyzerService, SerpAnalysis } from '../lib/seo-serp-analyzer.js';
 import { BacklinkAnalyzerService, BacklinkProfile } from '../lib/seo-backlinks.js';
-import { PageSpeedService, PageSpeedAnalysis, formatMetricValue, getCoreWebVitalsStatus } from '../lib/seo-pagespeed.js';
+import {
+  PageSpeedService,
+  PageSpeedAnalysis,
+  formatMetricValue,
+  getCoreWebVitalsStatus,
+} from '../lib/seo-pagespeed.js';
 import { RichResultsValidator, ValidationResult } from '../lib/seo-rich-results.js';
 import { autoGenerateSchema } from '../lib/seo-schema.js';
 
@@ -108,9 +113,15 @@ export class SeoDashboard extends LitElement {
       font-weight: 700;
     }
 
-    .score-card-value.good { color: #2ecc71; }
-    .score-card-value.warning { color: #f39c12; }
-    .score-card-value.poor { color: #e74c3c; }
+    .score-card-value.good {
+      color: #2ecc71;
+    }
+    .score-card-value.warning {
+      color: #f39c12;
+    }
+    .score-card-value.poor {
+      color: #e74c3c;
+    }
 
     .score-card-detail {
       font-size: 11px;
@@ -292,9 +303,18 @@ export class SeoDashboard extends LitElement {
       font-weight: 500;
     }
 
-    .backlink-da.high { background: #d4edda; color: #155724; }
-    .backlink-da.medium { background: #fff3cd; color: #856404; }
-    .backlink-da.low { background: #f8d7da; color: #721c24; }
+    .backlink-da.high {
+      background: #d4edda;
+      color: #155724;
+    }
+    .backlink-da.medium {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .backlink-da.low {
+      background: #f8d7da;
+      color: #721c24;
+    }
 
     /* PageSpeed Tab */
     .pagespeed-url-input {
@@ -318,9 +338,15 @@ export class SeoDashboard extends LitElement {
       border: 2px solid transparent;
     }
 
-    .cwv-card.good { border-color: #2ecc71; }
-    .cwv-card.needs-improvement { border-color: #f39c12; }
-    .cwv-card.poor { border-color: #e74c3c; }
+    .cwv-card.good {
+      border-color: #2ecc71;
+    }
+    .cwv-card.needs-improvement {
+      border-color: #f39c12;
+    }
+    .cwv-card.poor {
+      border-color: #e74c3c;
+    }
 
     .cwv-label {
       font-size: 11px;
@@ -340,9 +366,15 @@ export class SeoDashboard extends LitElement {
       font-weight: 600;
     }
 
-    .cwv-rating.good { color: #2ecc71; }
-    .cwv-rating.needs-improvement { color: #f39c12; }
-    .cwv-rating.poor { color: #e74c3c; }
+    .cwv-rating.good {
+      color: #2ecc71;
+    }
+    .cwv-rating.needs-improvement {
+      color: #f39c12;
+    }
+    .cwv-rating.poor {
+      color: #e74c3c;
+    }
 
     .opportunities-list {
       margin-top: 24px;
@@ -371,9 +403,15 @@ export class SeoDashboard extends LitElement {
       margin-right: 12px;
     }
 
-    .pagespeed-opportunity-priority.high { background: #e74c3c; }
-    .pagespeed-opportunity-priority.medium { background: #f39c12; }
-    .pagespeed-opportunity-priority.low { background: #2ecc71; }
+    .pagespeed-opportunity-priority.high {
+      background: #e74c3c;
+    }
+    .pagespeed-opportunity-priority.medium {
+      background: #f39c12;
+    }
+    .pagespeed-opportunity-priority.low {
+      background: #2ecc71;
+    }
 
     .pagespeed-opportunity-content {
       flex: 1;
@@ -496,7 +534,9 @@ export class SeoDashboard extends LitElement {
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .section-title {
@@ -597,7 +637,10 @@ export class SeoDashboard extends LitElement {
   private extractKeyword(content: ContentSuggestion): string {
     // Extract main keyword from title
     const title = content.title || '';
-    const words = title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    const words = title
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 3);
     return words.slice(0, 3).join(' ');
   }
 
@@ -643,19 +686,16 @@ export class SeoDashboard extends LitElement {
         </div>
 
         <div class="tabs">
-          ${(['overview', 'serp', 'backlinks', 'pagespeed', 'rich-results'] as DashboardTab[]).map(tab => html`
-            <button
-              class="tab ${this.activeTab === tab ? 'active' : ''}"
-              @click=${() => this.activeTab = tab}
-            >
-              ${this.getTabLabel(tab)}
-            </button>
-          `)}
+          ${(['overview', 'serp', 'backlinks', 'pagespeed', 'rich-results'] as DashboardTab[]).map(
+            (tab) => html`
+              <button class="tab ${this.activeTab === tab ? 'active' : ''}" @click=${() => (this.activeTab = tab)}>
+                ${this.getTabLabel(tab)}
+              </button>
+            `,
+          )}
         </div>
 
-        <div class="tab-content">
-          ${this.renderTabContent()}
-        </div>
+        <div class="tab-content">${this.renderTabContent()}</div>
       </div>
     `;
   }
@@ -709,9 +749,7 @@ export class SeoDashboard extends LitElement {
 
         <div class="score-card">
           <div class="score-card-label">Backlinks</div>
-          <div class="score-card-value good">
-            ${this.backlinkProfile?.totalBacklinks?.toLocaleString() || '--'}
-          </div>
+          <div class="score-card-value good">${this.backlinkProfile?.totalBacklinks?.toLocaleString() || '--'}</div>
           <div class="score-card-detail">Total backlinks</div>
         </div>
 
@@ -747,77 +785,87 @@ export class SeoDashboard extends LitElement {
           class="serp-input"
           placeholder="Enter target keyword..."
           .value=${this.targetKeyword}
-          @input=${(e: Event) => this.targetKeyword = (e.target as HTMLInputElement).value}
+          @input=${(e: Event) => (this.targetKeyword = (e.target as HTMLInputElement).value)}
         />
-        <button
-          class="serp-button"
-          @click=${this.analyzeSERP}
-          ?disabled=${this.loading.serp || !this.targetKeyword}
-        >
+        <button class="serp-button" @click=${this.analyzeSERP} ?disabled=${this.loading.serp || !this.targetKeyword}>
           ${this.loading.serp ? 'Analyzing...' : 'Analyze SERP'}
         </button>
       </div>
 
-      ${this.loading.serp ? html`
-        <div class="loading">
-          <div class="spinner"></div>
-          Analyzing search results...
-        </div>
-      ` : this.serpAnalysis ? html`
-        <div class="overview-grid" style="margin-bottom: 24px;">
-          <div class="score-card">
-            <div class="score-card-label">Search Volume</div>
-            <div class="score-card-value good">${this.serpAnalysis.searchVolume?.toLocaleString()}</div>
-            <div class="score-card-detail">monthly searches</div>
-          </div>
-          <div class="score-card">
-            <div class="score-card-label">Difficulty</div>
-            <div class="score-card-value ${this.getScoreClass(100 - (this.serpAnalysis.difficulty || 0))}">
-              ${this.serpAnalysis.difficulty}
-            </div>
-            <div class="score-card-detail">keyword difficulty</div>
-          </div>
-          <div class="score-card">
-            <div class="score-card-label">CPC</div>
-            <div class="score-card-value good">$${this.serpAnalysis.cpc?.toFixed(2)}</div>
-            <div class="score-card-detail">cost per click</div>
-          </div>
-        </div>
-
-        <div class="section-title">Top 5 Results</div>
-        <div class="serp-results">
-          ${this.serpAnalysis.results.slice(0, 5).map(result => html`
-            <div class="serp-result">
-              <span class="serp-position">${result.position}</span>
-              <div style="display: inline-block; vertical-align: top;">
-                <div class="serp-result-title">${result.title}</div>
-                <div class="serp-result-url">${result.url}</div>
-                <div class="serp-result-description">${result.description}</div>
+      ${
+        this.loading.serp
+          ? html`
+              <div class="loading">
+                <div class="spinner"></div>
+                Analyzing search results...
               </div>
-            </div>
-          `)}
-        </div>
+            `
+          : this.serpAnalysis
+            ? html`
+                <div class="overview-grid" style="margin-bottom: 24px;">
+                  <div class="score-card">
+                    <div class="score-card-label">Search Volume</div>
+                    <div class="score-card-value good">${this.serpAnalysis.searchVolume?.toLocaleString()}</div>
+                    <div class="score-card-detail">monthly searches</div>
+                  </div>
+                  <div class="score-card">
+                    <div class="score-card-label">Difficulty</div>
+                    <div class="score-card-value ${this.getScoreClass(100 - (this.serpAnalysis.difficulty || 0))}">
+                      ${this.serpAnalysis.difficulty}
+                    </div>
+                    <div class="score-card-detail">keyword difficulty</div>
+                  </div>
+                  <div class="score-card">
+                    <div class="score-card-label">CPC</div>
+                    <div class="score-card-value good">$${this.serpAnalysis.cpc?.toFixed(2)}</div>
+                    <div class="score-card-detail">cost per click</div>
+                  </div>
+                </div>
 
-        ${this.serpAnalysis.opportunities.length > 0 ? html`
-          <div class="opportunity-list">
-            <div class="section-title">SERP Opportunities</div>
-            ${this.serpAnalysis.opportunities.map(opp => html`
-              <div class="opportunity-item">
-                <span class="opportunity-type">${opp.type.replace('_', ' ')}</span>
-                <div class="opportunity-content">
-                  <div class="opportunity-title">${opp.description}</div>
-                  <div class="opportunity-description">${opp.recommendation}</div>
+                <div class="section-title">Top 5 Results</div>
+                <div class="serp-results">
+                  ${this.serpAnalysis.results.slice(0, 5).map(
+            (result) => html`
+              <div class="serp-result">
+                <span class="serp-position">${result.position}</span>
+                <div style="display: inline-block; vertical-align: top;">
+                  <div class="serp-result-title">${result.title}</div>
+                  <div class="serp-result-url">${result.url}</div>
+                  <div class="serp-result-description">${result.description}</div>
                 </div>
               </div>
-            `)}
-          </div>
-        ` : ''}
-      ` : html`
-        <div class="empty-state">
-          <div class="empty-state-icon">🔍</div>
-          <p>Enter a keyword to analyze the search results</p>
-        </div>
-      `}
+            `,
+          )}
+                </div>
+
+                ${
+          this.serpAnalysis.opportunities.length > 0
+            ? html`
+                <div class="opportunity-list">
+                  <div class="section-title">SERP Opportunities</div>
+                  ${this.serpAnalysis.opportunities.map(
+              (opp) => html`
+                <div class="opportunity-item">
+                  <span class="opportunity-type">${opp.type.replace('_', ' ')}</span>
+                  <div class="opportunity-content">
+                    <div class="opportunity-title">${opp.description}</div>
+                    <div class="opportunity-description">${opp.recommendation}</div>
+                  </div>
+                </div>
+              `,
+            )}
+                </div>
+              `
+            : ''
+        }
+              `
+            : html`
+                <div class="empty-state">
+                  <div class="empty-state-icon">🔍</div>
+                  <p>Enter a keyword to analyze the search results</p>
+                </div>
+              `
+      }
     `;
   }
 
@@ -829,93 +877,116 @@ export class SeoDashboard extends LitElement {
           class="serp-input"
           placeholder="Enter domain (e.g., example.com)..."
           .value=${this.targetUrl}
-          @input=${(e: Event) => this.targetUrl = (e.target as HTMLInputElement).value}
+          @input=${(e: Event) => (this.targetUrl = (e.target as HTMLInputElement).value)}
         />
-        <button
-          class="serp-button"
-          @click=${this.analyzeBacklinks}
-          ?disabled=${this.loading.backlinks}
-        >
+        <button class="serp-button" @click=${this.analyzeBacklinks} ?disabled=${this.loading.backlinks}>
           ${this.loading.backlinks ? 'Analyzing...' : 'Analyze Backlinks'}
         </button>
       </div>
 
-      ${this.loading.backlinks ? html`
-        <div class="loading">
-          <div class="spinner"></div>
-          Analyzing backlink profile...
-        </div>
-      ` : this.backlinkProfile ? html`
-        <div class="backlink-stats">
-          <div class="backlink-stat">
-            <div class="backlink-stat-value">${this.backlinkProfile.totalBacklinks.toLocaleString()}</div>
-            <div class="backlink-stat-label">Total Backlinks</div>
-          </div>
-          <div class="backlink-stat">
-            <div class="backlink-stat-value">${this.backlinkProfile.uniqueDomains.toLocaleString()}</div>
-            <div class="backlink-stat-label">Referring Domains</div>
-          </div>
-          <div class="backlink-stat">
-            <div class="backlink-stat-value">${this.backlinkProfile.domainAuthority}</div>
-            <div class="backlink-stat-label">Domain Authority</div>
-          </div>
-          <div class="backlink-stat">
-            <div class="backlink-stat-value">${this.backlinkProfile.spamScore}%</div>
-            <div class="backlink-stat-label">Spam Score</div>
-          </div>
-          <div class="backlink-stat">
-            <div class="backlink-stat-value">+${this.backlinkProfile.newLinks30Days}</div>
-            <div class="backlink-stat-label">New (30 days)</div>
-          </div>
-          <div class="backlink-stat">
-            <div class="backlink-stat-value">-${this.backlinkProfile.lostLinks30Days}</div>
-            <div class="backlink-stat-label">Lost (30 days)</div>
-          </div>
-        </div>
+      ${
+        this.loading.backlinks
+          ? html`
+              <div class="loading">
+                <div class="spinner"></div>
+                Analyzing backlink profile...
+              </div>
+            `
+          : this.backlinkProfile
+            ? html`
+                <div class="backlink-stats">
+                  <div class="backlink-stat">
+                    <div class="backlink-stat-value">${this.backlinkProfile.totalBacklinks.toLocaleString()}</div>
+                    <div class="backlink-stat-label">Total Backlinks</div>
+                  </div>
+                  <div class="backlink-stat">
+                    <div class="backlink-stat-value">${this.backlinkProfile.uniqueDomains.toLocaleString()}</div>
+                    <div class="backlink-stat-label">Referring Domains</div>
+                  </div>
+                  <div class="backlink-stat">
+                    <div class="backlink-stat-value">${this.backlinkProfile.domainAuthority}</div>
+                    <div class="backlink-stat-label">Domain Authority</div>
+                  </div>
+                  <div class="backlink-stat">
+                    <div class="backlink-stat-value">${this.backlinkProfile.spamScore}%</div>
+                    <div class="backlink-stat-label">Spam Score</div>
+                  </div>
+                  <div class="backlink-stat">
+                    <div class="backlink-stat-value">+${this.backlinkProfile.newLinks30Days}</div>
+                    <div class="backlink-stat-label">New (30 days)</div>
+                  </div>
+                  <div class="backlink-stat">
+                    <div class="backlink-stat-value">-${this.backlinkProfile.lostLinks30Days}</div>
+                    <div class="backlink-stat-label">Lost (30 days)</div>
+                  </div>
+                </div>
 
-        <div class="section-title">Anchor Text Distribution</div>
-        <div class="anchor-chart">
-          <div class="anchor-segment" style="width: ${this.backlinkProfile.anchorTextDistribution.branded}%; background: #3498db;">
-            ${this.backlinkProfile.anchorTextDistribution.branded}%
-          </div>
-          <div class="anchor-segment" style="width: ${this.backlinkProfile.anchorTextDistribution.exact}%; background: #2ecc71;">
-            ${this.backlinkProfile.anchorTextDistribution.exact}%
-          </div>
-          <div class="anchor-segment" style="width: ${this.backlinkProfile.anchorTextDistribution.partial}%; background: #f39c12;">
-            ${this.backlinkProfile.anchorTextDistribution.partial}%
-          </div>
-          <div class="anchor-segment" style="width: ${this.backlinkProfile.anchorTextDistribution.naked}%; background: #9b59b6;">
-            ${this.backlinkProfile.anchorTextDistribution.naked}%
-          </div>
-          <div class="anchor-segment" style="width: ${this.backlinkProfile.anchorTextDistribution.generic}%; background: #e74c3c;">
-            ${this.backlinkProfile.anchorTextDistribution.generic}%
-          </div>
-        </div>
-        <div class="anchor-legend">
-          <div class="legend-item"><span class="legend-color" style="background: #3498db;"></span> Branded</div>
-          <div class="legend-item"><span class="legend-color" style="background: #2ecc71;"></span> Exact Match</div>
-          <div class="legend-item"><span class="legend-color" style="background: #f39c12;"></span> Partial</div>
-          <div class="legend-item"><span class="legend-color" style="background: #9b59b6;"></span> Naked URL</div>
-          <div class="legend-item"><span class="legend-color" style="background: #e74c3c;"></span> Generic</div>
-        </div>
+                <div class="section-title">Anchor Text Distribution</div>
+                <div class="anchor-chart">
+                  <div
+                    class="anchor-segment"
+                    style="width: ${this.backlinkProfile.anchorTextDistribution.branded}%; background: #3498db;"
+                  >
+                    ${this.backlinkProfile.anchorTextDistribution.branded}%
+                  </div>
+                  <div
+                    class="anchor-segment"
+                    style="width: ${this.backlinkProfile.anchorTextDistribution.exact}%; background: #2ecc71;"
+                  >
+                    ${this.backlinkProfile.anchorTextDistribution.exact}%
+                  </div>
+                  <div
+                    class="anchor-segment"
+                    style="width: ${this.backlinkProfile.anchorTextDistribution.partial}%; background: #f39c12;"
+                  >
+                    ${this.backlinkProfile.anchorTextDistribution.partial}%
+                  </div>
+                  <div
+                    class="anchor-segment"
+                    style="width: ${this.backlinkProfile.anchorTextDistribution.naked}%; background: #9b59b6;"
+                  >
+                    ${this.backlinkProfile.anchorTextDistribution.naked}%
+                  </div>
+                  <div
+                    class="anchor-segment"
+                    style="width: ${this.backlinkProfile.anchorTextDistribution.generic}%; background: #e74c3c;"
+                  >
+                    ${this.backlinkProfile.anchorTextDistribution.generic}%
+                  </div>
+                </div>
+                <div class="anchor-legend">
+                  <div class="legend-item"><span class="legend-color" style="background: #3498db;"></span> Branded</div>
+                  <div class="legend-item">
+                    <span class="legend-color" style="background: #2ecc71;"></span> Exact Match
+                  </div>
+                  <div class="legend-item"><span class="legend-color" style="background: #f39c12;"></span> Partial</div>
+                  <div class="legend-item">
+                    <span class="legend-color" style="background: #9b59b6;"></span> Naked URL
+                  </div>
+                  <div class="legend-item"><span class="legend-color" style="background: #e74c3c;"></span> Generic</div>
+                </div>
 
-        <div class="section-title" style="margin-top: 24px;">Top Linking Domains</div>
-        <div class="backlink-list">
-          ${this.backlinkProfile.topLinkingDomains.slice(0, 10).map(domain => html`
-            <div class="backlink-item">
-              <span class="backlink-domain">${domain.domain}</span>
-              <span class="backlink-da ${this.getDaClass(domain.domainAuthority)}">
-                DA ${domain.domainAuthority}
-              </span>
-            </div>
-          `)}
-        </div>
-      ` : html`
-        <div class="empty-state">
-          <div class="empty-state-icon">🔗</div>
-          <p>Enter a domain to analyze its backlink profile</p>
-        </div>
-      `}
+                <div class="section-title" style="margin-top: 24px;">Top Linking Domains</div>
+                <div class="backlink-list">
+                  ${this.backlinkProfile.topLinkingDomains.slice(0, 10).map(
+            (domain) => html`
+              <div class="backlink-item">
+                <span class="backlink-domain">${domain.domain}</span>
+                <span class="backlink-da ${this.getDaClass(domain.domainAuthority)}">
+                  DA ${domain.domainAuthority}
+                </span>
+              </div>
+            `,
+          )}
+                </div>
+              `
+            : html`
+                <div class="empty-state">
+                  <div class="empty-state-icon">🔗</div>
+                  <p>Enter a domain to analyze its backlink profile</p>
+                </div>
+              `
+      }
     `;
   }
 
@@ -927,84 +998,96 @@ export class SeoDashboard extends LitElement {
           class="serp-input"
           placeholder="Enter URL to test (e.g., https://example.com)..."
           .value=${this.targetUrl}
-          @input=${(e: Event) => this.targetUrl = (e.target as HTMLInputElement).value}
+          @input=${(e: Event) => (this.targetUrl = (e.target as HTMLInputElement).value)}
         />
-        <button
-          class="serp-button"
-          @click=${this.analyzePageSpeed}
-          ?disabled=${this.loading.pagespeed}
-        >
+        <button class="serp-button" @click=${this.analyzePageSpeed} ?disabled=${this.loading.pagespeed}>
           ${this.loading.pagespeed ? 'Testing...' : 'Run Test'}
         </button>
       </div>
 
-      ${this.loading.pagespeed ? html`
-        <div class="loading">
-          <div class="spinner"></div>
-          Running PageSpeed analysis...
-        </div>
-      ` : this.pageSpeedAnalysis ? html`
-        <div class="overview-grid">
-          <div class="score-card">
-            <div class="score-card-label">Performance</div>
-            <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.performance)}">
-              ${this.pageSpeedAnalysis.scores.performance}
-            </div>
-          </div>
-          <div class="score-card">
-            <div class="score-card-label">Accessibility</div>
-            <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.accessibility)}">
-              ${this.pageSpeedAnalysis.scores.accessibility}
-            </div>
-          </div>
-          <div class="score-card">
-            <div class="score-card-label">Best Practices</div>
-            <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.bestPractices)}">
-              ${this.pageSpeedAnalysis.scores.bestPractices}
-            </div>
-          </div>
-          <div class="score-card">
-            <div class="score-card-label">SEO</div>
-            <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.seo)}">
-              ${this.pageSpeedAnalysis.scores.seo}
-            </div>
-          </div>
-        </div>
-
-        <div class="section-title">Core Web Vitals</div>
-        <div class="cwv-grid">
-          ${Object.entries(this.pageSpeedAnalysis.coreWebVitals).map(([key, metric]) => html`
-            <div class="cwv-card ${metric.rating}">
-              <div class="cwv-label">${this.getCwvLabel(key)}</div>
-              <div class="cwv-value">${formatMetricValue(metric)}</div>
-              <div class="cwv-rating ${metric.rating}">${metric.rating.replace('-', ' ')}</div>
-            </div>
-          `)}
-        </div>
-
-        ${this.pageSpeedAnalysis.opportunities.length > 0 ? html`
-          <div class="opportunities-list">
-            <div class="opportunity-header">Optimization Opportunities</div>
-            ${this.pageSpeedAnalysis.opportunities.map(opp => html`
-              <div class="pagespeed-opportunity">
-                <div class="pagespeed-opportunity-priority ${opp.priority >= 7 ? 'high' : opp.priority >= 4 ? 'medium' : 'low'}"></div>
-                <div class="pagespeed-opportunity-content">
-                  <div class="pagespeed-opportunity-title">${opp.title}</div>
-                  <div class="pagespeed-opportunity-savings">
-                    ${opp.savings.ms ? `Save ${opp.savings.ms}ms` : ''}
-                    ${opp.savings.bytes ? `Save ${this.formatBytes(opp.savings.bytes)}` : ''}
+      ${
+        this.loading.pagespeed
+          ? html`
+              <div class="loading">
+                <div class="spinner"></div>
+                Running PageSpeed analysis...
+              </div>
+            `
+          : this.pageSpeedAnalysis
+            ? html`
+                <div class="overview-grid">
+                  <div class="score-card">
+                    <div class="score-card-label">Performance</div>
+                    <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.performance)}">
+                      ${this.pageSpeedAnalysis.scores.performance}
+                    </div>
+                  </div>
+                  <div class="score-card">
+                    <div class="score-card-label">Accessibility</div>
+                    <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.accessibility)}">
+                      ${this.pageSpeedAnalysis.scores.accessibility}
+                    </div>
+                  </div>
+                  <div class="score-card">
+                    <div class="score-card-label">Best Practices</div>
+                    <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.bestPractices)}">
+                      ${this.pageSpeedAnalysis.scores.bestPractices}
+                    </div>
+                  </div>
+                  <div class="score-card">
+                    <div class="score-card-label">SEO</div>
+                    <div class="score-card-value ${this.getScoreClass(this.pageSpeedAnalysis.scores.seo)}">
+                      ${this.pageSpeedAnalysis.scores.seo}
+                    </div>
                   </div>
                 </div>
+
+                <div class="section-title">Core Web Vitals</div>
+                <div class="cwv-grid">
+                  ${Object.entries(this.pageSpeedAnalysis.coreWebVitals).map(
+            ([key, metric]) => html`
+              <div class="cwv-card ${metric.rating}">
+                <div class="cwv-label">${this.getCwvLabel(key)}</div>
+                <div class="cwv-value">${formatMetricValue(metric)}</div>
+                <div class="cwv-rating ${metric.rating}">${metric.rating.replace('-', ' ')}</div>
               </div>
-            `)}
-          </div>
-        ` : ''}
-      ` : html`
-        <div class="empty-state">
-          <div class="empty-state-icon">⚡</div>
-          <p>Enter a URL to test its PageSpeed and Core Web Vitals</p>
-        </div>
-      `}
+            `,
+          )}
+                </div>
+
+                ${
+          this.pageSpeedAnalysis.opportunities.length > 0
+            ? html`
+                <div class="opportunities-list">
+                  <div class="opportunity-header">Optimization Opportunities</div>
+                  ${this.pageSpeedAnalysis.opportunities.map(
+              (opp) => html`
+                <div class="pagespeed-opportunity">
+                  <div
+                    class="pagespeed-opportunity-priority ${opp.priority >= 7 ? 'high' : opp.priority >= 4 ? 'medium' : 'low'}"
+                  ></div>
+                  <div class="pagespeed-opportunity-content">
+                    <div class="pagespeed-opportunity-title">${opp.title}</div>
+                    <div class="pagespeed-opportunity-savings">
+                      ${opp.savings.ms ? `Save ${opp.savings.ms}ms` : ''}
+                      ${opp.savings.bytes ? `Save ${this.formatBytes(opp.savings.bytes)}` : ''}
+                    </div>
+                  </div>
+                </div>
+              `,
+            )}
+                </div>
+              `
+            : ''
+        }
+              `
+            : html`
+                <div class="empty-state">
+                  <div class="empty-state-icon">⚡</div>
+                  <p>Enter a URL to test its PageSpeed and Core Web Vitals</p>
+                </div>
+              `
+      }
     `;
   }
 
@@ -1025,62 +1108,76 @@ export class SeoDashboard extends LitElement {
         <span class="validation-icon">${validation.valid && validation.richResultsEligible ? '✅' : '⚠️'}</span>
         <div class="validation-text">
           <div class="validation-title">
-            ${validation.valid && validation.richResultsEligible
-              ? 'Schema Valid - Rich Results Eligible'
-              : 'Schema Issues Detected'}
+            ${
+              validation.valid && validation.richResultsEligible
+                ? 'Schema Valid - Rich Results Eligible'
+                : 'Schema Issues Detected'
+            }
           </div>
-          <div class="validation-subtitle">
-            Schema Type: ${validation.schemaType}
-          </div>
+          <div class="validation-subtitle">Schema Type: ${validation.schemaType}</div>
         </div>
       </div>
 
-      ${validation.eligibleFeatures.length > 0 ? html`
-        <div class="section-title">Eligible Rich Result Features</div>
-        <div class="eligible-features">
-          ${validation.eligibleFeatures.map(feature => html`
-            <span class="feature-badge">${feature.replace('_', ' ')}</span>
-          `)}
-        </div>
-      ` : ''}
-
-      ${validation.errors.length > 0 ? html`
-        <div class="section-title">Errors</div>
-        <div class="validation-errors">
-          ${validation.errors.map(error => html`
-            <div class="error-item">
-              <span class="error-icon">✕</span>
-              <div>
-                <strong>${error.property}:</strong> ${error.message}
+      ${
+        validation.eligibleFeatures.length > 0
+          ? html`
+              <div class="section-title">Eligible Rich Result Features</div>
+              <div class="eligible-features">
+                ${validation.eligibleFeatures.map(
+            (feature) => html` <span class="feature-badge">${feature.replace('_', ' ')}</span> `,
+          )}
               </div>
-            </div>
-          `)}
-        </div>
-      ` : ''}
-
-      ${validation.warnings.length > 0 ? html`
-        <div class="section-title">Warnings</div>
-        <div class="validation-errors">
-          ${validation.warnings.map(warning => html`
-            <div class="warning-item">
-              <span class="warning-icon">!</span>
-              <div>
-                <strong>${warning.property}:</strong> ${warning.message}
-                <br><em>${warning.recommendation}</em>
+            `
+          : ''
+      }
+      ${
+        validation.errors.length > 0
+          ? html`
+              <div class="section-title">Errors</div>
+              <div class="validation-errors">
+                ${validation.errors.map(
+            (error) => html`
+              <div class="error-item">
+                <span class="error-icon">✕</span>
+                <div><strong>${error.property}:</strong> ${error.message}</div>
               </div>
-            </div>
-          `)}
-        </div>
-      ` : ''}
-
-      ${validation.recommendations.length > 0 ? html`
-        <div class="section-title">Recommendations</div>
-        <ul style="margin: 0; padding-left: 20px;">
-          ${validation.recommendations.map(rec => html`
-            <li style="margin-bottom: 8px; color: var(--spectrum-gray-700);">${rec}</li>
-          `)}
-        </ul>
-      ` : ''}
+            `,
+          )}
+              </div>
+            `
+          : ''
+      }
+      ${
+        validation.warnings.length > 0
+          ? html`
+              <div class="section-title">Warnings</div>
+              <div class="validation-errors">
+                ${validation.warnings.map(
+            (warning) => html`
+              <div class="warning-item">
+                <span class="warning-icon">!</span>
+                <div>
+                  <strong>${warning.property}:</strong> ${warning.message} <br /><em>${warning.recommendation}</em>
+                </div>
+              </div>
+            `,
+          )}
+              </div>
+            `
+          : ''
+      }
+      ${
+        validation.recommendations.length > 0
+          ? html`
+              <div class="section-title">Recommendations</div>
+              <ul style="margin: 0; padding-left: 20px;">
+                ${validation.recommendations.map(
+            (rec) => html` <li style="margin-bottom: 8px; color: var(--spectrum-gray-700);">${rec}</li> `,
+          )}
+              </ul>
+            `
+          : ''
+      }
     `;
   }
 

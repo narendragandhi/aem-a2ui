@@ -164,8 +164,8 @@ export class CollaborationService {
       body: JSON.stringify({
         username: this.username,
         avatar: this.avatar,
-        sessionId: this.sessionId
-      })
+        sessionId: this.sessionId,
+      }),
     });
 
     this.client.subscribe(`/topic/room/${contentId}`, (message: IMessage) => {
@@ -243,7 +243,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/chat/${this.currentContentId}`,
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message }),
     });
   }
 
@@ -252,7 +252,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/cursor/${this.currentContentId}`,
-      body: JSON.stringify({ x, y })
+      body: JSON.stringify({ x, y }),
     });
   }
 
@@ -268,7 +268,7 @@ export class CollaborationService {
   }
 
   private emit(event: string, data: unknown): void {
-    this.handlers.get(event)?.forEach(handler => handler(data));
+    this.handlers.get(event)?.forEach((handler) => handler(data));
   }
 
   getSessionId(): string {
@@ -288,7 +288,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/selection/${this.currentContentId}`,
-      body: JSON.stringify({ field, startIndex, endIndex, selectedText })
+      body: JSON.stringify({ field, startIndex, endIndex, selectedText }),
     });
   }
 
@@ -297,7 +297,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/selection/${this.currentContentId}`,
-      body: JSON.stringify({ field, selectedText: '' })
+      body: JSON.stringify({ field, selectedText: '' }),
     });
   }
 
@@ -306,7 +306,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/reaction/${this.currentContentId}`,
-      body: JSON.stringify({ emoji, action: 'add', field })
+      body: JSON.stringify({ emoji, action: 'add', field }),
     });
   }
 
@@ -315,7 +315,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/reaction/${this.currentContentId}`,
-      body: JSON.stringify({ emoji, action: 'remove' })
+      body: JSON.stringify({ emoji, action: 'remove' }),
     });
   }
 
@@ -324,7 +324,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/lock/${this.currentContentId}`,
-      body: JSON.stringify({ field, action: 'lock' })
+      body: JSON.stringify({ field, action: 'lock' }),
     });
     return true;
   }
@@ -334,7 +334,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/lock/${this.currentContentId}`,
-      body: JSON.stringify({ field, action: 'unlock' })
+      body: JSON.stringify({ field, action: 'unlock' }),
     });
   }
 
@@ -343,7 +343,7 @@ export class CollaborationService {
 
     this.client.publish({
       destination: `/app/edit/${this.currentContentId}`,
-      body: JSON.stringify({ field, oldValue, newValue })
+      body: JSON.stringify({ field, oldValue, newValue }),
     });
   }
 }

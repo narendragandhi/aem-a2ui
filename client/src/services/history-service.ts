@@ -11,7 +11,7 @@ export class HistoryService {
   static addSuggestion(suggestion: ContentSuggestion) {
     const history = HistoryService.getHistory();
     // Prepend new suggestion, limit to 10 entries
-    const newHistory = [suggestion, ...history.filter(item => item.id !== suggestion.id)].slice(0, 10);
+    const newHistory = [suggestion, ...history.filter((item) => item.id !== suggestion.id)].slice(0, 10);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
   }
 

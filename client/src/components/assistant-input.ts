@@ -34,7 +34,9 @@ export class AssistantInput extends LitElement {
       border: 2px solid var(--input-border);
       border-radius: 8px;
       font-size: 15px;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
       background: var(--input-bg);
       color: var(--text-color);
     }
@@ -58,7 +60,9 @@ export class AssistantInput extends LitElement {
       cursor: pointer;
       font-size: 15px;
       font-weight: 600;
-      transition: background 0.2s, transform 0.1s;
+      transition:
+        background 0.2s,
+        transform 0.1s;
       white-space: nowrap;
     }
 
@@ -115,18 +119,18 @@ export class AssistantInput extends LitElement {
             @keydown=${this.handleKeydown}
             .disabled=${this.loading}
           />
-          <button
-            class="generate-btn"
-            @click=${this.generateContent}
-            .disabled=${this.loading}
-          >
+          <button class="generate-btn" @click=${this.generateContent} .disabled=${this.loading}>
             ${this.loading ? '' : 'Generate'}
           </button>
         </div>
         <div class="quick-prompts">
-          ${prompts.map((p) => html`
-            <span class="quick-prompt" @click=${() => this.setPrompt(p)}>${p.split(' ').slice(0, 3).join(' ')}...</span>
-          `)}
+          ${prompts.map(
+            (p) => html`
+              <span class="quick-prompt" @click=${() => this.setPrompt(p)}
+                >${p.split(' ').slice(0, 3).join(' ')}...</span
+              >
+            `,
+          )}
         </div>
       </div>
     `;
@@ -134,11 +138,13 @@ export class AssistantInput extends LitElement {
 
   private handleInput(e: Event) {
     this.prompt = (e.target as HTMLInputElement).value;
-    this.dispatchEvent(new CustomEvent('prompt-changed', {
-      detail: { prompt: this.prompt },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('prompt-changed', {
+        detail: { prompt: this.prompt },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private handleKeydown(e: KeyboardEvent) {
@@ -149,19 +155,23 @@ export class AssistantInput extends LitElement {
 
   private setPrompt(prompt: string) {
     this.prompt = prompt;
-    this.dispatchEvent(new CustomEvent('prompt-changed', {
-      detail: { prompt: this.prompt },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('prompt-changed', {
+        detail: { prompt: this.prompt },
+        bubbles: true,
+        composed: true,
+      }),
+    );
     this.generateContent();
   }
 
   private generateContent() {
-    this.dispatchEvent(new CustomEvent('generate-content', {
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('generate-content', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private getPromptsForType(componentType: string): string[] {

@@ -5,16 +5,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 
-/**
- * Global exception handler for consistent error responses.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -22,43 +23,62 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ClientAbortException.class)
     public void handleClientAbort(ClientAbortException ex) {
-        // Client disconnected - this is expected behavior, log at debug level
         logger.debug("Client disconnected: {}", ex.getMessage());
     }
 
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public void handleAsyncTimeout(AsyncRequestTimeoutException ex) {
-        // SSE/async request timed out - this is expected behavior for long-running streams
         logger.debug("Async request timed out (SSE connection closed): {}", ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleValidationError(IllegalArgumentException ex) {
         logger.warn("Validation error: {}", ex.getMessage());
-        return ResponseEntity.badRequest().body(Map.of(
-                "error", "Validation Error",
-                "message", ex.getMessage()
-        ));
+        return badRequest("Validation Error", ex.getMessage());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        logger.warn("Malformed request body: {}", ex.getMessage());
+        return badRequest("Malformed Request Body", "The request body is invalid or unreadable");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParam(MissingServletRequestParameterException ex) {
+        logger.warn("Missing request parameter: {}", ex.getMessage());
+        return badRequest("Missing Parameter", ex.getParameterName() + " is required");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        logger.warn("Type mismatch for parameter '{}': {}", ex.getName(), ex.getMessage());
+        return badRequest("Invalid Parameter",
+            "Parameter '" + ex.getName() + "' has invalid value: " + ex.getValue());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericError(Exception ex) {
-        // Check if this is a client disconnection
         if (isClientDisconnection(ex)) {
             logger.debug("Client disconnected: {}", ex.getMessage());
-            return null; // No response needed, client is gone
+            return null;
         }
 
         logger.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error", "Internal Server Error",
-                "message", "An unexpected error occurred"
+            "error", "Internal Server Error",
+            "message", "An unexpected error occurred",
+            "timestamp", Instant.now().toString()
         ));
     }
 
-    /**
-     * Check if the exception indicates a client disconnection.
-     */
+    private ResponseEntity<Map<String, Object>> badRequest(String error, String message) {
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", error,
+            "message", message,
+            "timestamp", Instant.now().toString()
+        ));
+    }
+
     private boolean isClientDisconnection(Throwable e) {
         Throwable current = e;
         while (current != null) {

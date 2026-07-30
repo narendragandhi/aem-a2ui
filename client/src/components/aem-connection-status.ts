@@ -79,8 +79,13 @@ export class AemConnectionStatus extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .connection-details {
@@ -180,20 +185,22 @@ export class AemConnectionStatus extends LitElement {
     return html`
       <div class="status-card">
         <div class="status-header">
-          <div class="status-title">
-            🔗 AEM Author Connection
-          </div>
+          <div class="status-title">🔗 AEM Author Connection</div>
           <div class="status-indicator ${this.getStatusClass()}">
             <span class="indicator-dot"></span>
             ${this.getStatusText()}
           </div>
         </div>
 
-        ${!this.connected && !this.loading ? html`
-          <div class="info-box">
-            ℹ️ Running in demo mode. Configure AEM credentials to connect to a real AEM Author instance.
-          </div>
-        ` : ''}
+        ${
+          !this.connected && !this.loading
+            ? html`
+                <div class="info-box">
+                  ℹ️ Running in demo mode. Configure AEM credentials to connect to a real AEM Author instance.
+                </div>
+              `
+            : ''
+        }
 
         <div class="connection-details">
           <div class="detail-row">
@@ -218,11 +225,7 @@ export class AemConnectionStatus extends LitElement {
           <sp-button variant="secondary" size="s" ?disabled=${this.loading}>
             ${this.connected ? 'Refresh' : 'Connect'}
           </sp-button>
-          ${this.connected ? html`
-            <sp-button variant="primary" size="s">
-              Push Changes
-            </sp-button>
-          ` : ''}
+          ${this.connected ? html` <sp-button variant="primary" size="s"> Push Changes </sp-button> ` : ''}
         </div>
       </div>
     `;

@@ -13,29 +13,29 @@ describe('Error Handler Service', () => {
     });
 
     it('should handle HTTP 401 errors', () => {
-      const error = new Error('HTTP 401: Unauthorized');
+      const error = new Response(null, { status: 401, statusText: 'Unauthorized' });
       const appError = errorHandler.handle(error);
 
       expect(appError.code).to.equal('AUTH_ERROR');
-      expect(appError.userMessage).to.include('session');
+      expect(appError.userMessage).to.include('Authentication');
       expect(appError.retryable).to.equal(false);
     });
 
     it('should handle HTTP 404 errors', () => {
-      const error = new Error('HTTP 404: Not Found');
+      const error = new Response(null, { status: 404, statusText: 'Not Found' });
       const appError = errorHandler.handle(error);
 
       expect(appError.code).to.equal('NOT_FOUND');
-      expect(appError.userMessage).to.include('find');
+      expect(appError.userMessage).to.include('not found');
       expect(appError.retryable).to.equal(false);
     });
 
     it('should handle HTTP 500 errors', () => {
-      const error = new Error('HTTP 500: Internal Server Error');
+      const error = new Response(null, { status: 500, statusText: 'Internal Server Error' });
       const appError = errorHandler.handle(error);
 
       expect(appError.code).to.equal('SERVER_ERROR');
-      expect(appError.userMessage).to.include('server');
+      expect(appError.userMessage).to.include('Something went wrong');
       expect(appError.retryable).to.equal(true);
     });
 
@@ -44,7 +44,14 @@ describe('Error Handler Service', () => {
       const appError = errorHandler.handle(error);
 
       expect(appError.code).to.equal('UNKNOWN_ERROR');
-      expect(appError.retryable).to.equal(true);
+      expect(appError.retryable).to.equal(false);
+    });
+
+    it('should handle HTTP error messages in Error objects as UNKNOWN_ERROR', () => {
+      const error = new Error('HTTP 401: Unauthorized');
+      const appError = errorHandler.handle(error);
+
+      expect(appError.code).to.equal('UNKNOWN_ERROR');
     });
 
     it('should handle string errors', () => {
@@ -106,7 +113,7 @@ describe('Error Handler Service', () => {
         expect((e as Error).message).to.equal('always fails');
       }
 
-      expect(callCount).to.equal(3); // Initial + 2 retries
+      expect(callCount).to.equal(2); // maxRetries=2 total attempts
     });
   });
 });

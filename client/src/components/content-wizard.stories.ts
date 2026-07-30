@@ -10,7 +10,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'A 3-step guided wizard for creating AEM content. Users select component type, customize tone/style, and generate content.',
+        component:
+          'A 3-step guided wizard for creating AEM content. Users select component type, customize tone/style, and generate content.',
       },
     },
   },
@@ -23,9 +24,7 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => html`
     <div style="height: 600px; padding: 20px; background: var(--spectrum-gray-100);">
-      <content-wizard
-        @generate=${(e: CustomEvent) => console.log('Generate event:', e.detail)}
-      ></content-wizard>
+      <content-wizard @generate=${(e: CustomEvent) => console.log('Generate event:', e.detail)}></content-wizard>
     </div>
   `,
 };
@@ -40,7 +39,8 @@ export const Step1ComponentSelection: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'First step shows a grid of 20 component types across 7 categories (Marketing, Content, Commerce, Media, Navigation, Interactive, Social).',
+        story:
+          'First step shows a grid of 20 component types across 7 categories (Marketing, Content, Commerce, Media, Navigation, Interactive, Social).',
       },
     },
   },
@@ -52,7 +52,8 @@ export const WithCategoryFilter: Story = {
     <div style="height: 600px; padding: 20px; background: var(--spectrum-gray-100);">
       <content-wizard></content-wizard>
       <p style="margin-top: 16px; font-size: 12px; color: #666;">
-        Click category chips to filter components: All, Marketing, Content, Commerce, Media, Navigation, Interactive, Social
+        Click category chips to filter components: All, Marketing, Content, Commerce, Media, Navigation, Interactive,
+        Social
       </p>
     </div>
   `,

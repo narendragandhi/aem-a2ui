@@ -21,7 +21,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'AEM authoring environment simulation with Preview, Edit (component chrome), and Structure (JCR tree) modes. Includes responsive device preview.',
+        component:
+          'AEM authoring environment simulation with Preview, Edit (component chrome), and Structure (JCR tree) modes. Includes responsive device preview.',
       },
     },
   },
@@ -48,7 +49,8 @@ const mockSections = [
       description: 'Discover powerful tools designed for modern teams',
       ctaText: 'Get Started',
       ctaUrl: '#',
-      imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
+      imageUrl:
+        'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
       componentType: 'hero',
     },
     status: 'ready' as const,
@@ -59,10 +61,12 @@ const mockSections = [
     content: {
       id: 'teaser-1',
       title: 'Streamline Your Workflow',
-      description: 'Our platform integrates seamlessly with your existing tools, reducing friction and increasing productivity.',
+      description:
+        'Our platform integrates seamlessly with your existing tools, reducing friction and increasing productivity.',
       ctaText: 'Learn More',
       ctaUrl: '#',
-      imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
+      imageUrl:
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
       componentType: 'teaser',
     },
     status: 'ready' as const,
@@ -96,10 +100,7 @@ export const PreviewMode: Story = {
   },
   render: (args) => html`
     <div style="height: 700px;">
-      <aem-preview
-        .viewMode=${args.viewMode}
-        .sections=${args.sections}
-      ></aem-preview>
+      <aem-preview .viewMode=${args.viewMode} .sections=${args.sections}></aem-preview>
     </div>
   `,
 };
@@ -112,16 +113,14 @@ export const EditMode: Story = {
   },
   render: (args) => html`
     <div style="height: 700px;">
-      <aem-preview
-        .viewMode=${args.viewMode}
-        .sections=${args.sections}
-      ></aem-preview>
+      <aem-preview .viewMode=${args.viewMode} .sections=${args.sections}></aem-preview>
     </div>
   `,
   parameters: {
     docs: {
       description: {
-        story: 'Edit mode shows AEM-style component chrome with edit/configure/delete actions when hovering components.',
+        story:
+          'Edit mode shows AEM-style component chrome with edit/configure/delete actions when hovering components.',
       },
     },
   },
@@ -135,10 +134,7 @@ export const StructureMode: Story = {
   },
   render: (args) => html`
     <div style="height: 700px;">
-      <aem-preview
-        .viewMode=${args.viewMode}
-        .sections=${args.sections}
-      ></aem-preview>
+      <aem-preview .viewMode=${args.viewMode} .sections=${args.sections}></aem-preview>
     </div>
   `,
   parameters: {
@@ -158,10 +154,7 @@ export const EmptyState: Story = {
   },
   render: (args) => html`
     <div style="height: 400px;">
-      <aem-preview
-        .viewMode=${args.viewMode}
-        .sections=${args.sections}
-      ></aem-preview>
+      <aem-preview .viewMode=${args.viewMode} .sections=${args.sections}></aem-preview>
     </div>
   `,
 };
@@ -177,10 +170,7 @@ export const GeneratingState: Story = {
   },
   render: (args) => html`
     <div style="height: 500px;">
-      <aem-preview
-        .viewMode=${args.viewMode}
-        .sections=${args.sections}
-      ></aem-preview>
+      <aem-preview .viewMode=${args.viewMode} .sections=${args.sections}></aem-preview>
     </div>
   `,
   parameters: {

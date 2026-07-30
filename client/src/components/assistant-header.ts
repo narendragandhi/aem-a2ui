@@ -22,7 +22,7 @@ export class AssistantHeader extends LitElement {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .header h1 {
@@ -58,7 +58,7 @@ export class AssistantHeader extends LitElement {
       border: none;
       border-radius: 4px;
       font-size: 13px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       color: var(--header-text);
       cursor: pointer;
     }
@@ -71,7 +71,7 @@ export class AssistantHeader extends LitElement {
       font-size: 11px;
       padding: 4px 8px;
       border-radius: 12px;
-      background: rgba(255,255,255,0.25);
+      background: rgba(255, 255, 255, 0.25);
       font-weight: 500;
     }
 
@@ -111,37 +111,39 @@ export class AssistantHeader extends LitElement {
         </h1>
         <div class="agent-selector">
           <select @change=${this.handleAgentChange}>
-            ${this.agents.map(agent => html`
-              <option value=${agent.url} ?selected=${agent.url === this.agentUrl}>
-                ${agent.name}
-              </option>
-            `)}
+            ${this.agents.map(
+              (agent) => html`
+                <option value=${agent.url} ?selected=${agent.url === this.agentUrl}>${agent.name}</option>
+              `,
+            )}
           </select>
           <span class="ai-badge">${this.isAI ? 'AI Powered' : 'Template Mode'}</span>
-          <button class="theme-toggle-btn" @click=${this.toggleTheme}>
-            &#9788;
-          </button>
+          <button class="theme-toggle-btn" @click=${this.toggleTheme}>&#9788;</button>
         </div>
       </div>
     `;
   }
 
   private toggleTheme() {
-    this.dispatchEvent(new CustomEvent('toggle-theme', {
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('toggle-theme', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private handleAgentChange(e: Event) {
     const select = e.target as HTMLSelectElement;
-    const agent = this.agents.find(a => a.url === select.value);
+    const agent = this.agents.find((a) => a.url === select.value);
     if (agent) {
-      this.dispatchEvent(new CustomEvent('agent-changed', {
-        detail: { agent },
-        bubbles: true,
-        composed: true,
-      }));
+      this.dispatchEvent(
+        new CustomEvent('agent-changed', {
+          detail: { agent },
+          bubbles: true,
+          composed: true,
+        }),
+      );
     }
   }
 }

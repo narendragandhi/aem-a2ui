@@ -285,25 +285,21 @@ export class BulkGenerator extends LitElement {
   ];
 
   render() {
-    const completedCount = this.items.filter(i => i.status === 'complete').length;
+    const completedCount = this.items.filter((i) => i.status === 'complete').length;
 
     return html`
       <div class="bulk-panel">
         <div class="panel-header">
-          <span class="panel-title">
-            ⚡ Bulk Component Generator
-          </span>
+          <span class="panel-title"> ⚡ Bulk Component Generator </span>
           <span>${this.items.length} components</span>
         </div>
 
         <div class="panel-body">
           <!-- Quick Templates -->
           <div class="templates">
-            ${this.templates.map(t => html`
-              <button class="template-chip" @click=${() => this.applyTemplate(t)}>
-                ${t.name}
-              </button>
-            `)}
+            ${this.templates.map(
+              (t) => html` <button class="template-chip" @click=${() => this.applyTemplate(t)}>${t.name}</button> `,
+            )}
           </div>
 
           <!-- Page Context -->
@@ -312,65 +308,65 @@ export class BulkGenerator extends LitElement {
             <textarea
               placeholder="e.g., Summer sale landing page for outdoor furniture. Target audience: homeowners 30-50."
               .value=${this.pageContext}
-              @input=${(e: Event) => this.pageContext = (e.target as HTMLTextAreaElement).value}
+              @input=${(e: Event) => (this.pageContext = (e.target as HTMLTextAreaElement).value)}
             ></textarea>
           </div>
 
           <!-- Items List -->
           <div class="items-header">
             <span class="items-title">Components to Generate</span>
-            <button class="add-btn" @click=${this.addItem}>
-              + Add Component
-            </button>
+            <button class="add-btn" @click=${this.addItem}>+ Add Component</button>
           </div>
 
           <div class="bulk-items">
-            ${this.items.map((item, index) => html`
-              <div class="bulk-item ${item.status}">
-                <select
-                  .value=${item.componentType}
-                  @change=${(e: Event) => this.updateItem(index, 'componentType', (e.target as HTMLSelectElement).value)}
-                  ?disabled=${item.status === 'generating'}
-                >
-                  ${AEM_COMPONENTS.map(c => html`
-                    <option value=${c.id}>${c.icon} ${c.name}</option>
-                  `)}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Specific prompt (optional)"
-                  .value=${item.prompt}
-                  @input=${(e: Event) => this.updateItem(index, 'prompt', (e.target as HTMLInputElement).value)}
-                  ?disabled=${item.status === 'generating'}
-                />
-                <div class="item-actions">
-                  ${item.status === 'pending' ? html`
-                    <button class="item-btn delete" @click=${() => this.removeItem(index)}>🗑️</button>
-                  ` : item.status === 'generating' ? html`
-                    <span class="status-icon">⏳</span>
-                  ` : item.status === 'complete' ? html`
-                    <span class="status-icon">✅</span>
-                  ` : html`
-                    <span class="status-icon">❌</span>
-                  `}
+            ${this.items.map(
+              (item, index) => html`
+                <div class="bulk-item ${item.status}">
+                  <select
+                    .value=${item.componentType}
+                    @change=${(e: Event) => this.updateItem(index, 'componentType', (e.target as HTMLSelectElement).value)}
+                    ?disabled=${item.status === 'generating'}
+                  >
+                    ${AEM_COMPONENTS.map((c) => html` <option value=${c.id}>${c.icon} ${c.name}</option> `)}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Specific prompt (optional)"
+                    .value=${item.prompt}
+                    @input=${(e: Event) => this.updateItem(index, 'prompt', (e.target as HTMLInputElement).value)}
+                    ?disabled=${item.status === 'generating'}
+                  />
+                  <div class="item-actions">
+                    ${
+                    item.status === 'pending'
+                      ? html` <button class="item-btn delete" @click=${() => this.removeItem(index)}>🗑️</button> `
+                      : item.status === 'generating'
+                        ? html` <span class="status-icon">⏳</span> `
+                        : item.status === 'complete'
+                          ? html` <span class="status-icon">✅</span> `
+                          : html` <span class="status-icon">❌</span> `
+                  }
+                  </div>
                 </div>
-              </div>
-            `)}
+              `,
+            )}
           </div>
 
-          ${this.isGenerating ? html`
-            <div class="progress">
-              <span>Generating ${completedCount}/${this.items.length}...</span>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${this.progress}%"></div>
-              </div>
-            </div>
-          ` : ''}
+          ${
+            this.isGenerating
+              ? html`
+                  <div class="progress">
+                    <span>Generating ${completedCount}/${this.items.length}...</span>
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width: ${this.progress}%"></div>
+                    </div>
+                  </div>
+                `
+              : ''
+          }
 
           <div class="actions">
-            <button class="clear-btn" @click=${this.clearItems} ?disabled=${this.isGenerating}>
-              Clear All
-            </button>
+            <button class="clear-btn" @click=${this.clearItems} ?disabled=${this.isGenerating}>Clear All</button>
             <button
               class="generate-btn"
               @click=${this.generateAll}
@@ -385,12 +381,15 @@ export class BulkGenerator extends LitElement {
   }
 
   private addItem() {
-    this.items = [...this.items, {
-      id: `item-${Date.now()}`,
-      componentType: 'teaser',
-      prompt: '',
-      status: 'pending',
-    }];
+    this.items = [
+      ...this.items,
+      {
+        id: `item-${Date.now()}`,
+        componentType: 'teaser',
+        prompt: '',
+        status: 'pending',
+      },
+    ];
   }
 
   private removeItem(index: number) {
@@ -398,9 +397,7 @@ export class BulkGenerator extends LitElement {
   }
 
   private updateItem(index: number, field: keyof BulkItem, value: string) {
-    this.items = this.items.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
-    );
+    this.items = this.items.map((item, i) => (i === index ? { ...item, [field]: value } : item));
   }
 
   private clearItems() {
@@ -429,23 +426,18 @@ export class BulkGenerator extends LitElement {
       const item = this.items[i];
 
       // Update status to generating
-      this.items = this.items.map((it, idx) =>
-        idx === i ? { ...it, status: 'generating' as const } : it
-      );
+      this.items = this.items.map((it, idx) => (idx === i ? { ...it, status: 'generating' as const } : it));
 
       try {
         const prompt = this.buildPrompt(item);
         const result = await this.generateComponent(prompt, item.componentType);
 
         // Update with result
-        this.items = this.items.map((it, idx) =>
-          idx === i ? { ...it, status: 'complete' as const, result } : it
-        );
+        this.items = this.items.map((it, idx) => (idx === i ? { ...it, status: 'complete' as const, result } : it));
         results.push(result);
-
       } catch (error) {
         this.items = this.items.map((it, idx) =>
-          idx === i ? { ...it, status: 'error' as const, error: String(error) } : it
+          idx === i ? { ...it, status: 'error' as const, error: String(error) } : it,
         );
         logger.error(`Failed to generate ${item.componentType}`, 'BulkGenerator', error);
       }
@@ -456,17 +448,19 @@ export class BulkGenerator extends LitElement {
     this.isGenerating = false;
 
     // Dispatch event with all results
-    this.dispatchEvent(new CustomEvent('bulk-complete', {
-      detail: { results, items: this.items },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('bulk-complete', {
+        detail: { results, items: this.items },
+        bubbles: true,
+        composed: true,
+      }),
+    );
 
     logger.info(`Bulk generation complete: ${results.length}/${this.items.length} succeeded`, 'BulkGenerator');
   }
 
   private buildPrompt(item: BulkItem): string {
-    const componentDef = AEM_COMPONENTS.find(c => c.id === item.componentType);
+    const componentDef = AEM_COMPONENTS.find((c) => c.id === item.componentType);
     const componentName = componentDef?.name || item.componentType;
 
     let prompt = `Create a ${componentName} component`;
@@ -509,7 +503,9 @@ export class BulkGenerator extends LitElement {
       description: data.artifacts?.[0]?.parts?.[0]?.data?.description || 'Generated description for this component.',
       ctaText: data.artifacts?.[0]?.parts?.[0]?.data?.ctaText || 'Learn More',
       ctaUrl: data.artifacts?.[0]?.parts?.[0]?.data?.ctaUrl || '#',
-      imageUrl: data.artifacts?.[0]?.parts?.[0]?.data?.imageUrl || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
+      imageUrl:
+        data.artifacts?.[0]?.parts?.[0]?.data?.imageUrl ||
+        'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
       componentType,
     };
 

@@ -310,17 +310,19 @@ export class VersionHistory extends LitElement {
         body: JSON.stringify({
           version: this.selectedVersion.version,
           updatedBy: this.currentUser,
-          changeNote: `Restored to version ${this.selectedVersion.version}`
-        })
+          changeNote: `Restored to version ${this.selectedVersion.version}`,
+        }),
       });
 
       if (response.ok) {
         const restoredContent = await response.json();
-        this.dispatchEvent(new CustomEvent('version-restored', {
-          detail: { content: restoredContent },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('version-restored', {
+            detail: { content: restoredContent },
+            bubbles: true,
+            composed: true,
+          }),
+        );
         this.showRestoreConfirm = false;
         this.loadVersionHistory();
       }
@@ -341,11 +343,15 @@ export class VersionHistory extends LitElement {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
-  private getFieldDiff(content1: ContentSuggestion, content2: ContentSuggestion, field: keyof ContentSuggestion): string {
+  private getFieldDiff(
+    content1: ContentSuggestion,
+    content2: ContentSuggestion,
+    field: keyof ContentSuggestion,
+  ): string {
     const val1 = String(content1[field] || '');
     const val2 = String(content2[field] || '');
     if (val1 === val2) return '';
@@ -369,9 +375,7 @@ export class VersionHistory extends LitElement {
           <div class="empty-state">
             <div class="empty-icon">📚</div>
             <div>No version history</div>
-            <div style="font-size: 12px; margin-top: 8px;">
-              Content versions will appear here as changes are made
-            </div>
+            <div style="font-size: 12px; margin-top: 8px;">Content versions will appear here as changes are made</div>
           </div>
         </div>
       `;
@@ -384,11 +388,15 @@ export class VersionHistory extends LitElement {
             Version History
             <span class="version-count">(${this.versions.length} versions)</span>
           </span>
-          ${this.comparing ? html`
-            <sp-button variant="secondary" size="s" @click=${() => this.comparing = false}>
-              Back to List
-            </sp-button>
-          ` : ''}
+          ${
+            this.comparing
+              ? html`
+                  <sp-button variant="secondary" size="s" @click=${() => (this.comparing = false)}>
+                    Back to List
+                  </sp-button>
+                `
+              : ''
+          }
         </div>
 
         ${this.comparing && this.selectedVersion ? this.renderComparison() : this.renderTimeline()}
@@ -412,32 +420,33 @@ export class VersionHistory extends LitElement {
               <div class="version-header">
                 <div class="version-info">
                   <div class="version-number">
-                    Version ${version.version}
-                    ${isCurrent ? html`<span class="current-badge">Current</span>` : ''}
+                    Version ${version.version} ${isCurrent ? html`<span class="current-badge">Current</span>` : ''}
                   </div>
-                  <div class="version-meta">
-                    ${version.createdBy} · ${this.formatDate(version.createdAt)}
-                  </div>
+                  <div class="version-meta">${version.createdBy} · ${this.formatDate(version.createdAt)}</div>
                 </div>
               </div>
 
-              ${version.changeNote ? html`
-                <div class="change-note">${version.changeNote}</div>
-              ` : ''}
+              ${version.changeNote ? html` <div class="change-note">${version.changeNote}</div> ` : ''}
 
               <div class="version-actions">
-                <sp-button variant="secondary" size="s">
-                  View
-                </sp-button>
-                ${!isCurrent ? html`
-                  <sp-button variant="primary" size="s" @click=${(e: Event) => {
+                <sp-button variant="secondary" size="s"> View </sp-button>
+                ${
+                  !isCurrent
+                    ? html`
+                        <sp-button
+                          variant="primary"
+                          size="s"
+                          @click=${(e: Event) => {
                     e.stopPropagation();
                     this.selectedVersion = version;
                     this.showRestoreConfirm = true;
-                  }}>
-                    Restore
-                  </sp-button>
-                ` : ''}
+                  }}
+                        >
+                          Restore
+                        </sp-button>
+                      `
+                    : ''
+                }
               </div>
             </div>
           `;
@@ -454,8 +463,8 @@ export class VersionHistory extends LitElement {
     const diffs = [
       this.getFieldDiff(this.currentContent, this.selectedVersion.content, 'title'),
       this.getFieldDiff(this.currentContent, this.selectedVersion.content, 'description'),
-      this.getFieldDiff(this.currentContent, this.selectedVersion.content, 'ctaText')
-    ].filter(d => d);
+      this.getFieldDiff(this.currentContent, this.selectedVersion.content, 'ctaText'),
+    ].filter((d) => d);
 
     return html`
       <div class="compare-section">
@@ -472,21 +481,23 @@ export class VersionHistory extends LitElement {
           </div>
         </div>
 
-        ${diffs.length > 0 ? html`
-          <div style="margin-top: 16px;">
-            <div class="compare-title">Changes</div>
-            ${diffs.map(diff => html`
-              <div class="field-diff">${diff}</div>
-            `)}
-          </div>
-        ` : html`
-          <div style="margin-top: 16px; font-size: 12px; color: var(--spectrum-gray-600);">
-            No significant changes detected between these versions.
-          </div>
-        `}
+        ${
+          diffs.length > 0
+            ? html`
+                <div style="margin-top: 16px;">
+                  <div class="compare-title">Changes</div>
+                  ${diffs.map((diff) => html` <div class="field-diff">${diff}</div> `)}
+                </div>
+              `
+            : html`
+                <div style="margin-top: 16px; font-size: 12px; color: var(--spectrum-gray-600);">
+                  No significant changes detected between these versions.
+                </div>
+              `
+        }
 
         <div class="version-actions" style="margin-top: 16px;">
-          <sp-button variant="primary" @click=${() => this.showRestoreConfirm = true}>
+          <sp-button variant="primary" @click=${() => (this.showRestoreConfirm = true)}>
             Restore This Version
           </sp-button>
         </div>
@@ -499,28 +510,42 @@ export class VersionHistory extends LitElement {
   private renderPreview(content: ContentSuggestion, label: string) {
     return html`
       <div style="font-size: 12px;">
-        ${content.imageUrl ? html`
-          <div class="preview-thumbnail">
-            <img src="${content.imageUrl}" alt="${content.imageAlt || ''}" />
-          </div>
-        ` : html`
-          <div class="preview-thumbnail">No Image</div>
-        `}
+        ${
+          content.imageUrl
+            ? html`
+                <div class="preview-thumbnail">
+                  <img src="${content.imageUrl}" alt="${content.imageAlt || ''}" />
+                </div>
+              `
+            : html` <div class="preview-thumbnail">No Image</div> `
+        }
 
         <div class="section-title">${label}</div>
         <div style="font-weight: 600; margin-bottom: 4px;">${content.title}</div>
-        ${content.description ? html`
-          <div style="color: var(--spectrum-gray-600); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            ${content.description}
-          </div>
-        ` : ''}
-        ${content.ctaText ? html`
-          <div style="margin-top: 8px;">
-            <span style="background: var(--spectrum-blue-100); padding: 2px 6px; border-radius: 4px; font-size: 10px;">
-              ${content.ctaText}
-            </span>
-          </div>
-        ` : ''}
+        ${
+          content.description
+            ? html`
+                <div
+                  style="color: var(--spectrum-gray-600); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                >
+                  ${content.description}
+                </div>
+              `
+            : ''
+        }
+        ${
+          content.ctaText
+            ? html`
+                <div style="margin-top: 8px;">
+                  <span
+                    style="background: var(--spectrum-blue-100); padding: 2px 6px; border-radius: 4px; font-size: 10px;"
+                  >
+                    ${content.ctaText}
+                  </span>
+                </div>
+              `
+            : ''
+        }
       </div>
     `;
   }
@@ -529,7 +554,9 @@ export class VersionHistory extends LitElement {
     if (!this.selectedVersion) return '';
 
     return html`
-      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+      <div
+        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;"
+      >
         <div class="panel" style="width: 400px; max-width: 90%;">
           <div class="restore-warning">
             ⚠️ Restoring an older version will create a new version with the old content. This cannot be undone.
@@ -543,9 +570,7 @@ export class VersionHistory extends LitElement {
           </div>
 
           <div style="display: flex; gap: 8px; justify-content: flex-end;">
-            <sp-button variant="secondary" @click=${() => this.showRestoreConfirm = false}>
-              Cancel
-            </sp-button>
+            <sp-button variant="secondary" @click=${() => (this.showRestoreConfirm = false)}> Cancel </sp-button>
             <sp-button variant="primary" ?disabled=${this.loading} @click=${this.restoreVersion}>
               ${this.loading ? 'Restoring...' : 'Restore'}
             </sp-button>

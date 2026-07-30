@@ -125,7 +125,10 @@ export class PageSpeedService {
   /**
    * Compare two URLs
    */
-  async compareUrls(url1: string, url2: string): Promise<{
+  async compareUrls(
+    url1: string,
+    url2: string,
+  ): Promise<{
     url1: PageSpeedAnalysis;
     url2: PageSpeedAnalysis;
     comparison: {
@@ -136,10 +139,7 @@ export class PageSpeedService {
       difference: number;
     }[];
   }> {
-    const [analysis1, analysis2] = await Promise.all([
-      this.analyzeUrl(url1),
-      this.analyzeUrl(url2),
-    ]);
+    const [analysis1, analysis2] = await Promise.all([this.analyzeUrl(url1), this.analyzeUrl(url2)]);
 
     const comparison = [
       {
@@ -210,34 +210,42 @@ export class PageSpeedService {
 
     // High priority opportunities
     analysis.opportunities
-      .filter(o => o.priority >= 7)
-      .forEach(opp => {
+      .filter((o) => o.priority >= 7)
+      .forEach((opp) => {
         plan.push({
           priority: 'high',
           category: 'Performance',
           action: opp.title,
-          estimatedImpact: opp.savings.ms ? `Save ${opp.savings.ms}ms` : opp.savings.bytes ? `Save ${this.formatBytes(opp.savings.bytes)}` : 'Significant improvement',
+          estimatedImpact: opp.savings.ms
+            ? `Save ${opp.savings.ms}ms`
+            : opp.savings.bytes
+              ? `Save ${this.formatBytes(opp.savings.bytes)}`
+              : 'Significant improvement',
           implementation: opp.description,
         });
       });
 
     // Medium priority
     analysis.opportunities
-      .filter(o => o.priority >= 4 && o.priority < 7)
-      .forEach(opp => {
+      .filter((o) => o.priority >= 4 && o.priority < 7)
+      .forEach((opp) => {
         plan.push({
           priority: 'medium',
           category: 'Performance',
           action: opp.title,
-          estimatedImpact: opp.savings.ms ? `Save ${opp.savings.ms}ms` : opp.savings.bytes ? `Save ${this.formatBytes(opp.savings.bytes)}` : 'Moderate improvement',
+          estimatedImpact: opp.savings.ms
+            ? `Save ${opp.savings.ms}ms`
+            : opp.savings.bytes
+              ? `Save ${this.formatBytes(opp.savings.bytes)}`
+              : 'Moderate improvement',
           implementation: opp.description,
         });
       });
 
     // Low priority
     analysis.opportunities
-      .filter(o => o.priority < 4)
-      .forEach(opp => {
+      .filter((o) => o.priority < 4)
+      .forEach((opp) => {
         plan.push({
           priority: 'low',
           category: 'Performance',
@@ -442,7 +450,7 @@ export class PageSpeedService {
           value: Math.round(lcpValue),
           unit: 'ms',
           rating: lcpValue < 2500 ? 'good' : lcpValue < 4000 ? 'needs-improvement' : 'poor',
-          percentile: Math.round(100 - (lcpValue / 50)),
+          percentile: Math.round(100 - lcpValue / 50),
         },
         fid: {
           value: Math.round(50 + Math.random() * 200),
@@ -454,7 +462,7 @@ export class PageSpeedService {
           value: parseFloat(clsValue.toFixed(3)),
           unit: 'score',
           rating: clsValue < 0.1 ? 'good' : clsValue < 0.25 ? 'needs-improvement' : 'poor',
-          percentile: Math.round(100 - (clsValue * 200)),
+          percentile: Math.round(100 - clsValue * 200),
         },
         fcp: {
           value: Math.round(1200 + Math.random() * 1500),
@@ -607,8 +615,8 @@ export function getCoreWebVitalsStatus(vitals: CoreWebVitals): {
   totalCount: number;
 } {
   const metrics = [vitals.lcp, vitals.cls, vitals.fid];
-  const passedCount = metrics.filter(m => m.rating === 'good').length;
-  const poorCount = metrics.filter(m => m.rating === 'poor').length;
+  const passedCount = metrics.filter((m) => m.rating === 'good').length;
+  const poorCount = metrics.filter((m) => m.rating === 'poor').length;
 
   return {
     overall: poorCount > 0 ? 'poor' : passedCount === metrics.length ? 'good' : 'needs-improvement',

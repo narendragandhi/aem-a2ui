@@ -12,14 +12,24 @@ export interface ContentFragmentModel {
   id: string;
   name: string;
   description: string;
-  modelPath: string;  // e.g., /conf/mysite/settings/dam/cfm/models/article
+  modelPath: string; // e.g., /conf/mysite/settings/dam/cfm/models/article
   fields: ContentFragmentField[];
 }
 
 export interface ContentFragmentField {
   name: string;
-  fieldName: string;  // JCR property name
-  type: 'text' | 'multi-text' | 'number' | 'boolean' | 'date' | 'enumeration' | 'tags' | 'content-reference' | 'fragment-reference' | 'json';
+  fieldName: string; // JCR property name
+  type:
+    | 'text'
+    | 'multi-text'
+    | 'number'
+    | 'boolean'
+    | 'date'
+    | 'enumeration'
+    | 'tags'
+    | 'content-reference'
+    | 'fragment-reference'
+    | 'json';
   required?: boolean;
   multiValue?: boolean;
   description?: string;
@@ -145,9 +155,9 @@ export const CF_MODELS: ContentFragmentModel[] = [
 export function contentToFragment(
   content: ContentSuggestion,
   modelId: string,
-  options: { path?: string; variations?: string[] } = {}
+  options: { path?: string; variations?: string[] } = {},
 ): ContentFragment {
-  const model = CF_MODELS.find(m => m.id === modelId);
+  const model = CF_MODELS.find((m) => m.id === modelId);
   if (!model) {
     throw new Error(`Unknown model: ${modelId}`);
   }
@@ -175,10 +185,10 @@ export function contentToFragment(
 
   // Add variations if requested
   if (options.variations && options.variations.length > 0) {
-    fragment.variations = options.variations.map(varName => ({
+    fragment.variations = options.variations.map((varName) => ({
       name: varName.toLowerCase().replace(/\s+/g, '-'),
       title: varName,
-      data: { ...data },  // Could customize per variation
+      data: { ...data }, // Could customize per variation
     }));
   }
 
@@ -218,7 +228,7 @@ function mapContentToField(content: ContentSuggestion, field: ContentFragmentFie
       return content.price ? parseFloat(content.price.replace(/[^0-9.]/g, '')) : undefined;
     case 'authorName':
     case 'author':
-      return 'Content Team';  // Default
+      return 'Content Team'; // Default
     case 'publishDate':
       return new Date().toISOString();
     case 'inStock':
@@ -236,17 +246,20 @@ export function fragmentToJcr(fragment: ContentFragment): Record<string, unknown
     'jcr:primaryType': 'dam:Asset',
     'jcr:content': {
       'jcr:primaryType': 'dam:AssetContent',
-      'data': {
+      data: {
         'jcr:primaryType': 'nt:unstructured',
         'cq:model': fragment.modelPath,
-        ...Object.entries(fragment.data).reduce((acc, [key, value]) => {
-          if (value !== undefined) {
-            acc[key] = value;
-          }
-          return acc;
-        }, {} as Record<string, unknown>),
+        ...Object.entries(fragment.data).reduce(
+          (acc, [key, value]) => {
+            if (value !== undefined) {
+              acc[key] = value;
+            }
+            return acc;
+          },
+          {} as Record<string, unknown>,
+        ),
       },
-      'metadata': {
+      metadata: {
         'jcr:primaryType': 'nt:unstructured',
         'dc:title': fragment.title,
         'dc:description': fragment.description || '',
@@ -278,16 +291,16 @@ export function fragmentToJcr(fragment: ContentFragment): Record<string, unknown
  * Export Content Fragment for GraphQL (persisted query format)
  */
 export function fragmentToGraphQL(fragment: ContentFragment, modelId: string): Record<string, unknown> {
-  const model = CF_MODELS.find(m => m.id === modelId);
+  const model = CF_MODELS.find((m) => m.id === modelId);
 
   return {
-    '_path': fragment.path,
-    '_model': {
-      '_path': fragment.modelPath,
-      'title': model?.name || modelId,
+    _path: fragment.path,
+    _model: {
+      _path: fragment.modelPath,
+      title: model?.name || modelId,
     },
     ...fragment.data,
-    '_variations': fragment.variations?.map(v => v.name) || [],
+    _variations: fragment.variations?.map((v) => v.name) || [],
   };
 }
 
@@ -299,58 +312,61 @@ export function generateModelDefinition(model: ContentFragmentModel): Record<str
     'jcr:primaryType': 'cq:Template',
     'jcr:title': model.name,
     'jcr:description': model.description,
-    'ranking': 100,
+    ranking: 100,
     'cq:templateType': '/libs/settings/dam/cfm/model-types/fragment',
     'jcr:content': {
       'jcr:primaryType': 'nt:unstructured',
       'jcr:title': model.name,
-      'dataTypesConfig': '/mnt/overlay/settings/dam/cfm/model-types/fragment/datatypes',
-      'items': model.fields.reduce((acc, field, index) => {
-        acc[field.fieldName] = {
-          'jcr:primaryType': 'nt:unstructured',
-          'fieldLabel': field.name,
-          'name': field.fieldName,
-          'renderType': mapFieldTypeToRenderType(field.type),
-          'valueType': mapFieldTypeToValueType(field.type),
-          'required': field.required || false,
-          'metaType': field.type,
-          'listOrder': index + 1,
-          'multi': field.multiValue || false,
-        };
-        return acc;
-      }, {} as Record<string, unknown>),
+      dataTypesConfig: '/mnt/overlay/settings/dam/cfm/model-types/fragment/datatypes',
+      items: model.fields.reduce(
+        (acc, field, index) => {
+          acc[field.fieldName] = {
+            'jcr:primaryType': 'nt:unstructured',
+            fieldLabel: field.name,
+            name: field.fieldName,
+            renderType: mapFieldTypeToRenderType(field.type),
+            valueType: mapFieldTypeToValueType(field.type),
+            required: field.required || false,
+            metaType: field.type,
+            listOrder: index + 1,
+            multi: field.multiValue || false,
+          };
+          return acc;
+        },
+        {} as Record<string, unknown>,
+      ),
     },
   };
 }
 
 function mapFieldTypeToRenderType(type: ContentFragmentField['type']): string {
   const mapping: Record<string, string> = {
-    'text': 'textfield',
+    text: 'textfield',
     'multi-text': 'textarea',
-    'number': 'numberfield',
-    'boolean': 'checkbox',
-    'date': 'datepicker',
-    'enumeration': 'dropdown',
-    'tags': 'tags',
+    number: 'numberfield',
+    boolean: 'checkbox',
+    date: 'datepicker',
+    enumeration: 'dropdown',
+    tags: 'tags',
     'content-reference': 'contentreference',
     'fragment-reference': 'fragmentreference',
-    'json': 'textarea',
+    json: 'textarea',
   };
   return mapping[type] || 'textfield';
 }
 
 function mapFieldTypeToValueType(type: ContentFragmentField['type']): string {
   const mapping: Record<string, string> = {
-    'text': 'string',
+    text: 'string',
     'multi-text': 'string',
-    'number': 'number',
-    'boolean': 'boolean',
-    'date': 'calendar',
-    'enumeration': 'string',
-    'tags': 'string[]',
+    number: 'number',
+    boolean: 'boolean',
+    date: 'calendar',
+    enumeration: 'string',
+    tags: 'string[]',
     'content-reference': 'string',
     'fragment-reference': 'string',
-    'json': 'string',
+    json: 'string',
   };
   return mapping[type] || 'string';
 }
@@ -367,5 +383,5 @@ function convertToDAMPath(url: string): string {
  * Get model by ID
  */
 export function getModelById(id: string): ContentFragmentModel | undefined {
-  return CF_MODELS.find(m => m.id === id);
+  return CF_MODELS.find((m) => m.id === id);
 }

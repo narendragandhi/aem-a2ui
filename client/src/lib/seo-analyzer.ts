@@ -132,8 +132,23 @@ function analyzeTitleSeo(title: string, targetKeyword?: string): CategoryScore {
   }
 
   // Power words check
-  const powerWords = ['discover', 'ultimate', 'proven', 'exclusive', 'free', 'new', 'best', 'top', 'essential', 'complete', 'guide', 'secret', 'amazing', 'transform'];
-  const hasPowerWord = powerWords.some(word => title.toLowerCase().includes(word));
+  const powerWords = [
+    'discover',
+    'ultimate',
+    'proven',
+    'exclusive',
+    'free',
+    'new',
+    'best',
+    'top',
+    'essential',
+    'complete',
+    'guide',
+    'secret',
+    'amazing',
+    'transform',
+  ];
+  const hasPowerWord = powerWords.some((word) => title.toLowerCase().includes(word));
   if (hasPowerWord) {
     passed.push('Title contains power words');
     score += 4;
@@ -185,8 +200,22 @@ function analyzeTitleSeo(title: string, targetKeyword?: string): CategoryScore {
   }
 
   // Starts with action word
-  const actionWords = ['get', 'learn', 'discover', 'find', 'create', 'build', 'master', 'unlock', 'boost', 'transform', 'how', 'why', 'what'];
-  const startsWithAction = actionWords.some(word => title.toLowerCase().startsWith(word));
+  const actionWords = [
+    'get',
+    'learn',
+    'discover',
+    'find',
+    'create',
+    'build',
+    'master',
+    'unlock',
+    'boost',
+    'transform',
+    'how',
+    'why',
+    'what',
+  ];
+  const startsWithAction = actionWords.some((word) => title.toLowerCase().startsWith(word));
   if (startsWithAction) {
     passed.push('Title starts with action word');
     score += 3;
@@ -236,7 +265,7 @@ function analyzeMetaSeo(content: ContentSuggestion, targetKeyword?: string): Cat
 
   // CTA in description
   const ctaWords = ['learn', 'discover', 'get', 'find', 'read', 'click', 'explore', 'start', 'try', 'see'];
-  const hasCta = ctaWords.some(word => description.toLowerCase().includes(word));
+  const hasCta = ctaWords.some((word) => description.toLowerCase().includes(word));
   if (hasCta) {
     passed.push('Description contains call-to-action');
     score += 4;
@@ -266,7 +295,7 @@ function analyzeMetaSeo(content: ContentSuggestion, targetKeyword?: string): Cat
 
   // Unique selling proposition
   const uspWords = ['only', 'exclusive', 'unique', 'best', 'leading', '#1', 'top-rated', 'award', 'guaranteed'];
-  const hasUsp = uspWords.some(word => description.toLowerCase().includes(word));
+  const hasUsp = uspWords.some((word) => description.toLowerCase().includes(word));
   if (hasUsp) {
     passed.push('Description highlights unique value');
     score += 3;
@@ -291,7 +320,7 @@ function analyzeContentSeo(content: ContentSuggestion, targetKeyword?: string): 
   let score = 0;
   const maxScore = 20;
 
-  const wordCount = fullText.split(/\s+/).filter(w => w.length > 0).length;
+  const wordCount = fullText.split(/\s+/).filter((w) => w.length > 0).length;
 
   // Word count
   if (wordCount < 50) {
@@ -497,7 +526,7 @@ function analyzeKeywordsSeo(text: string, targetKeyword?: string): CategoryScore
 
   // LSI keywords suggestion
   const lsiKeywords = generateLsiKeywords(targetKeyword);
-  const foundLsi = lsiKeywords.filter(lsi => text.toLowerCase().includes(lsi));
+  const foundLsi = lsiKeywords.filter((lsi) => text.toLowerCase().includes(lsi));
   if (foundLsi.length >= 2) {
     passed.push(`Uses related terms: ${foundLsi.slice(0, 3).join(', ')}`);
     score += 2;
@@ -552,7 +581,7 @@ function analyzeStructureSeo(content: ContentSuggestion): CategoryScore {
 
     // CTA text quality
     const goodCtaWords = ['start', 'get', 'try', 'learn', 'discover', 'download', 'join', 'subscribe'];
-    if (goodCtaWords.some(w => content.ctaText!.toLowerCase().includes(w))) {
+    if (goodCtaWords.some((w) => content.ctaText!.toLowerCase().includes(w))) {
       score += 1;
     }
   }
@@ -564,9 +593,9 @@ function analyzeStructureSeo(content: ContentSuggestion): CategoryScore {
  * Calculate readability metrics
  */
 export function calculateReadability(text: string): ReadabilityMetrics {
-  const words = text.split(/\s+/).filter(w => w.length > 0);
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-  const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
+  const words = text.split(/\s+/).filter((w) => w.length > 0);
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  const paragraphs = text.split(/\n\n+/).filter((p) => p.trim().length > 0);
 
   const wordCount = words.length;
   const sentenceCount = Math.max(sentences.length, 1);
@@ -577,10 +606,10 @@ export function calculateReadability(text: string): ReadabilityMetrics {
   const avgWordLength = words.reduce((sum, w) => sum + w.length, 0) / Math.max(wordCount, 1);
 
   // Flesch Reading Ease
-  const fleschReadingEase = 206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllablesPerWord);
+  const fleschReadingEase = 206.835 - 1.015 * avgSentenceLength - 84.6 * avgSyllablesPerWord;
 
   // Flesch-Kincaid Grade Level
-  const fleschKincaid = (0.39 * avgSentenceLength) + (11.8 * avgSyllablesPerWord) - 15.59;
+  const fleschKincaid = 0.39 * avgSentenceLength + 11.8 * avgSyllablesPerWord - 15.59;
 
   const readingTime = Math.ceil(wordCount / 200); // 200 wpm average
 
@@ -627,7 +656,7 @@ export function analyzeKeyword(text: string, keyword: string): KeywordAnalysis {
   const lowerText = text.toLowerCase();
   const lowerKeyword = keyword.toLowerCase();
 
-  const words = text.split(/\s+/).filter(w => w.length > 0);
+  const words = text.split(/\s+/).filter((w) => w.length > 0);
   const wordCount = words.length;
 
   // Count occurrences
@@ -637,7 +666,7 @@ export function analyzeKeyword(text: string, keyword: string): KeywordAnalysis {
 
   // Calculate density
   const keywordWords = keyword.split(/\s+/).length;
-  const density = wordCount > 0 ? (count * keywordWords / wordCount) * 100 : 0;
+  const density = wordCount > 0 ? ((count * keywordWords) / wordCount) * 100 : 0;
 
   // Check positions
   const firstPosition = lowerText.indexOf(lowerKeyword);
@@ -667,12 +696,12 @@ export function analyzeKeyword(text: string, keyword: string): KeywordAnalysis {
  */
 function generateLsiKeywords(keyword: string): string[] {
   const lsiMap: Record<string, string[]> = {
-    'sale': ['discount', 'offer', 'deal', 'savings', 'promotion', 'clearance', 'price', 'value'],
-    'product': ['item', 'goods', 'merchandise', 'solution', 'offering', 'service'],
-    'hero': ['banner', 'header', 'headline', 'feature', 'showcase', 'highlight'],
-    'summer': ['seasonal', 'warm', 'outdoor', 'vacation', 'holiday', 'sunny'],
-    'furniture': ['decor', 'home', 'interior', 'design', 'living', 'comfort'],
-    'outdoor': ['patio', 'garden', 'exterior', 'backyard', 'nature', 'open-air'],
+    sale: ['discount', 'offer', 'deal', 'savings', 'promotion', 'clearance', 'price', 'value'],
+    product: ['item', 'goods', 'merchandise', 'solution', 'offering', 'service'],
+    hero: ['banner', 'header', 'headline', 'feature', 'showcase', 'highlight'],
+    summer: ['seasonal', 'warm', 'outdoor', 'vacation', 'holiday', 'sunny'],
+    furniture: ['decor', 'home', 'interior', 'design', 'living', 'comfort'],
+    outdoor: ['patio', 'garden', 'exterior', 'backyard', 'nature', 'open-air'],
   };
 
   const words = keyword.toLowerCase().split(/\s+/);
@@ -721,12 +750,94 @@ export function generateMetaTags(content: ContentSuggestion, baseUrl: string = '
  * Extract keywords from text
  */
 function extractKeywords(text: string): string[] {
-  const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'whom', 'where', 'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'your', 'our', 'their', 'its']);
+  const stopWords = new Set([
+    'the',
+    'a',
+    'an',
+    'and',
+    'or',
+    'but',
+    'in',
+    'on',
+    'at',
+    'to',
+    'for',
+    'of',
+    'with',
+    'by',
+    'is',
+    'are',
+    'was',
+    'were',
+    'be',
+    'been',
+    'being',
+    'have',
+    'has',
+    'had',
+    'do',
+    'does',
+    'did',
+    'will',
+    'would',
+    'could',
+    'should',
+    'may',
+    'might',
+    'must',
+    'shall',
+    'can',
+    'this',
+    'that',
+    'these',
+    'those',
+    'i',
+    'you',
+    'he',
+    'she',
+    'it',
+    'we',
+    'they',
+    'what',
+    'which',
+    'who',
+    'whom',
+    'where',
+    'when',
+    'why',
+    'how',
+    'all',
+    'each',
+    'every',
+    'both',
+    'few',
+    'more',
+    'most',
+    'other',
+    'some',
+    'such',
+    'no',
+    'nor',
+    'not',
+    'only',
+    'own',
+    'same',
+    'so',
+    'than',
+    'too',
+    'very',
+    'just',
+    'your',
+    'our',
+    'their',
+    'its',
+  ]);
 
-  const words = text.toLowerCase()
+  const words = text
+    .toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')
     .split(/\s+/)
-    .filter(w => w.length > 3 && !stopWords.has(w));
+    .filter((w) => w.length > 3 && !stopWords.has(w));
 
   // Count frequency
   const frequency: Record<string, number> = {};

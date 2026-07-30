@@ -24,9 +24,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <embabel-agent.version>1.0.0</embabel-agent.version>
-        <checkstyle.version>10.12.5</checkstyle.version>
-        <checkstyle.plugin.version>3.3.0</checkstyle.plugin.version>
-        <jacoco.version>0.8.11</jacoco.version>
+        <checkstyle.version>10.21.4</checkstyle.version>
+        <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
+        <jacoco.version>0.8.13</jacoco.version>
     </properties>
 
     <repositories>
@@ -112,6 +112,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Structured JSON logging (prod profile) -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
+            <optional>true</optional>
         </dependency>
 
         <!-- Testing -->

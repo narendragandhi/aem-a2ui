@@ -86,18 +86,6 @@ public class SecurityConfig {
     }
 
     /**
-     * Optional IMS authentication filter (stub).
-     */
-    @Bean
-    public FilterRegistrationBean<ImsAuthFilter> imsAuthFilter() {
-        FilterRegistrationBean<ImsAuthFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new ImsAuthFilter(imsEnabled, imsRequireJwt));
-        registration.addUrlPatterns("/tasks", "/advanced/tasks", "/stream/*", "/recommend", "/aem/*", "/workflows/*");
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
-        return registration;
-    }
-
-    /**
      * Rate limiter filter.
      */
     @Bean

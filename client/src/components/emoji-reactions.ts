@@ -32,7 +32,9 @@ export class EmojiReactions extends LitElement {
       justify-content: center;
       font-size: 14px;
       cursor: pointer;
-      transition: transform 0.15s, background 0.15s;
+      transition:
+        transform 0.15s,
+        background 0.15s;
       position: relative;
     }
 
@@ -75,7 +77,9 @@ export class EmojiReactions extends LitElement {
       gap: 4px;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.2s, visibility 0.2s;
+      transition:
+        opacity 0.2s,
+        visibility 0.2s;
     }
 
     .emoji-picker.visible {
@@ -128,40 +132,43 @@ export class EmojiReactions extends LitElement {
   }
 
   private addReaction(emoji: string) {
-    this.dispatchEvent(new CustomEvent('react', {
-      detail: { emoji },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('react', {
+        detail: { emoji },
+        bubbles: true,
+        composed: true,
+      }),
+    );
     this.showPicker = false;
   }
 
   private removeReaction(emoji: string) {
-    this.dispatchEvent(new CustomEvent('unreact', {
-      detail: { emoji },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('unreact', {
+        detail: { emoji },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   render() {
     return html`
       <div class="reactions-container">
         <div class="emoji-picker ${this.showPicker ? 'visible' : ''}">
-          ${REACTIONS.map(emoji => html`
-            <button class="emoji-btn" @click=${() => this.addReaction(emoji)}>${emoji}</button>
-          `)}
+          ${REACTIONS.map(
+            (emoji) => html` <button class="emoji-btn" @click=${() => this.addReaction(emoji)}>${emoji}</button> `,
+          )}
         </div>
 
-        ${this.reactions.map(r => {
+        ${this.reactions.map((r) => {
           const isOwn = r.sessionIds.includes(this.currentUserId);
           return html`
             <div
               class="reaction ${isOwn ? 'own' : ''}"
-              @click=${() => isOwn ? this.removeReaction(r.emoji) : this.addReaction(r.emoji)}
+              @click=${() => (isOwn ? this.removeReaction(r.emoji) : this.addReaction(r.emoji))}
             >
-              ${r.emoji}
-              ${r.count > 1 ? html`<span class="reaction-count">${r.count}</span>` : ''}
+              ${r.emoji} ${r.count > 1 ? html`<span class="reaction-count">${r.count}</span>` : ''}
             </div>
           `;
         })}

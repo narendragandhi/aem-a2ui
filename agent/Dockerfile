@@ -9,8 +9,8 @@ RUN pip install uv
 # Copy dependency files
 COPY pyproject.toml ./
 
-# Install dependencies
-RUN uv venv && uv pip install fastapi uvicorn pydantic
+# Install dependencies from pyproject.toml
+RUN uv venv && uv pip install -r pyproject.toml
 
 # Copy application code
 COPY *.py ./

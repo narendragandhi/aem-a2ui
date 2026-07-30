@@ -10,7 +10,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Multi-page layout builder with drag-drop support. Choose from templates (Landing, Product, Blog) or build custom pages with 17 component types.',
+        component:
+          'Multi-page layout builder with drag-drop support. Choose from templates (Landing, Product, Blog) or build custom pages with 17 component types.',
       },
     },
   },

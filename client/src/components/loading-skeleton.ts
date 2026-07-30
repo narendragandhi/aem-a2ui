@@ -210,11 +210,21 @@ export class LoadingSkeleton extends LitElement {
       height: 14px;
     }
 
-    .skeleton-line:nth-child(1) { width: 100%; }
-    .skeleton-line:nth-child(2) { width: 95%; }
-    .skeleton-line:nth-child(3) { width: 85%; }
-    .skeleton-line:nth-child(4) { width: 90%; }
-    .skeleton-line:nth-child(5) { width: 60%; }
+    .skeleton-line:nth-child(1) {
+      width: 100%;
+    }
+    .skeleton-line:nth-child(2) {
+      width: 95%;
+    }
+    .skeleton-line:nth-child(3) {
+      width: 85%;
+    }
+    .skeleton-line:nth-child(4) {
+      width: 90%;
+    }
+    .skeleton-line:nth-child(5) {
+      width: 60%;
+    }
   `;
 
   render() {
@@ -225,9 +235,7 @@ export class LoadingSkeleton extends LitElement {
       case 'paragraph':
         return html`
           <div class="skeleton-paragraph">
-            ${Array.from({ length: this.lines }).map(
-              () => html`<div class="skeleton skeleton-line"></div>`
-            )}
+            ${Array.from({ length: this.lines }).map(() => html`<div class="skeleton skeleton-line"></div>`)}
           </div>
         `;
 
@@ -275,7 +283,7 @@ export class LoadingSkeleton extends LitElement {
                   <div class="skeleton skeleton-suggestion-text"></div>
                   <div class="skeleton skeleton-suggestion-text" style="width: 70%;"></div>
                 </div>
-              `
+              `,
             )}
           </div>
         `;
@@ -313,8 +321,12 @@ export class ContentSkeleton extends LitElement {
     }
 
     @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
     }
 
     /* Hero layout */
@@ -456,9 +468,15 @@ export class ContentSkeleton extends LitElement {
       height: 16px;
     }
 
-    .line-1 { width: 100%; }
-    .line-2 { width: 90%; }
-    .line-3 { width: 75%; }
+    .line-1 {
+      width: 100%;
+    }
+    .line-2 {
+      width: 90%;
+    }
+    .line-3 {
+      width: 75%;
+    }
 
     /* Generating indicator */
     .generating-indicator {
@@ -481,7 +499,9 @@ export class ContentSkeleton extends LitElement {
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .generating-text {

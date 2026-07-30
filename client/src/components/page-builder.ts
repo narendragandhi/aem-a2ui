@@ -15,26 +15,26 @@ const PAGE_TEMPLATES = [
     id: 'landing',
     name: 'Landing Page',
     icon: '🚀',
-    sections: ['navigation', 'hero', 'teaser', 'teaser', 'teaser', 'cta', 'footer']
+    sections: ['navigation', 'hero', 'teaser', 'teaser', 'teaser', 'cta', 'footer'],
   },
   {
     id: 'product',
     name: 'Product Page',
     icon: '🛍️',
-    sections: ['navigation', 'hero', 'product', 'tabs', 'quote', 'cta', 'footer']
+    sections: ['navigation', 'hero', 'product', 'tabs', 'quote', 'cta', 'footer'],
   },
   {
     id: 'blog',
     name: 'Blog Article',
     icon: '📝',
-    sections: ['navigation', 'hero', 'teaser', 'accordion', 'socialShare', 'footer']
+    sections: ['navigation', 'hero', 'teaser', 'accordion', 'socialShare', 'footer'],
   },
   {
     id: 'custom',
     name: 'Custom Page',
     icon: '✨',
-    sections: []
-  }
+    sections: [],
+  },
 ];
 
 const COMPONENT_OPTIONS = [
@@ -120,7 +120,7 @@ export class PageBuilder extends LitElement {
     .template-card:hover {
       border-color: var(--spectrum-accent-color-default, #1473e6);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .template-icon {
@@ -361,7 +361,7 @@ export class PageBuilder extends LitElement {
       background: white;
       border: 1px solid var(--spectrum-gray-300, #e0e0e0);
       border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
       padding: 8px;
       margin-bottom: 8px;
       display: grid;
@@ -602,15 +602,17 @@ export class PageBuilder extends LitElement {
           <p class="template-subtitle">Choose a template or start from scratch</p>
 
           <div class="template-grid">
-            ${PAGE_TEMPLATES.map(template => html`
-              <div class="template-card" @click=${() => this.selectTemplate(template)}>
-                <div class="template-icon">${template.icon}</div>
-                <div class="template-name">${template.name}</div>
-                <div class="template-count">
-                  ${template.sections.length > 0 ? `${template.sections.length} sections` : 'Build your own'}
+            ${PAGE_TEMPLATES.map(
+              (template) => html`
+                <div class="template-card" @click=${() => this.selectTemplate(template)}>
+                  <div class="template-icon">${template.icon}</div>
+                  <div class="template-name">${template.name}</div>
+                  <div class="template-count">
+                    ${template.sections.length > 0 ? `${template.sections.length} sections` : 'Build your own'}
+                  </div>
                 </div>
-              </div>
-            `)}
+              `,
+            )}
           </div>
         </div>
       </div>
@@ -618,8 +620,8 @@ export class PageBuilder extends LitElement {
   }
 
   private renderBuilder() {
-    const readyCount = this.sections.filter(s => s.status === 'ready').length;
-    const template = PAGE_TEMPLATES.find(t => t.id === this.selectedTemplate);
+    const readyCount = this.sections.filter((s) => s.status === 'ready').length;
+    const template = PAGE_TEMPLATES.find((t) => t.id === this.selectedTemplate);
 
     return html`
       <div class="page-builder">
@@ -630,15 +632,19 @@ export class PageBuilder extends LitElement {
               <span class="section-count">${this.sections.length} sections</span>
             </div>
 
-            ${this.generating ? html`
-              <div class="generate-progress">
-                <sp-progress-circle indeterminate size="s"></sp-progress-circle>
-                <span>${readyCount} of ${this.sections.length} sections complete</span>
-              </div>
-            ` : ''}
+            ${
+              this.generating
+                ? html`
+                    <div class="generate-progress">
+                      <sp-progress-circle indeterminate size="s"></sp-progress-circle>
+                      <span>${readyCount} of ${this.sections.length} sections complete</span>
+                    </div>
+                  `
+                : ''
+            }
 
             <div class="builder-actions">
-              <sp-button variant="secondary" @click=${() => this.selectedTemplate = null}>
+              <sp-button variant="secondary" @click=${() => (this.selectedTemplate = null)}>
                 Change Template
               </sp-button>
               <button
@@ -657,32 +663,41 @@ export class PageBuilder extends LitElement {
               type="text"
               placeholder="e.g., A landing page for our summer sale campaign targeting young professionals..."
               .value=${this.pageDescription}
-              @input=${(e: Event) => this.pageDescription = (e.target as HTMLInputElement).value}
+              @input=${(e: Event) => (this.pageDescription = (e.target as HTMLInputElement).value)}
             />
           </div>
 
           <div class="sections-list">
-            ${this.sections.length === 0 ? html`
-              <div class="empty-state">
-                <div class="empty-icon">📄</div>
-                <p>No sections yet. Add components to build your page.</p>
-              </div>
-            ` : ''}
-
+            ${
+              this.sections.length === 0
+                ? html`
+                    <div class="empty-state">
+                      <div class="empty-icon">📄</div>
+                      <p>No sections yet. Add components to build your page.</p>
+                    </div>
+                  `
+                : ''
+            }
             ${this.sections.map((section, index) => this.renderSection(section, index))}
 
             <div class="add-section">
-              ${this.showAddMenu ? html`
-                <div class="add-menu">
-                  ${COMPONENT_OPTIONS.map(comp => html`
-                    <button class="add-menu-item" @click=${() => this.addSection(comp.id)}>
-                      <div class="add-menu-item-icon">${comp.icon}</div>
-                      <div class="add-menu-item-name">${comp.name}</div>
-                    </button>
-                  `)}
-                </div>
-              ` : ''}
-              <button class="add-section-btn" @click=${() => this.showAddMenu = !this.showAddMenu}>
+              ${
+                this.showAddMenu
+                  ? html`
+                      <div class="add-menu">
+                        ${COMPONENT_OPTIONS.map(
+                    (comp) => html`
+                      <button class="add-menu-item" @click=${() => this.addSection(comp.id)}>
+                        <div class="add-menu-item-icon">${comp.icon}</div>
+                        <div class="add-menu-item-name">${comp.name}</div>
+                      </button>
+                    `,
+                  )}
+                      </div>
+                    `
+                  : ''
+              }
+              <button class="add-section-btn" @click=${() => (this.showAddMenu = !this.showAddMenu)}>
                 <span>+</span> Add Section
               </button>
             </div>
@@ -693,7 +708,7 @@ export class PageBuilder extends LitElement {
   }
 
   private renderSection(section: PageSection, index: number) {
-    const comp = COMPONENT_OPTIONS.find(c => c.id === section.type);
+    const comp = COMPONENT_OPTIONS.find((c) => c.id === section.type);
 
     return html`
       <div
@@ -716,20 +731,26 @@ export class PageBuilder extends LitElement {
         </div>
         <div class="section-actions">
           <button class="section-btn" @click=${() => this.moveSection(index, -1)} ?disabled=${index === 0}>↑</button>
-          <button class="section-btn" @click=${() => this.moveSection(index, 1)} ?disabled=${index === this.sections.length - 1}>↓</button>
+          <button
+            class="section-btn"
+            @click=${() => this.moveSection(index, 1)}
+            ?disabled=${index === this.sections.length - 1}
+          >
+            ↓
+          </button>
           <button class="section-btn delete" @click=${() => this.removeSection(index)}>✕</button>
         </div>
       </div>
     `;
   }
 
-  private selectTemplate(template: typeof PAGE_TEMPLATES[0]) {
+  private selectTemplate(template: (typeof PAGE_TEMPLATES)[0]) {
     this.selectedTemplate = template.id;
     this.sections = template.sections.map((type, index) => ({
       id: `section-${Date.now()}-${index}`,
       type,
       content: null,
-      status: 'empty'
+      status: 'empty',
     }));
     this.showAddMenu = false;
     this.notifySectionsChanged();
@@ -753,20 +774,25 @@ export class PageBuilder extends LitElement {
   }
 
   private notifySectionsChanged() {
-    this.dispatchEvent(new CustomEvent('sections-changed', {
-      detail: { sections: [...this.sections] },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('sections-changed', {
+        detail: { sections: [...this.sections] },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private addSection(type: string) {
-    this.sections = [...this.sections, {
-      id: `section-${Date.now()}`,
-      type,
-      content: null,
-      status: 'empty'
-    }];
+    this.sections = [
+      ...this.sections,
+      {
+        id: `section-${Date.now()}`,
+        type,
+        content: null,
+        status: 'empty',
+      },
+    ];
     this.showAddMenu = false;
     this.notifySectionsChanged();
   }
@@ -826,9 +852,7 @@ export class PageBuilder extends LitElement {
 
     // Generate content for each section sequentially
     for (let i = 0; i < this.sections.length; i++) {
-      this.sections = this.sections.map((s, idx) =>
-        idx === i ? { ...s, status: 'generating' as const } : s
-      );
+      this.sections = this.sections.map((s, idx) => (idx === i ? { ...s, status: 'generating' as const } : s));
 
       // Notify parent of status change
       this.notifySectionsChanged();
@@ -836,40 +860,42 @@ export class PageBuilder extends LitElement {
       // Dispatch event to generate content
       const prompt = `${this.sections[i].type} component for: ${this.pageDescription || 'a professional business page'}`;
 
-      this.dispatchEvent(new CustomEvent('generate-section', {
-        detail: {
-          sectionId: this.sections[i].id,
-          sectionIndex: i,
-          componentType: this.sections[i].type,
-          prompt,
-          pageContext: this.pageDescription
-        },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('generate-section', {
+          detail: {
+            sectionId: this.sections[i].id,
+            sectionIndex: i,
+            componentType: this.sections[i].type,
+            prompt,
+            pageContext: this.pageDescription,
+          },
+          bubbles: true,
+          composed: true,
+        }),
+      );
 
       // Wait a bit between sections to avoid overwhelming the API
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
 
   // Public method to update section content
   public updateSectionContent(sectionId: string, content: ContentSuggestion) {
-    this.sections = this.sections.map(s =>
-      s.id === sectionId ? { ...s, content, status: 'ready' as const } : s
-    );
+    this.sections = this.sections.map((s) => (s.id === sectionId ? { ...s, content, status: 'ready' as const } : s));
 
     // Notify parent of changes
     this.notifySectionsChanged();
 
     // Check if all done
-    if (this.sections.every(s => s.status === 'ready')) {
+    if (this.sections.every((s) => s.status === 'ready')) {
       this.generating = false;
-      this.dispatchEvent(new CustomEvent('page-ready', {
-        detail: { sections: this.sections },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('page-ready', {
+          detail: { sections: this.sections },
+          bubbles: true,
+          composed: true,
+        }),
+      );
     }
   }
 

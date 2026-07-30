@@ -29,8 +29,15 @@ export class LivePresence extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+      }
     }
 
     .avatars {
@@ -64,7 +71,7 @@ export class LivePresence extends LitElement {
       margin-left: 0;
     }
 
-    .avatar[data-self="true"] {
+    .avatar[data-self='true'] {
       border-color: var(--spectrum-blue-400);
     }
 
@@ -107,9 +114,18 @@ export class LivePresence extends LitElement {
 
   private getAvatarColor(username: string): string {
     const colors = [
-      '#1473e6', '#0d66d0', '#2680eb', '#3b82f6',
-      '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
-      '#ef4444', '#f97316', '#eab308', '#22c55e'
+      '#1473e6',
+      '#0d66d0',
+      '#2680eb',
+      '#3b82f6',
+      '#8b5cf6',
+      '#a855f7',
+      '#d946ef',
+      '#ec4899',
+      '#ef4444',
+      '#f97316',
+      '#eab308',
+      '#22c55e',
     ];
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
@@ -119,11 +135,16 @@ export class LivePresence extends LitElement {
   }
 
   private getInitials(name: string): string {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
   }
 
   private displayUsers(): LiveUser[] {
-    return this.users.filter(u => u.sessionId !== this.currentUserId);
+    return this.users.filter((u) => u.sessionId !== this.currentUserId);
   }
 
   private extraCount(): number {
@@ -147,11 +168,12 @@ export class LivePresence extends LitElement {
         <div class="pulse"></div>
         <span class="online-text">${activeUsers.length + 1} online</span>
         <div class="avatars">
-          ${this.renderUserAvatar(this.users.find(u => u.sessionId === this.currentUserId), true)}
-          ${activeUsers.slice(0, 4).map(user => this.renderUserAvatar(user, false))}
-          ${this.extraCount() > 0 ? html`
-            <div class="avatar more-count">+${this.extraCount()}</div>
-          ` : ''}
+          ${this.renderUserAvatar(
+            this.users.find((u) => u.sessionId === this.currentUserId),
+            true,
+          )}
+          ${activeUsers.slice(0, 4).map((user) => this.renderUserAvatar(user, false))}
+          ${this.extraCount() > 0 ? html` <div class="avatar more-count">+${this.extraCount()}</div> ` : ''}
         </div>
       </div>
     `;

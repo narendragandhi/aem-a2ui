@@ -296,7 +296,7 @@ class KeyboardShortcutsService {
       new CustomEvent('keyboard-shortcut', {
         detail: { action },
         bubbles: true,
-      })
+      }),
     );
   }
 
@@ -306,7 +306,7 @@ class KeyboardShortcutsService {
       new CustomEvent('show-shortcuts-help', {
         detail: { open: this.helpModalOpen },
         bubbles: true,
-      })
+      }),
     );
   }
 

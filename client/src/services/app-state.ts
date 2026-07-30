@@ -231,10 +231,7 @@ class AppStateManager {
   }
 
   // Subscribe to specific state key
-  subscribeToKey<K extends keyof AppState>(
-    key: K,
-    listener: StateListener<AppState[K]>
-  ): () => void {
+  subscribeToKey<K extends keyof AppState>(key: K, listener: StateListener<AppState[K]>): () => void {
     if (!this.listeners.has(key)) {
       this.listeners.set(key, new Set());
     }
@@ -315,9 +312,7 @@ class AppStateManager {
     this.setState({ appliedContent: content });
 
     // Also update in suggestions if it exists
-    const suggestions = this.state.suggestions.map((s) =>
-      s.id === content.id ? content : s
-    );
+    const suggestions = this.state.suggestions.map((s) => (s.id === content.id ? content : s));
     this.setState({ suggestions });
   }
 
@@ -350,7 +345,7 @@ export const appState = new AppStateManager();
 export function connectState<T>(
   element: HTMLElement,
   selector: StateSelector<T>,
-  callback: (value: T) => void
+  callback: (value: T) => void,
 ): () => void {
   // Initial call
   callback(appState.select(selector));

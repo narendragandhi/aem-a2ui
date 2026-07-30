@@ -53,8 +53,13 @@ export class DemoMode extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
     }
 
     .simulated-users {
@@ -147,7 +152,7 @@ export class DemoMode extends LitElement {
   ];
   @state() private activeUsers: Set<string> = new Set(['sim-1', 'sim-2']);
 
-  private interval: number | null = null;
+  private interval: ReturnType<typeof setInterval> | null = null;
 
   connectedCallback() {
     super.connectedCallback();
@@ -173,7 +178,7 @@ export class DemoMode extends LitElement {
 
   private startSimulation() {
     this.interval = setInterval(() => {
-      this.users = this.users.map(user => {
+      this.users = this.users.map((user) => {
         if (!this.activeUsers.has(user.id)) return user;
 
         return {
@@ -204,7 +209,7 @@ export class DemoMode extends LitElement {
   private triggerRandomAction() {
     const actions = ['chat', 'reaction', 'comment'];
     const action = actions[Math.floor(Math.random() * actions.length)];
-    const activeUser = this.users.find(u => this.activeUsers.has(u.id));
+    const activeUser = this.users.find((u) => this.activeUsers.has(u.id));
 
     if (activeUser) {
       if (action === 'chat') {
@@ -225,43 +230,54 @@ export class DemoMode extends LitElement {
         </div>
 
         <div class="simulated-users">
-          ${this.users.map(user => html`
-            <div
-              class="sim-user ${this.activeUsers.has(user.id) ? 'active' : ''}"
-              style="background: ${user.color}"
-              @click=${() => this.toggleUser(user.id)}
-              title="${user.name}"
-            >
-              ${user.avatar}
-            </div>
-          `)}
+          ${this.users.map(
+            (user) => html`
+              <div
+                class="sim-user ${this.activeUsers.has(user.id) ? 'active' : ''}"
+                style="background: ${user.color}"
+                @click=${() => this.toggleUser(user.id)}
+                title="${user.name}"
+              >
+                ${user.avatar}
+              </div>
+            `,
+          )}
         </div>
 
-        <button
-          class="toggle-btn ${this.enabled ? 'active' : ''}"
-          @click=${() => this.enabled = !this.enabled}
-        >
+        <button class="toggle-btn ${this.enabled ? 'active' : ''}" @click=${() => (this.enabled = !this.enabled)}>
           ${this.enabled ? 'Demo Active' : 'Enable Demo'}
         </button>
 
-        ${this.enabled ? html`
-          <div class="actions">
-            <button class="action-btn" @click=${() => this.triggerRandomAction()} title="Send demo message">
-              💬
-            </button>
-            <button class="action-btn" @click=${() => {
+        ${
+          this.enabled
+            ? html`
+                <div class="actions">
+                  <button class="action-btn" @click=${() => this.triggerRandomAction()} title="Send demo message">
+                    💬
+                  </button>
+                  <button
+                    class="action-btn"
+                    @click=${() => {
               collaborationService.sendChatMessage('Alice: Great work team! 👏');
-            }} title="Applaud">
-              👏
-            </button>
-            <button class="action-btn" @click=${() => {
+            }}
+                    title="Applaud"
+                  >
+                    👏
+                  </button>
+                  <button
+                    class="action-btn"
+                    @click=${() => {
               this.users[0].cursorX = 150 + Math.random() * 400;
               this.users[0].cursorY = 150 + Math.random() * 300;
-            }} title="Randomize cursors">
-              🎲
-            </button>
-          </div>
-        ` : ''}
+            }}
+                    title="Randomize cursors"
+                  >
+                    🎲
+                  </button>
+                </div>
+              `
+            : ''
+        }
       </div>
     `;
   }

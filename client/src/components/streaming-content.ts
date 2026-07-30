@@ -102,6 +102,13 @@ interface AgUiEvent {
     version?: string;
     aemConnected?: boolean;
     totalSteps?: number;
+    // HITL (Human-in-the-Loop) data
+    interruptId?: string;
+    interruptType?: string;
+    title?: string;
+    description?: string;
+    options?: Array<{ id: string; label: string; style: string }>;
+    resolution?: string;
   };
 }
 
@@ -170,8 +177,13 @@ export class StreamingContent extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .cancel-btn {
@@ -235,8 +247,14 @@ export class StreamingContent extends LitElement {
     }
 
     @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
+      0%,
+      50% {
+        opacity: 1;
+      }
+      51%,
+      100% {
+        opacity: 0;
+      }
     }
 
     .field-value.empty {
@@ -458,7 +476,8 @@ export class StreamingContent extends LitElement {
       color: var(--spectrum-green-700);
     }
 
-    .tool-args, .tool-result {
+    .tool-args,
+    .tool-result {
       font-size: 11px;
       font-family: monospace;
       background: var(--spectrum-gray-100);
@@ -468,7 +487,8 @@ export class StreamingContent extends LitElement {
       overflow-x: auto;
     }
 
-    .tool-args-label, .tool-result-label {
+    .tool-args-label,
+    .tool-result-label {
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
@@ -704,18 +724,30 @@ export class StreamingContent extends LitElement {
       // Listen for ALL AG-UI event types (17 total)
       const eventTypes: AgUiEventType[] = [
         // Lifecycle
-        'RUN_STARTED', 'RUN_FINISHED', 'RUN_ERROR',
-        'STEP_STARTED', 'STEP_FINISHED',
+        'RUN_STARTED',
+        'RUN_FINISHED',
+        'RUN_ERROR',
+        'STEP_STARTED',
+        'STEP_FINISHED',
         // Text Message
-        'TEXT_MESSAGE_START', 'TEXT_MESSAGE_DELTA', 'TEXT_MESSAGE_END',
+        'TEXT_MESSAGE_START',
+        'TEXT_MESSAGE_DELTA',
+        'TEXT_MESSAGE_END',
         // Tool Call
-        'TOOL_CALL_START', 'TOOL_CALL_ARGS', 'TOOL_CALL_END', 'TOOL_CALL_RESULT',
+        'TOOL_CALL_START',
+        'TOOL_CALL_ARGS',
+        'TOOL_CALL_END',
+        'TOOL_CALL_RESULT',
         // State
-        'STATE_DELTA', 'STATE_SNAPSHOT', 'MESSAGES_SNAPSHOT',
+        'STATE_DELTA',
+        'STATE_SNAPSHOT',
+        'MESSAGES_SNAPSHOT',
         // Extension
-        'RAW_EVENT', 'CUSTOM_EVENT',
+        'RAW_EVENT',
+        'CUSTOM_EVENT',
         // HITL
-        'INTERRUPT_REQUESTED', 'INTERRUPT_RESOLVED',
+        'INTERRUPT_REQUESTED',
+        'INTERRUPT_RESOLVED',
       ];
 
       eventTypes.forEach((eventType) => {
@@ -756,13 +788,25 @@ export class StreamingContent extends LitElement {
     try {
       this.eventSource = new EventSource(`${this.agentUrl}/stream/governance?${params}`);
       const eventTypes: AgUiEventType[] = [
-        'RUN_STARTED', 'RUN_FINISHED', 'RUN_ERROR',
-        'STEP_STARTED', 'STEP_FINISHED',
-        'TEXT_MESSAGE_START', 'TEXT_MESSAGE_DELTA', 'TEXT_MESSAGE_END',
-        'TOOL_CALL_START', 'TOOL_CALL_ARGS', 'TOOL_CALL_END', 'TOOL_CALL_RESULT',
-        'STATE_DELTA', 'STATE_SNAPSHOT', 'MESSAGES_SNAPSHOT',
-        'RAW_EVENT', 'CUSTOM_EVENT',
-        'INTERRUPT_REQUESTED', 'INTERRUPT_RESOLVED',
+        'RUN_STARTED',
+        'RUN_FINISHED',
+        'RUN_ERROR',
+        'STEP_STARTED',
+        'STEP_FINISHED',
+        'TEXT_MESSAGE_START',
+        'TEXT_MESSAGE_DELTA',
+        'TEXT_MESSAGE_END',
+        'TOOL_CALL_START',
+        'TOOL_CALL_ARGS',
+        'TOOL_CALL_END',
+        'TOOL_CALL_RESULT',
+        'STATE_DELTA',
+        'STATE_SNAPSHOT',
+        'MESSAGES_SNAPSHOT',
+        'RAW_EVENT',
+        'CUSTOM_EVENT',
+        'INTERRUPT_REQUESTED',
+        'INTERRUPT_RESOLVED',
       ];
 
       eventTypes.forEach((eventType) => {
@@ -817,9 +861,7 @@ export class StreamingContent extends LitElement {
 
       case 'STEP_FINISHED':
         this.steps = this.steps.map((step) =>
-          step.stepId === data.stepId
-            ? { ...step, status: data.status === 'completed' ? 'completed' : 'error' }
-            : step
+          step.stepId === data.stepId ? { ...step, status: data.status === 'completed' ? 'completed' : 'error' } : step,
         );
         // Update progress based on steps
         if (data.stepIndex && data.totalSteps) {
@@ -844,15 +886,13 @@ export class StreamingContent extends LitElement {
 
       case 'TOOL_CALL_ARGS':
         this.toolCalls = this.toolCalls.map((tc) =>
-          tc.toolCallId === data.toolCallId
-            ? { ...tc, args: data.args, status: 'args_received' }
-            : tc
+          tc.toolCallId === data.toolCallId ? { ...tc, args: data.args, status: 'args_received' } : tc,
         );
         break;
 
       case 'TOOL_CALL_RESULT':
         this.toolCalls = this.toolCalls.map((tc) =>
-          tc.toolCallId === data.toolCallId ? { ...tc, result: data.result } : tc
+          tc.toolCallId === data.toolCallId ? { ...tc, result: data.result } : tc,
         );
         // Extract DAM assets from tool result if present
         if (data.result?.assets) {
@@ -862,7 +902,7 @@ export class StreamingContent extends LitElement {
 
       case 'TOOL_CALL_END':
         this.toolCalls = this.toolCalls.map((tc) =>
-          tc.toolCallId === data.toolCallId ? { ...tc, status: 'completed' } : tc
+          tc.toolCallId === data.toolCallId ? { ...tc, status: 'completed' } : tc,
         );
         break;
 
@@ -936,7 +976,7 @@ export class StreamingContent extends LitElement {
               detail: data.payload,
               bubbles: true,
               composed: true,
-            })
+            }),
           );
         }
         if (data.eventType === 'governance.result') {
@@ -949,10 +989,10 @@ export class StreamingContent extends LitElement {
       // ═══════════════════════════════════════════════════════════
       case 'INTERRUPT_REQUESTED':
         this.hitlInterrupt = {
-          interruptId: data.interruptId as string || '',
-          type: data.type as string || 'approval',
-          title: data.title as string || 'Review Required',
-          description: data.description as string || '',
+          interruptId: (data.interruptId as string) || '',
+          type: (data.interruptType as string) || 'approval',
+          title: (data.title as string) || 'Review Required',
+          description: (data.description as string) || '',
           options: (data.options as Array<{ id: string; label: string; style: string }>) || [],
           resolved: false,
         };
@@ -962,7 +1002,7 @@ export class StreamingContent extends LitElement {
             detail: this.hitlInterrupt,
             bubbles: true,
             composed: true,
-          })
+          }),
         );
         break;
 
@@ -985,9 +1025,7 @@ export class StreamingContent extends LitElement {
         this.eventSource?.close();
 
         // Mark all steps as completed
-        this.steps = this.steps.map((s) =>
-          s.status === 'in_progress' ? { ...s, status: 'completed' } : s
-        );
+        this.steps = this.steps.map((s) => (s.status === 'in_progress' ? { ...s, status: 'completed' } : s));
 
         // Emit content-ready event
         this.dispatchEvent(
@@ -999,7 +1037,7 @@ export class StreamingContent extends LitElement {
             },
             bubbles: true,
             composed: true,
-          })
+          }),
         );
         break;
 
@@ -1070,7 +1108,7 @@ export class StreamingContent extends LitElement {
         detail: { content: this.content },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -1086,19 +1124,14 @@ export class StreamingContent extends LitElement {
   override render() {
     return html`
       <div class="streaming-container">
-        ${this.renderHeader()}
-        ${this.status !== 'idle' ? this.renderProgressBar() : ''}
+        ${this.renderHeader()} ${this.status !== 'idle' ? this.renderProgressBar() : ''}
         ${this.progressMessage ? this.renderProgressMessage() : ''}
-        ${this.status === 'idle' ? this.renderIdleState() : ''}
-        ${this.status === 'error' ? this.renderError() : ''}
+        ${this.status === 'idle' ? this.renderIdleState() : ''} ${this.status === 'error' ? this.renderError() : ''}
         ${this.steps.length > 0 ? this.renderSteps() : ''}
         ${this.guidedEvents.length > 0 ? this.renderGuidedEvents() : ''}
         ${this.governanceResult ? this.renderGovernanceResult() : ''}
-        ${this.hitlInterrupt ? this.renderHitlPanel() : ''}
-        ${this.toolCalls.length > 0 ? this.renderToolCalls() : ''}
-        ${this.status === 'streaming' || this.status === 'completed'
-          ? this.renderContent()
-          : ''}
+        ${this.hitlInterrupt ? this.renderHitlPanel() : ''} ${this.toolCalls.length > 0 ? this.renderToolCalls() : ''}
+        ${this.status === 'streaming' || this.status === 'completed' ? this.renderContent() : ''}
         ${this.status === 'completed' ? this.renderActions() : ''}
       </div>
     `;
@@ -1117,19 +1150,21 @@ export class StreamingContent extends LitElement {
         <div class="stream-status">
           <span class="status-dot ${this.status}"></span>
           <span>${statusText[this.status]}</span>
-          ${this.useAdvanced
-            ? html`
-                <span class="aem-badge ${this.aemConnected ? 'connected' : 'disconnected'}">
-                  ${this.aemConnected ? '🟢 AEM Live' : '⚪ Mock Mode'}
-                </span>
-              `
-            : ''}
+          ${
+            this.useAdvanced
+              ? html`
+                  <span class="aem-badge ${this.aemConnected ? 'connected' : 'disconnected'}">
+                    ${this.aemConnected ? '🟢 AEM Live' : '⚪ Mock Mode'}
+                  </span>
+                `
+              : ''
+          }
         </div>
-        ${this.status === 'streaming'
-          ? html`
-              <button class="cancel-btn" @click=${this.cancelStream}>Cancel</button>
-            `
-          : ''}
+        ${
+          this.status === 'streaming'
+            ? html` <button class="cancel-btn" @click=${this.cancelStream}>Cancel</button> `
+            : ''
+        }
       </div>
     `;
   }
@@ -1141,17 +1176,19 @@ export class StreamingContent extends LitElement {
           (step) => html`
             <div class="step-item">
               <div class="step-icon ${step.status}">
-                ${step.status === 'completed'
-                  ? '✓'
-                  : step.status === 'in_progress'
-                  ? '⟳'
-                  : step.icon || (step.stepIndex || 0).toString()}
+                ${
+                  step.status === 'completed'
+                    ? '✓'
+                    : step.status === 'in_progress'
+                      ? '⟳'
+                      : step.icon || (step.stepIndex || 0).toString()
+                }
               </div>
               <div class="step-info">
                 <div class="step-title ${step.status}">${step.stepTitle}</div>
               </div>
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -1205,28 +1242,30 @@ export class StreamingContent extends LitElement {
                 <span class="tool-name">${tc.toolName}</span>
                 <span class="tool-status ${tc.status}">${tc.status}</span>
               </div>
-              ${tc.toolDescription
-                ? html`<div class="step-description">${tc.toolDescription}</div>`
-                : ''}
-              ${tc.args
-                ? html`
-                    <div class="tool-args-label">Arguments</div>
-                    <div class="tool-args">
-                      <pre>${JSON.stringify(tc.args, null, 2)}</pre>
-                    </div>
-                  `
-                : ''}
-              ${tc.result
-                ? html`
-                    <div class="tool-result-label">Result</div>
-                    <div class="tool-result">
-                      <pre>${JSON.stringify(tc.result, null, 2)}</pre>
-                    </div>
-                    ${this.renderDamAssets(tc)}
-                  `
-                : ''}
+              ${tc.toolDescription ? html`<div class="step-description">${tc.toolDescription}</div>` : ''}
+              ${
+                tc.args
+                  ? html`
+                      <div class="tool-args-label">Arguments</div>
+                      <div class="tool-args">
+                        <pre>${JSON.stringify(tc.args, null, 2)}</pre>
+                      </div>
+                    `
+                  : ''
+              }
+              ${
+                tc.result
+                  ? html`
+                      <div class="tool-result-label">Result</div>
+                      <div class="tool-result">
+                        <pre>${JSON.stringify(tc.result, null, 2)}</pre>
+                      </div>
+                      ${this.renderDamAssets(tc)}
+                    `
+                  : ''
+              }
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -1244,13 +1283,15 @@ export class StreamingContent extends LitElement {
           (asset) => html`
             <div class="dam-asset" title="${asset.title || asset.path}">
               <img
-                src="${asset.thumbnailUrl ||
-                `http://host.docker.internal:4502${asset.path}/_jcr_content/renditions/cq5dam.thumbnail.48.48.png`}"
+                src="${
+                  asset.thumbnailUrl ||
+                  `http://host.docker.internal:4502${asset.path}/_jcr_content/renditions/cq5dam.thumbnail.48.48.png`
+                }"
                 alt="${asset.title || 'Asset'}"
                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect fill=%22%23f0f0f0%22 width=%2248%22 height=%2248%22/><text x=%2224%22 y=%2228%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%2212%22>📷</text></svg>'"
               />
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -1297,13 +1338,10 @@ export class StreamingContent extends LitElement {
         <div class="hitl-actions">
           ${this.hitlInterrupt.options.map(
             (option) => html`
-              <button
-                class="hitl-btn ${option.style}"
-                @click=${() => this.handleHitlAction(option.id)}
-              >
+              <button class="hitl-btn ${option.style}" @click=${() => this.handleHitlAction(option.id)}>
                 ${option.label}
               </button>
-            `
+            `,
           )}
         </div>
       </div>
@@ -1319,7 +1357,7 @@ export class StreamingContent extends LitElement {
         },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
@@ -1340,9 +1378,7 @@ export class StreamingContent extends LitElement {
     return html`
       <div class="error-message">
         ${this.error}
-        <button class="action-btn secondary" style="margin-top: 8px" @click=${this.retry}>
-          Retry
-        </button>
+        <button class="action-btn secondary" style="margin-top: 8px" @click=${this.retry}>Retry</button>
       </div>
     `;
   }
@@ -1354,9 +1390,7 @@ export class StreamingContent extends LitElement {
         ${this.renderField('subtitle', 'Subtitle', this.content.subtitle)}
         ${this.renderField('description', 'Description', this.content.description)}
         ${this.content.ctaText ? this.renderCta() : ''}
-        ${this.content.price
-          ? this.renderField('price', 'Price', this.content.price)
-          : ''}
+        ${this.content.price ? this.renderField('price', 'Price', this.content.price) : ''}
         ${this.content.imageUrl ? this.renderImage() : ''}
       </div>
     `;
@@ -1369,11 +1403,7 @@ export class StreamingContent extends LitElement {
     return html`
       <div class="field-group">
         <div class="field-label">${label}</div>
-        <div
-          class="field-value ${fieldName} ${isStreaming ? 'streaming' : ''} ${isEmpty
-            ? 'empty'
-            : ''}"
-        >
+        <div class="field-value ${fieldName} ${isStreaming ? 'streaming' : ''} ${isEmpty ? 'empty' : ''}">
           ${value || (isStreaming ? '' : 'Waiting...')}
         </div>
       </div>
@@ -1386,9 +1416,7 @@ export class StreamingContent extends LitElement {
     return html`
       <div class="field-group">
         <div class="field-label">Call to Action</div>
-        <div class="cta-preview ${isStreaming ? 'streaming' : ''}">
-          ${this.content.ctaText || 'Button'}
-        </div>
+        <div class="cta-preview ${isStreaming ? 'streaming' : ''}">${this.content.ctaText || 'Button'}</div>
       </div>
     `;
   }
@@ -1398,9 +1426,7 @@ export class StreamingContent extends LitElement {
       <div class="field-group">
         <div class="field-label">Image</div>
         <div class="image-preview">
-          ${this.content.imageUrl
-            ? html`<img src="${this.content.imageUrl}" alt="Preview" />`
-            : 'No image'}
+          ${this.content.imageUrl ? html`<img src="${this.content.imageUrl}" alt="Preview" />` : 'No image'}
         </div>
       </div>
     `;

@@ -125,9 +125,7 @@ export class BrandScore extends LitElement {
             <span>✨</span>
             Brand Alignment
           </span>
-          <span class="score-badge ${scoreClass}">
-            ${this.score}% ${scoreLabel}
-          </span>
+          <span class="score-badge ${scoreClass}"> ${this.score}% ${scoreLabel} </span>
         </div>
 
         <div class="score-bar-container">
@@ -135,26 +133,31 @@ export class BrandScore extends LitElement {
         </div>
 
         <div class="factors-list">
-          ${this.factors.map(factor => html`
-            <div class="factor">
-              <span class="factor-icon pass">✓</span>
-              ${factor}
-            </div>
-          `)}
+          ${this.factors.map(
+            (factor) => html`
+              <div class="factor">
+                <span class="factor-icon pass">✓</span>
+                ${factor}
+              </div>
+            `,
+          )}
         </div>
       </div>
     `;
   }
 
   // Calculate score based on content
-  public static calculateScore(content: { title?: string; subtitle?: string; description?: string; cta?: string }): { score: number; factors: string[] } {
+  public static calculateScore(content: { title?: string; subtitle?: string; description?: string; cta?: string }): {
+    score: number;
+    factors: string[];
+  } {
     const factors: string[] = [];
     let score = 70; // Base score
 
     // Check for action-oriented headline
     if (content.title) {
       const actionWords = ['transform', 'discover', 'unlock', 'accelerate', 'simplify', 'elevate', 'power', 'build'];
-      if (actionWords.some(word => content.title!.toLowerCase().includes(word))) {
+      if (actionWords.some((word) => content.title!.toLowerCase().includes(word))) {
         score += 8;
         factors.push('Action-oriented headline');
       }
@@ -169,7 +172,7 @@ export class BrandScore extends LitElement {
     // Check for value-focused messaging
     if (content.description) {
       const valueWords = ['efficiency', 'security', 'scale', 'integration', 'seamless', 'enterprise'];
-      if (valueWords.some(word => content.description!.toLowerCase().includes(word))) {
+      if (valueWords.some((word) => content.description!.toLowerCase().includes(word))) {
         score += 7;
         factors.push('Value pillar messaging');
       }
@@ -184,7 +187,7 @@ export class BrandScore extends LitElement {
     // Check CTA
     if (content.cta) {
       const goodCTAs = ['start', 'get', 'try', 'see', 'explore', 'discover', 'learn'];
-      if (goodCTAs.some(word => content.cta!.toLowerCase().includes(word))) {
+      if (goodCTAs.some((word) => content.cta!.toLowerCase().includes(word))) {
         score += 5;
         factors.push('Action-driven CTA');
       }

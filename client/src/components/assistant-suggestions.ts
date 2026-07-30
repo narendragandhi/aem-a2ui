@@ -165,66 +165,96 @@ export class AssistantSuggestions extends LitElement {
       <div class="suggestions-section">
         <div class="suggestions-header">
           <h2>Generated Suggestions</h2>
-          ${this.suggestions.length > 0 ? html`
-            <span class="suggestion-count">${this.suggestions.length} variation${this.suggestions.length > 1 ? 's' : ''}</span>
-          ` : ''}
+          ${
+            this.suggestions.length > 0
+              ? html`
+                  <span class="suggestion-count"
+                    >${this.suggestions.length} variation${this.suggestions.length > 1 ? 's' : ''}</span
+                  >
+                `
+              : ''
+          }
         </div>
 
-        ${this.suggestions.length === 0 ? html`
-          <div class="empty-suggestions">
-            <div class="empty-suggestions-icon">&#128161;</div>
-            <p>Enter a prompt above to generate content suggestions</p>
-          </div>
-        ` : html`
-          <div class="suggestions-list">
-            ${this.suggestions.map(suggestion => html`
-              <div
-                class="suggestion-card ${this.selectedSuggestion?.id === suggestion.id ? 'selected' : ''}"
-                @click=${() => this.selectSuggestion(suggestion)}
-              >
-                <div class="suggestion-card-header">
-                  <h3>${suggestion.title}</h3>
-                  <span class="component-type-badge">${suggestion.componentType}</span>
+        ${
+          this.suggestions.length === 0
+            ? html`
+                <div class="empty-suggestions">
+                  <div class="empty-suggestions-icon">&#128161;</div>
+                  <p>Enter a prompt above to generate content suggestions</p>
                 </div>
-                <p>${suggestion.description}</p>
-                <div class="suggestion-actions">
-                  <button class="btn-apply" @click=${(e: Event) => { e.stopPropagation(); this.applySuggestion(suggestion); }}>
-                    Apply to Preview
-                  </button>
-                  <button class="btn-copy" @click=${(e: Event) => { e.stopPropagation(); this.copyToClipboard(suggestion); }}>
-                    Copy
-                  </button>
+              `
+            : html`
+                <div class="suggestions-list">
+                  ${this.suggestions.map(
+              (suggestion) => html`
+                <div
+                  class="suggestion-card ${this.selectedSuggestion?.id === suggestion.id ? 'selected' : ''}"
+                  @click=${() => this.selectSuggestion(suggestion)}
+                >
+                  <div class="suggestion-card-header">
+                    <h3>${suggestion.title}</h3>
+                    <span class="component-type-badge">${suggestion.componentType}</span>
+                  </div>
+                  <p>${suggestion.description}</p>
+                  <div class="suggestion-actions">
+                    <button
+                      class="btn-apply"
+                      @click=${(e: Event) => {
+                    e.stopPropagation();
+                    this.applySuggestion(suggestion);
+                  }}
+                    >
+                      Apply to Preview
+                    </button>
+                    <button
+                      class="btn-copy"
+                      @click=${(e: Event) => {
+                    e.stopPropagation();
+                    this.copyToClipboard(suggestion);
+                  }}
+                    >
+                      Copy
+                    </button>
+                  </div>
                 </div>
-              </div>
-            `)}
-          </div>
-        `}
+              `,
+            )}
+                </div>
+              `
+        }
       </div>
     `;
   }
 
   private selectSuggestion(suggestion: ContentSuggestion) {
-    this.dispatchEvent(new CustomEvent('suggestion-selected', {
-      detail: { suggestion },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('suggestion-selected', {
+        detail: { suggestion },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private applySuggestion(suggestion: ContentSuggestion) {
-    this.dispatchEvent(new CustomEvent('suggestion-applied', {
-      detail: { suggestion },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('suggestion-applied', {
+        detail: { suggestion },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private copyToClipboard(suggestion: ContentSuggestion) {
-    this.dispatchEvent(new CustomEvent('copy-suggestion', {
-      detail: { suggestion },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('copy-suggestion', {
+        detail: { suggestion },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 }
 

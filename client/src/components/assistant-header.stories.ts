@@ -37,10 +37,6 @@ type Story = StoryObj;
 
 export const Default: Story = {
   render: (args) => html`
-    <assistant-header
-      .agentUrl=${args.agentUrl}
-      .isAI=${args.isAI}
-      .agents=${args.agents}
-    ></assistant-header>
+    <assistant-header .agentUrl=${args.agentUrl} .isAI=${args.isAI} .agents=${args.agents}></assistant-header>
   `,
 };

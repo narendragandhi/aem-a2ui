@@ -1,0 +1,27 @@
+{
+  "name": "aem-a2ui-extension",
+  "version": "1.0.0",
+  "description": "AEM A2UI AI Content Assistant - Universal Editor Extension",
+  "private": true,
+  "scripts": {
+    "dev": "aio app dev",
+    "build": "aio app build",
+    "deploy": "aio app deploy",
+    "undeploy": "aio app undeploy",
+    "test": "aio app test",
+    "e2e": "aio app e2e",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@adobe/aio-sdk": "^6.0.0",
+    "@adobe/aio-sdk-core": "^5.0.0",
+    "@adobe/aio-sdk-auth": "^4.0.0",
+    "@adobe/aio-lib-runtime": "^6.0.0",
+    "@adobe/universal-editor-service": "^1.0.0"
+  },
+  "devDependencies": {
+    "@adobe/aio-cli-plugin-app": "^14.0.0",
+    "@adobe/eslint-config-aio-app": "^3.0.0",
+    "jest": "^29.0.0"
+  }
+}

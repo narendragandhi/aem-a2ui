@@ -25,8 +25,8 @@ export interface AemContentPackage {
 }
 
 export interface AssetReference {
-  sourcePath: string;  // External URL or local path
-  targetPath: string;  // DAM path in AEM
+  sourcePath: string; // External URL or local path
+  targetPath: string; // DAM path in AEM
 }
 
 /**
@@ -38,7 +38,9 @@ export function contentToJcr(
     pagePath?: string;
     nodeName?: string;
     includeActions?: boolean;
-  } = {}
+    path?: string;
+    resourceType?: string;
+  } = {},
 ): JcrNode {
   const componentDef = getComponentById(content.componentType || 'teaser');
   const resourceType = componentDef?.resourceType || 'core/wcm/components/teaser/v2/teaser';
@@ -59,20 +61,20 @@ export function contentToJcr(
       Object.assign(node, {
         'jcr:title': content.title,
         'jcr:description': content.description,
-        'pretitle': content.subtitle || '',
-        'actionsEnabled': true,
-        'titleFromPage': false,
-        'descriptionFromPage': false,
+        pretitle: content.subtitle || '',
+        actionsEnabled: true,
+        titleFromPage: false,
+        descriptionFromPage: false,
       });
 
       // Add CTA as action
       if (content.ctaText && options.includeActions !== false) {
         node['actions'] = {
           'jcr:primaryType': 'nt:unstructured',
-          'item0': {
+          item0: {
             'jcr:primaryType': 'nt:unstructured',
-            'link': content.ctaUrl || '#',
-            'text': content.ctaText,
+            link: content.ctaUrl || '#',
+            text: content.ctaText,
           },
         };
       }
@@ -86,31 +88,31 @@ export function contentToJcr(
 
     case 'text':
       Object.assign(node, {
-        'text': `<p>${content.description}</p>`,
-        'textIsRich': true,
+        text: `<p>${content.description}</p>`,
+        textIsRich: true,
       });
       break;
 
     case 'title':
       Object.assign(node, {
         'jcr:title': content.title,
-        'type': 'h1',
+        type: 'h1',
       });
       break;
 
     case 'button':
       Object.assign(node, {
         'jcr:title': content.ctaText || 'Click Here',
-        'link': content.ctaUrl || '#',
+        link: content.ctaUrl || '#',
       });
       break;
 
     case 'image':
       Object.assign(node, {
-        'fileReference': convertToDAMPath(content.imageUrl || ''),
-        'alt': content.imageAlt || content.title,
+        fileReference: convertToDAMPath(content.imageUrl || ''),
+        alt: content.imageAlt || content.title,
         'jcr:title': content.title,
-        'isDecorative': false,
+        isDecorative: false,
       });
       break;
 
@@ -119,9 +121,9 @@ export function contentToJcr(
         'sling:resourceType': 'core/cif/components/commerce/productteaser/v1/productteaser',
         'jcr:title': content.title,
         'jcr:description': content.description,
-        'showTitle': true,
-        'showPrice': true,
-        'showAddToCart': true,
+        showTitle: true,
+        showPrice: true,
+        showAddToCart: true,
       });
       if (content.price) {
         node['price'] = content.price;
@@ -148,7 +150,7 @@ export function generatePageStructure(
     pagePath: string;
     pageTitle: string;
     template?: string;
-  }
+  },
 ): JcrNode {
   const pageNode: JcrNode = {
     'jcr:primaryType': 'cq:Page',
@@ -157,15 +159,18 @@ export function generatePageStructure(
       'jcr:title': options.pageTitle,
       'sling:resourceType': 'aem-component-factory/components/page',
       'cq:template': options.template || '/conf/aem-component-factory/settings/wcm/templates/page',
-      'root': {
+      root: {
         'jcr:primaryType': 'nt:unstructured',
         'sling:resourceType': 'core/wcm/components/container/v1/container',
-        'layout': 'responsiveGrid',
-        ...contents.reduce((acc, content, index) => {
-          const nodeName = `component_${index}`;
-          acc[nodeName] = contentToJcr(content, { nodeName });
-          return acc;
-        }, {} as Record<string, JcrNode>),
+        layout: 'responsiveGrid',
+        ...contents.reduce(
+          (acc, content, index) => {
+            const nodeName = `component_${index}`;
+            acc[nodeName] = contentToJcr(content, { nodeName });
+            return acc;
+          },
+          {} as Record<string, JcrNode>,
+        ),
       },
     },
   };
@@ -182,7 +187,7 @@ export function contentToSlingModel(content: ContentSuggestion): Record<string, 
 
   const baseModel = {
     ':type': getComponentById(componentType)?.resourceType || 'core/wcm/components/teaser/v2/teaser',
-    'id': content.id,
+    id: content.id,
   };
 
   switch (componentType) {
@@ -190,64 +195,72 @@ export function contentToSlingModel(content: ContentSuggestion): Record<string, 
     case 'teaser':
       return {
         ...baseModel,
-        'pretitle': content.subtitle || null,
-        'title': content.title,
-        'description': content.description,
-        'titleType': 'h2',
-        'actionsEnabled': true,
-        'actions': content.ctaText ? [{
-          'title': content.ctaText,
-          'url': content.ctaUrl || '#',
-        }] : [],
-        'image': content.imageUrl ? {
-          'src': content.imageUrl,
-          'alt': content.imageAlt || content.title,
-          'width': 1200,
-          'height': 800,
-        } : null,
+        pretitle: content.subtitle || null,
+        title: content.title,
+        description: content.description,
+        titleType: 'h2',
+        actionsEnabled: true,
+        actions: content.ctaText
+          ? [
+              {
+                title: content.ctaText,
+                url: content.ctaUrl || '#',
+              },
+            ]
+          : [],
+        image: content.imageUrl
+          ? {
+              src: content.imageUrl,
+              alt: content.imageAlt || content.title,
+              width: 1200,
+              height: 800,
+            }
+          : null,
       };
 
     case 'text':
       return {
         ...baseModel,
-        'text': content.description,
-        'richText': true,
+        text: content.description,
+        richText: true,
       };
 
     case 'image':
       return {
         ...baseModel,
-        'src': content.imageUrl,
-        'alt': content.imageAlt || content.title,
-        'title': content.title,
-        'link': content.ctaUrl,
+        src: content.imageUrl,
+        alt: content.imageAlt || content.title,
+        title: content.title,
+        link: content.ctaUrl,
       };
 
     case 'product':
       return {
         ...baseModel,
         ':type': 'core/cif/components/commerce/productteaser/v1/productteaser',
-        'name': content.title,
-        'description': content.description,
-        'price': {
-          'formatted': content.price,
-          'currency': 'USD',
+        name: content.title,
+        description: content.description,
+        price: {
+          formatted: content.price,
+          currency: 'USD',
         },
-        'image': {
-          'src': content.imageUrl,
-          'alt': content.title,
+        image: {
+          src: content.imageUrl,
+          alt: content.title,
         },
-        'actions': [{
-          'title': content.ctaText || 'Add to Cart',
-          'url': content.ctaUrl || '#',
-        }],
+        actions: [
+          {
+            title: content.ctaText || 'Add to Cart',
+            url: content.ctaUrl || '#',
+          },
+        ],
       };
 
     default:
       return {
         ...baseModel,
-        'title': content.title,
-        'description': content.description,
+        title: content.title,
+        description: content.description,
       };
   }
 }

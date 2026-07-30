@@ -186,7 +186,7 @@ export const errorHandler = new ErrorHandler();
  */
 export async function withErrorHandling<T>(
   operation: () => Promise<T>,
-  context?: string
+  context?: string,
 ): Promise<{ data?: T; error?: AppError }> {
   try {
     const data = await operation();
@@ -202,7 +202,7 @@ export async function withErrorHandling<T>(
  */
 export async function withRetry<T>(
   operation: () => Promise<T>,
-  options: { maxRetries?: number; delay?: number; context?: string } = {}
+  options: { maxRetries?: number; delay?: number; context?: string } = {},
 ): Promise<T> {
   const { maxRetries = 3, delay = 1000, context } = options;
   let lastError: AppError | undefined;

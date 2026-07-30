@@ -9,21 +9,16 @@ import com.example.aema2ui.service.BrandValidationService;
 import com.example.aema2ui.service.LocalizationService;
 import com.example.aema2ui.service.aem.AemUniversalEditorService;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-    /**
-     * Demo endpoints for AG-UI / A2UI scenarios.
-     */
 @RestController
 @RequestMapping("/demo")
+@ConditionalOnProperty(name = "aem.demo.enabled", havingValue = "true", matchIfMissing = true)
 public class DemoController {
-
-    @Value("${aem.demo.enabled:true}")
-    private boolean demoEnabled;
 
     private final BrandConfigService brandConfigService;
     private final BrandValidationService brandValidationService;
@@ -46,9 +41,6 @@ public class DemoController {
 
     @PostMapping("/governance/check")
     public ResponseEntity<Map<String, Object>> governanceCheck(@RequestBody GovernanceRequest request) {
-        if (!demoEnabled) {
-            return ResponseEntity.status(404).body(Map.of("error", "Demo endpoints disabled"));
-        }
         BrandConfig brandConfig = request.brandId != null
             ? brandConfigService.getBrandConfig(request.brandId).orElse(brandConfigService.getActiveBrandConfig())
             : brandConfigService.getActiveBrandConfig();
@@ -67,9 +59,6 @@ public class DemoController {
      */
     @GetMapping("/component-schema")
     public ResponseEntity<Map<String, Object>> componentSchema(@RequestParam(defaultValue = "hero") String type) {
-        if (!demoEnabled) {
-            return ResponseEntity.status(404).body(Map.of("error", "Demo endpoints disabled"));
-        }
         Map<String, Object> schema = aemUniversalEditorService.getFieldSchema(type);
         return ResponseEntity.ok(Map.of(
             "componentType", type,
@@ -82,9 +71,6 @@ public class DemoController {
      */
     @GetMapping("/dam-assembly")
     public ResponseEntity<Map<String, Object>> damAssembly(@RequestParam(defaultValue = "adventure") String query) {
-        if (!demoEnabled) {
-            return ResponseEntity.status(404).body(Map.of("error", "Demo endpoints disabled"));
-        }
         List<Map<String, Object>> assets = aemIntegrationService.searchDamAssets(query, "image");
         Map<String, Object> selected = assets.isEmpty() ? null : assets.get(0);
         return ResponseEntity.ok(Map.of(
@@ -99,9 +85,6 @@ public class DemoController {
      */
     @PostMapping("/personalize")
     public ResponseEntity<Map<String, Object>> personalize(@RequestBody PersonalizeRequest request) {
-        if (!demoEnabled) {
-            return ResponseEntity.status(404).body(Map.of("error", "Demo endpoints disabled"));
-        }
         Map<String, ContentSuggestion> variants = new LinkedHashMap<>();
         List<String> personas = request.personas != null ? request.personas : List.of("Executive", "Developer");
         for (String persona : personas) {
@@ -117,9 +100,6 @@ public class DemoController {
      */
     @PostMapping("/localize")
     public ResponseEntity<Map<String, Object>> localize(@RequestBody LocalizeRequest request) {
-        if (!demoEnabled) {
-            return ResponseEntity.status(404).body(Map.of("error", "Demo endpoints disabled"));
-        }
         List<String> langs = request.languages != null ? request.languages : List.of("es-ES", "fr-FR");
         Map<String, ContentSuggestion> localized = localizationService.localize(request.content, langs);
         return ResponseEntity.ok(Map.of(
@@ -132,9 +112,6 @@ public class DemoController {
      */
     @PostMapping("/xf")
     public ResponseEntity<Map<String, Object>> experienceFragment(@RequestBody XfRequest request) {
-        if (!demoEnabled) {
-            return ResponseEntity.status(404).body(Map.of("error", "Demo endpoints disabled"));
-        }
         String basePath = "/content/experience-fragments/aem-a2ui";
         String name = request.name != null && !request.name.isBlank()
             ? request.name

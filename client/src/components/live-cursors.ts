@@ -63,22 +63,19 @@ export class LiveCursors extends LitElement {
   }
 
   render() {
-    const activeCursors = this.cursors.filter(
-      c => c.sessionId !== this.currentUserId && this.isRecent(c)
-    );
+    const activeCursors = this.cursors.filter((c) => c.sessionId !== this.currentUserId && this.isRecent(c));
 
     return html`
-      ${activeCursors.map(cursor => html`
-        <div
-          class="cursor"
-          style="transform: translate(${cursor.x}px, ${cursor.y}px)"
-        >
-          <div class="cursor-pointer" style="border-bottom-color: ${this.getAvatarColor(cursor.sessionId)}"></div>
-          <div class="cursor-label" style="background: ${this.getAvatarColor(cursor.sessionId)}">
-            ${cursor.username}
+      ${activeCursors.map(
+        (cursor) => html`
+          <div class="cursor" style="transform: translate(${cursor.x}px, ${cursor.y}px)">
+            <div class="cursor-pointer" style="border-bottom-color: ${this.getAvatarColor(cursor.sessionId)}"></div>
+            <div class="cursor-label" style="background: ${this.getAvatarColor(cursor.sessionId)}">
+              ${cursor.username}
+            </div>
           </div>
-        </div>
-      `)}
+        `,
+      )}
     `;
   }
 }

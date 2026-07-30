@@ -43,7 +43,10 @@ class ApiService {
   private abortControllers: Map<string, AbortController> = new Map();
 
   constructor() {
-    this.baseUrl = 'http://localhost:10003';
+    this.baseUrl =
+      (typeof window !== 'undefined' && (window as any).__ENV__?.VITE_JAVA_AGENT_URL) ||
+      (import.meta as Record<string, any>).env?.VITE_JAVA_AGENT_URL ||
+      'http://localhost:10003';
   }
 
   setBaseUrl(url: string) {
@@ -72,11 +75,7 @@ class ApiService {
     apiLogger.debug('All requests cancelled');
   }
 
-  private async fetch<T>(
-    endpoint: string,
-    options: RequestInit = {},
-    requestId?: string
-  ): Promise<T> {
+  private async fetch<T>(endpoint: string, options: RequestInit = {}, requestId?: string): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const controller = new AbortController();
 
@@ -122,15 +121,19 @@ class ApiService {
 
   // Content Generation
   async generateContent(prompt: string): Promise<TaskResponse> {
-    return this.fetch<TaskResponse>('/tasks', {
-      method: 'POST',
-      body: JSON.stringify({
-        message: {
-          role: 'user',
-          parts: [{ text: prompt }],
-        },
-      } as TaskRequest),
-    }, 'generate-content');
+    return this.fetch<TaskResponse>(
+      '/tasks',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          message: {
+            role: 'user',
+            parts: [{ text: prompt }],
+          },
+        } as TaskRequest),
+      },
+      'generate-content',
+    );
   }
 
   // Advanced Generation (with component type)
@@ -140,21 +143,25 @@ class ApiService {
     options?: {
       tone?: string;
       imageStyle?: string;
-    }
+    },
   ): Promise<TaskResponse> {
     const fullPrompt = options
       ? `[${componentType}] ${prompt} (tone: ${options.tone || 'professional'}, style: ${options.imageStyle || 'photography'})`
       : `[${componentType}] ${prompt}`;
 
-    return this.fetch<TaskResponse>('/tasks', {
-      method: 'POST',
-      body: JSON.stringify({
-        message: {
-          role: 'user',
-          parts: [{ text: fullPrompt }],
-        },
-      }),
-    }, 'generate-advanced');
+    return this.fetch<TaskResponse>(
+      '/tasks',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          message: {
+            role: 'user',
+            parts: [{ text: fullPrompt }],
+          },
+        }),
+      },
+      'generate-advanced',
+    );
   }
 
   // Streaming Generation
@@ -162,16 +169,14 @@ class ApiService {
     prompt: string,
     componentType: string,
     onEvent: (event: string, data: unknown) => void,
-    onError: (error: AppError) => void
+    onError: (error: AppError) => void,
   ): EventSource {
     const params = new URLSearchParams({
       input: prompt,
       componentType,
     });
 
-    const eventSource = new EventSource(
-      `${this.baseUrl}/stream/generate?${params}`
-    );
+    const eventSource = new EventSource(`${this.baseUrl}/stream/generate?${params}`);
 
     eventSource.onopen = () => {
       apiLogger.debug('SSE connection opened');
@@ -210,10 +215,14 @@ class ApiService {
 
   // AI Recommendations
   async getRecommendation(description: string): Promise<PageRecommendation> {
-    return this.fetch<PageRecommendation>('/recommend', {
-      method: 'POST',
-      body: JSON.stringify({ description }),
-    }, 'recommendation');
+    return this.fetch<PageRecommendation>(
+      '/recommend',
+      {
+        method: 'POST',
+        body: JSON.stringify({ description }),
+      },
+      'recommendation',
+    );
   }
 
   // AEM Health Check
@@ -243,7 +252,7 @@ class ApiService {
     contentId: string,
     content: ContentSuggestion,
     createdBy: string,
-    changeNote: string
+    changeNote: string,
   ): Promise<{ id: string }> {
     return this.fetch(`/content/${contentId}/versions`, {
       method: 'POST',
@@ -336,9 +345,6 @@ class ApiService {
 export const api = new ApiService();
 
 // Helper for retryable API calls
-export async function apiWithRetry<T>(
-  operation: () => Promise<T>,
-  context?: string
-): Promise<T> {
+export async function apiWithRetry<T>(operation: () => Promise<T>, context?: string): Promise<T> {
   return withRetry(operation, { context, maxRetries: 3, delay: 1000 });
 }

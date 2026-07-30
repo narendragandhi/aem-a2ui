@@ -8,8 +8,24 @@ import { ContentSuggestion } from '../lib/types.js';
 describe('AssistantSuggestions', () => {
   let element: AssistantSuggestions;
   const suggestions: ContentSuggestion[] = [
-    { id: '1', title: 'Suggestion 1', description: 'Description 1', ctaText: 'CTA 1', ctaUrl: '#', imageUrl: '#', componentType: 'hero' },
-    { id: '2', title: 'Suggestion 2', description: 'Description 2', ctaText: 'CTA 2', ctaUrl: '#', imageUrl: '#', componentType: 'teaser' },
+    {
+      id: '1',
+      title: 'Suggestion 1',
+      description: 'Description 1',
+      ctaText: 'CTA 1',
+      ctaUrl: '#',
+      imageUrl: '#',
+      componentType: 'hero',
+    },
+    {
+      id: '2',
+      title: 'Suggestion 2',
+      description: 'Description 2',
+      ctaText: 'CTA 2',
+      ctaUrl: '#',
+      imageUrl: '#',
+      componentType: 'teaser',
+    },
   ];
 
   beforeEach(async () => {

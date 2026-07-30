@@ -35,9 +35,16 @@ export class ContentLocks extends LitElement {
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-2px); }
-      75% { transform: translateX(2px); }
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-2px);
+      }
+      75% {
+        transform: translateX(2px);
+      }
     }
 
     .lock-icon {
@@ -66,13 +73,21 @@ export class ContentLocks extends LitElement {
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
   `;
 
   @property({ type: Array }) locks: Array<{ field: string; sessionId: string; username: string }> = [];
-  @property({ type: Object }) fieldPositions: Record<string, { top: number; left: number; width: number; height: number }> = {};
+  @property({ type: Object }) fieldPositions: Record<
+    string,
+    { top: number; left: number; width: number; height: number }
+  > = {};
 
   private getLockPosition(field: string): { top: number; left: number } | null {
     const pos = this.fieldPositions[field];
@@ -83,13 +98,15 @@ export class ContentLocks extends LitElement {
   render() {
     return html`
       <div class="locks-overlay">
-        ${this.locks.map(lock => {
+        ${this.locks.map((lock) => {
           const pos = this.getLockPosition(lock.field);
           if (!pos) return null;
           return html`
             <div class="lock-badge" style="top: ${pos.top}px; left: ${pos.left}px;">
               <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                <path
+                  d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                />
               </svg>
               ${lock.username} editing
             </div>

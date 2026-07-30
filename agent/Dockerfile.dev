@@ -6,7 +6,7 @@ WORKDIR /app
 RUN pip install uv
 
 COPY pyproject.toml ./
-RUN uv venv && uv pip install fastapi uvicorn pydantic watchfiles
+RUN uv venv && uv pip install -r pyproject.toml watchfiles
 
 COPY *.py ./
 

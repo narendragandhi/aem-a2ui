@@ -18,7 +18,7 @@ describe('AssistantHeader', () => {
   it('should render the header', () => {
     const h1 = element.shadowRoot?.querySelector('h1');
     expect(h1).to.exist;
-    expect(h1?.textContent).to.include('AEM Content Assistant');
+    expect(h1?.textContent).to.include('AEM Component Factory');
   });
 
   it('should dispatch an agent-changed event when the selection changes', async () => {

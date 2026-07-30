@@ -24,7 +24,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Panel for submitting approved content to AEM workflows. Shows workflow model selection, progress tracking, and step management.',
+        component:
+          'Panel for submitting approved content to AEM workflows. Shows workflow model selection, progress tracking, and step management.',
       },
     },
   },
@@ -54,7 +55,8 @@ export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Shows available workflow models (Request for Publication, Request for Activation, Review and Approve, Translation Request) for selection.',
+        story:
+          'Shows available workflow models (Request for Publication, Request for Activation, Review and Approve, Translation Request) for selection.',
       },
     },
   },

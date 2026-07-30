@@ -54,7 +54,7 @@ export class AemDeployService {
       const response = await fetch(`${this.baseUrl}/libs/granite/core/content/login.html`, {
         method: 'HEAD',
         headers: {
-          'Authorization': this.getAuthHeader(),
+          Authorization: this.getAuthHeader(),
         },
       });
       return response.ok || response.status === 302;
@@ -67,10 +67,7 @@ export class AemDeployService {
   /**
    * Deploy content to AEM using Sling POST Servlet
    */
-  async deployContent(
-    content: ContentSuggestion,
-    options: DeployOptions
-  ): Promise<DeployResult> {
+  async deployContent(content: ContentSuggestion, options: DeployOptions): Promise<DeployResult> {
     try {
       const jcrContent = contentToJcr(content, {
         path: options.path,
@@ -91,7 +88,7 @@ export class AemDeployService {
       const response = await fetch(`${this.baseUrl}${options.path}`, {
         method: 'POST',
         headers: {
-          'Authorization': this.getAuthHeader(),
+          Authorization: this.getAuthHeader(),
         },
         body: formData,
       });
@@ -127,7 +124,7 @@ export class AemDeployService {
     content: ContentSuggestion,
     parentPath: string,
     pageName: string,
-    template: string = '/conf/aem-component-factory/settings/wcm/templates/content-page'
+    template: string = '/conf/aem-component-factory/settings/wcm/templates/content-page',
   ): Promise<DeployResult> {
     try {
       const pagePath = `${parentPath}/${pageName}`;
@@ -143,7 +140,7 @@ export class AemDeployService {
       const createResponse = await fetch(`${this.baseUrl}/bin/wcmcommand`, {
         method: 'POST',
         headers: {
-          'Authorization': this.getAuthHeader(),
+          Authorization: this.getAuthHeader(),
         },
         body: formData,
       });
@@ -182,7 +179,7 @@ export class AemDeployService {
     content: ContentSuggestion,
     parentPath: string,
     pageName: string,
-    template: string
+    template: string,
   ): Promise<DeployResult> {
     const pagePath = `${parentPath}/${pageName}`;
 
@@ -193,13 +190,13 @@ export class AemDeployService {
         'jcr:title': content.title,
         'sling:resourceType': 'aem-component-factory/components/page',
         'cq:template': template,
-        'root': {
+        root: {
           'jcr:primaryType': 'nt:unstructured',
           'sling:resourceType': 'wcm/foundation/components/responsivegrid',
-          'container': {
+          container: {
             'jcr:primaryType': 'nt:unstructured',
             'sling:resourceType': 'wcm/foundation/components/responsivegrid',
-            'component_0': contentToJcr(content, {
+            component_0: contentToJcr(content, {
               path: `${pagePath}/jcr:content/root/container/component_0`,
               resourceType: `core/wcm/components/${content.componentType || 'teaser'}/v2/${content.componentType || 'teaser'}`,
             }),
@@ -216,7 +213,7 @@ export class AemDeployService {
     const response = await fetch(`${this.baseUrl}${pagePath}`, {
       method: 'POST',
       headers: {
-        'Authorization': this.getAuthHeader(),
+        Authorization: this.getAuthHeader(),
       },
       body: formData,
     });
@@ -239,28 +236,31 @@ export class AemDeployService {
   async deployContentFragment(
     fragmentData: Record<string, unknown>,
     path: string,
-    modelPath: string
+    modelPath: string,
   ): Promise<DeployResult> {
     try {
       const formData = new FormData();
       formData.append(':operation', 'import');
       formData.append(':contentType', 'json');
-      formData.append(':content', JSON.stringify({
-        'jcr:primaryType': 'dam:Asset',
-        'jcr:content': {
-          'jcr:primaryType': 'dam:AssetContent',
-          'data': {
-            'jcr:primaryType': 'nt:unstructured',
-            'cq:model': modelPath,
-            ...fragmentData,
+      formData.append(
+        ':content',
+        JSON.stringify({
+          'jcr:primaryType': 'dam:Asset',
+          'jcr:content': {
+            'jcr:primaryType': 'dam:AssetContent',
+            data: {
+              'jcr:primaryType': 'nt:unstructured',
+              'cq:model': modelPath,
+              ...fragmentData,
+            },
           },
-        },
-      }));
+        }),
+      );
 
       const response = await fetch(`${this.baseUrl}${path}`, {
         method: 'POST',
         headers: {
-          'Authorization': this.getAuthHeader(),
+          Authorization: this.getAuthHeader(),
         },
         body: formData,
       });
@@ -285,11 +285,7 @@ export class AemDeployService {
   /**
    * Upload asset to DAM
    */
-  async uploadAsset(
-    file: File | Blob,
-    path: string,
-    filename: string
-  ): Promise<DeployResult> {
+  async uploadAsset(file: File | Blob, path: string, filename: string): Promise<DeployResult> {
     try {
       const formData = new FormData();
       formData.append('file', file, filename);
@@ -298,7 +294,7 @@ export class AemDeployService {
       const response = await fetch(`${this.baseUrl}${path}.createasset.html`, {
         method: 'POST',
         headers: {
-          'Authorization': this.getAuthHeader(),
+          Authorization: this.getAuthHeader(),
         },
         body: formData,
       });
@@ -327,12 +323,12 @@ export class AemDeployService {
     try {
       const formData = new FormData();
       formData.append('cmd', 'Activate');
-      paths.forEach(path => formData.append('path', path));
+      paths.forEach((path) => formData.append('path', path));
 
       const response = await fetch(`${this.baseUrl}/bin/replicate.json`, {
         method: 'POST',
         headers: {
-          'Authorization': this.getAuthHeader(),
+          Authorization: this.getAuthHeader(),
         },
         body: formData,
       });
@@ -356,11 +352,7 @@ export class AemDeployService {
   /**
    * Flatten nested object to FormData
    */
-  private flattenToFormData(
-    obj: Record<string, unknown>,
-    formData: FormData,
-    prefix: string
-  ): void {
+  private flattenToFormData(obj: Record<string, unknown>, formData: FormData, prefix: string): void {
     for (const [key, value] of Object.entries(obj)) {
       const fieldName = prefix ? `${prefix}/${key}` : key;
 
@@ -391,7 +383,7 @@ export class AemDeployService {
 export function createDeployService(
   baseUrl: string,
   username: string = 'admin',
-  password: string = 'admin'
+  password: string = 'admin',
 ): AemDeployService {
   return new AemDeployService(baseUrl, { username, password });
 }

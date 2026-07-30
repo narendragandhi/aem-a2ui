@@ -14,7 +14,7 @@ const COMPONENT_TYPES = [
     icon: 'Image',
     description: 'Full-width banner with headline and CTA',
     example: 'Landing pages, campaigns',
-    category: 'Marketing'
+    category: 'Marketing',
   },
   {
     id: 'banner',
@@ -22,7 +22,7 @@ const COMPONENT_TYPES = [
     icon: 'Campaign',
     description: 'Attention-grabbing announcement',
     example: 'Sales, alerts, CTAs',
-    category: 'Marketing'
+    category: 'Marketing',
   },
   {
     id: 'carousel',
@@ -30,7 +30,7 @@ const COMPONENT_TYPES = [
     icon: 'Slides',
     description: 'Rotating slides with images and text',
     example: 'Featured content, galleries',
-    category: 'Marketing'
+    category: 'Marketing',
   },
   // Content & Editorial
   {
@@ -39,7 +39,7 @@ const COMPONENT_TYPES = [
     icon: 'FileTemplate',
     description: 'Content preview with image and text',
     example: 'Blog posts, articles',
-    category: 'Content'
+    category: 'Content',
   },
   {
     id: 'quote',
@@ -47,7 +47,7 @@ const COMPONENT_TYPES = [
     icon: 'Quote',
     description: 'Customer testimonial or pull quote',
     example: 'Reviews, endorsements',
-    category: 'Content'
+    category: 'Content',
   },
   {
     id: 'accordion',
@@ -55,7 +55,7 @@ const COMPONENT_TYPES = [
     icon: 'Accordion',
     description: 'Expandable content sections',
     example: 'FAQs, details',
-    category: 'Content'
+    category: 'Content',
   },
   {
     id: 'tabs',
@@ -63,7 +63,7 @@ const COMPONENT_TYPES = [
     icon: 'Tabs',
     description: 'Tabbed content organization',
     example: 'Product specs, categories',
-    category: 'Content'
+    category: 'Content',
   },
   // E-Commerce
   {
@@ -72,7 +72,7 @@ const COMPONENT_TYPES = [
     icon: 'ShoppingCart',
     description: 'Product showcase with image and price',
     example: 'E-commerce, catalogs',
-    category: 'Commerce'
+    category: 'Commerce',
   },
   {
     id: 'productList',
@@ -80,7 +80,7 @@ const COMPONENT_TYPES = [
     icon: 'List',
     description: 'Grid or list of multiple products',
     example: 'Category pages, collections',
-    category: 'Commerce'
+    category: 'Commerce',
   },
   {
     id: 'pricing',
@@ -88,7 +88,7 @@ const COMPONENT_TYPES = [
     icon: 'Table',
     description: 'Comparison pricing tiers',
     example: 'SaaS, subscriptions',
-    category: 'Commerce'
+    category: 'Commerce',
   },
   // Media
   {
@@ -97,7 +97,7 @@ const COMPONENT_TYPES = [
     icon: 'Video',
     description: 'Embedded video with controls',
     example: 'Tutorials, promos',
-    category: 'Media'
+    category: 'Media',
   },
   {
     id: 'gallery',
@@ -105,7 +105,7 @@ const COMPONENT_TYPES = [
     icon: 'Gallery',
     description: 'Grid of images with lightbox',
     example: 'Portfolios, lookbooks',
-    category: 'Media'
+    category: 'Media',
   },
   // Navigation & Structure
   {
@@ -114,7 +114,7 @@ const COMPONENT_TYPES = [
     icon: 'Menu',
     description: 'Site navigation with dropdowns',
     example: 'Headers, menus',
-    category: 'Navigation'
+    category: 'Navigation',
   },
   {
     id: 'footer',
@@ -122,7 +122,7 @@ const COMPONENT_TYPES = [
     icon: 'Footer',
     description: 'Site footer with links and info',
     example: 'Contact, sitemap',
-    category: 'Navigation'
+    category: 'Navigation',
   },
   {
     id: 'breadcrumb',
@@ -130,7 +130,7 @@ const COMPONENT_TYPES = [
     icon: 'Path',
     description: 'Navigation path indicator',
     example: 'Deep pages, hierarchy',
-    category: 'Navigation'
+    category: 'Navigation',
   },
   // Interactive
   {
@@ -139,7 +139,7 @@ const COMPONENT_TYPES = [
     icon: 'Form',
     description: 'Input form with validation',
     example: 'Contact, signup',
-    category: 'Interactive'
+    category: 'Interactive',
   },
   {
     id: 'search',
@@ -147,7 +147,7 @@ const COMPONENT_TYPES = [
     icon: 'Search',
     description: 'Search input with suggestions',
     example: 'Site search, filtering',
-    category: 'Interactive'
+    category: 'Interactive',
   },
   {
     id: 'cta',
@@ -155,7 +155,7 @@ const COMPONENT_TYPES = [
     icon: 'Button',
     description: 'Prominent action button section',
     example: 'Signups, downloads',
-    category: 'Interactive'
+    category: 'Interactive',
   },
   // Social & Trust
   {
@@ -164,7 +164,7 @@ const COMPONENT_TYPES = [
     icon: 'Share',
     description: 'Social media sharing buttons',
     example: 'Articles, products',
-    category: 'Social'
+    category: 'Social',
   },
   {
     id: 'team',
@@ -172,7 +172,7 @@ const COMPONENT_TYPES = [
     icon: 'Users',
     description: 'Team member profiles',
     example: 'About us, leadership',
-    category: 'Social'
+    category: 'Social',
   },
 ];
 
@@ -293,7 +293,7 @@ export class ContentWizard extends LitElement {
       background: var(--spectrum-gray-50, white);
       border-radius: 8px;
       padding: 32px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       position: relative;
       display: flex;
       flex-direction: column;
@@ -746,7 +746,7 @@ export class ContentWizard extends LitElement {
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -860,22 +860,24 @@ export class ContentWizard extends LitElement {
       ${this.renderStepIndicator()}
 
       <div class="step-content">
-        ${this.currentStep === 1 ? this.renderStep1() : ''}
-        ${this.currentStep === 2 ? this.renderStep2() : ''}
+        ${this.currentStep === 1 ? this.renderStep1() : ''} ${this.currentStep === 2 ? this.renderStep2() : ''}
         ${this.currentStep === 3 ? this.renderStep3() : ''}
-
-        ${this.loading ? html`
-          <div class="loading-overlay">
-            <sp-progress-circle indeterminate size="l"></sp-progress-circle>
-            <div class="loading-text">Generating your content...</div>
-          </div>
-        ` : ''}
+        ${
+          this.loading
+            ? html`
+                <div class="loading-overlay">
+                  <sp-progress-circle indeterminate size="l"></sp-progress-circle>
+                  <div class="loading-text">Generating your content...</div>
+                </div>
+              `
+            : ''
+        }
       </div>
 
       <asset-browser
         .open=${this.showAssetBrowser}
         .selectedAssetId=${this.selectedAsset?.id || null}
-        @close=${() => this.showAssetBrowser = false}
+        @close=${() => (this.showAssetBrowser = false)}
         @asset-selected=${this.handleAssetSelected}
       ></asset-browser>
     `;
@@ -890,17 +892,21 @@ export class ContentWizard extends LitElement {
 
     return html`
       <div class="step-indicator">
-        ${steps.map((step, index) => html`
-          <div class="step">
-            <div class="step-number ${this.getStepClass(step.num)}">
-              ${this.currentStep > step.num ? '\u2713' : step.num}
+        ${steps.map(
+          (step, index) => html`
+            <div class="step">
+              <div class="step-number ${this.getStepClass(step.num)}">
+                ${this.currentStep > step.num ? '\u2713' : step.num}
+              </div>
+              <span class="step-label ${this.currentStep === step.num ? 'active' : ''}">${step.label}</span>
             </div>
-            <span class="step-label ${this.currentStep === step.num ? 'active' : ''}">${step.label}</span>
-          </div>
-          ${index < steps.length - 1 ? html`
-            <div class="step-connector ${this.currentStep > step.num ? 'completed' : ''}"></div>
-          ` : ''}
-        `)}
+            ${
+            index < steps.length - 1
+              ? html` <div class="step-connector ${this.currentStep > step.num ? 'completed' : ''}"></div> `
+              : ''
+          }
+          `,
+        )}
       </div>
     `;
   }
@@ -939,7 +945,7 @@ export class ContentWizard extends LitElement {
       cta: '\u{1F4E2}',
       // Social
       socialShare: '\u{1F517}',
-      team: '\u{1F465}'
+      team: '\u{1F465}',
     };
     return icons[id] || '\u{2728}';
   }
@@ -949,7 +955,7 @@ export class ContentWizard extends LitElement {
       professional: '\u{1F4BC}',
       playful: '\u{1F389}',
       urgent: '\u{26A1}',
-      elegant: '\u{2728}'
+      elegant: '\u{2728}',
     };
     return icons[id] || '\u{2728}';
   }
@@ -959,7 +965,7 @@ export class ContentWizard extends LitElement {
       photo: '\u{1F4F7}',
       illustration: '\u{1F3A8}',
       abstract: '\u{1F537}',
-      minimal: '\u{2B1C}'
+      minimal: '\u{2B1C}',
     };
     return icons[id] || '\u{2728}';
   }
@@ -968,7 +974,7 @@ export class ContentWizard extends LitElement {
     if (this.selectedCategory === 'all') {
       return COMPONENT_TYPES;
     }
-    return COMPONENT_TYPES.filter(type => type.category === this.selectedCategory);
+    return COMPONENT_TYPES.filter((type) => type.category === this.selectedCategory);
   }
 
   private renderStep1() {
@@ -979,39 +985,39 @@ export class ContentWizard extends LitElement {
       <p class="step-subtitle">Choose a component type to get started</p>
 
       <div class="category-filter">
-        ${CATEGORIES.map(cat => html`
-          <span
-            class="category-chip ${this.selectedCategory === cat.id ? 'selected' : ''}"
-            @click=${() => this.selectedCategory = cat.id}
-          >
-            ${cat.name}
-          </span>
-        `)}
+        ${CATEGORIES.map(
+          (cat) => html`
+            <span
+              class="category-chip ${this.selectedCategory === cat.id ? 'selected' : ''}"
+              @click=${() => (this.selectedCategory = cat.id)}
+            >
+              ${cat.name}
+            </span>
+          `,
+        )}
       </div>
 
       <div class="type-grid">
-        ${filteredComponents.map(type => html`
-          <div
-            class="type-card ${this.selectedType === type.id ? 'selected' : ''}"
-            @click=${() => this.selectType(type.id)}
-          >
-            <div class="type-card-header">
-              <span class="type-icon">${this.getTypeIcon(type.id)}</span>
-              <span class="type-name">${type.name}</span>
+        ${filteredComponents.map(
+          (type) => html`
+            <div
+              class="type-card ${this.selectedType === type.id ? 'selected' : ''}"
+              @click=${() => this.selectType(type.id)}
+            >
+              <div class="type-card-header">
+                <span class="type-icon">${this.getTypeIcon(type.id)}</span>
+                <span class="type-name">${type.name}</span>
+              </div>
+              <p class="type-description">${type.description}</p>
+              <p class="type-example">Best for: ${type.example}</p>
             </div>
-            <p class="type-description">${type.description}</p>
-            <p class="type-example">Best for: ${type.example}</p>
-          </div>
-        `)}
+          `,
+        )}
       </div>
 
       <div class="step-navigation">
         <div></div>
-        <sp-button
-          variant="accent"
-          @click=${() => this.nextStep()}
-          ?disabled=${!this.selectedType}
-        >
+        <sp-button variant="accent" @click=${() => this.nextStep()} ?disabled=${!this.selectedType}>
           Next: Customize
         </sp-button>
       </div>
@@ -1019,7 +1025,7 @@ export class ContentWizard extends LitElement {
   }
 
   private renderStep2() {
-    const selectedTypeInfo = COMPONENT_TYPES.find(t => t.id === this.selectedType);
+    const selectedTypeInfo = COMPONENT_TYPES.find((t) => t.id === this.selectedType);
 
     return html`
       <h2 class="step-title">Customize your ${selectedTypeInfo?.name}</h2>
@@ -1027,70 +1033,76 @@ export class ContentWizard extends LitElement {
 
       <label class="section-label">Tone & Voice</label>
       <div class="tone-grid">
-        ${TONES.map(tone => html`
-          <div
-            class="tone-card ${this.selectedTone === tone.id ? 'selected' : ''}"
-            @click=${() => this.selectedTone = tone.id}
-          >
-            <div class="tone-icon">${this.getToneIcon(tone.id)}</div>
-            <div class="tone-name">${tone.name}</div>
-            <div class="tone-description">${tone.description}</div>
-          </div>
-        `)}
+        ${TONES.map(
+          (tone) => html`
+            <div
+              class="tone-card ${this.selectedTone === tone.id ? 'selected' : ''}"
+              @click=${() => (this.selectedTone = tone.id)}
+            >
+              <div class="tone-icon">${this.getToneIcon(tone.id)}</div>
+              <div class="tone-name">${tone.name}</div>
+              <div class="tone-description">${tone.description}</div>
+            </div>
+          `,
+        )}
       </div>
 
       <label class="section-label">Image Style</label>
       <div class="image-style-grid">
-        ${IMAGE_STYLES.map(style => html`
-          <div
-            class="image-style-card ${this.selectedImageStyle === style.id ? 'selected' : ''}"
-            @click=${() => this.selectedImageStyle = style.id}
-          >
-            <div class="image-style-icon">${this.getStyleIcon(style.id)}</div>
-            <div class="image-style-name">${style.name}</div>
-          </div>
-        `)}
+        ${IMAGE_STYLES.map(
+          (style) => html`
+            <div
+              class="image-style-card ${this.selectedImageStyle === style.id ? 'selected' : ''}"
+              @click=${() => (this.selectedImageStyle = style.id)}
+            >
+              <div class="image-style-icon">${this.getStyleIcon(style.id)}</div>
+              <div class="image-style-name">${style.name}</div>
+            </div>
+          `,
+        )}
       </div>
 
       <div class="asset-selection">
         <label class="section-label">Select Image from Library (Optional)</label>
         <div class="asset-preview-container">
-          ${this.selectedAsset ? html`
-            <div class="selected-asset-card">
-              <img
-                class="selected-asset-thumbnail"
-                src="${this.selectedAsset.thumbnailUrl || this.selectedAsset.url}"
-                alt="${this.selectedAsset.name}"
-              />
-              <div class="selected-asset-info">
-                <div class="selected-asset-name">${this.selectedAsset.name}</div>
-                <div class="selected-asset-tags">
-                  ${this.selectedAsset.tags.slice(0, 4).map(tag => html`
-                    <span class="selected-asset-tag">${tag}</span>
-                  `)}
-                </div>
-                ${this.selectedAsset.brandAligned ? html`
-                  <span class="selected-asset-badge">\u2713 Brand Aligned</span>
-                ` : ''}
-              </div>
-            </div>
-            <div class="asset-actions">
-              <sp-button variant="secondary" @click=${() => this.showAssetBrowser = true}>
-                Change
-              </sp-button>
-              <sp-button variant="secondary" @click=${() => this.selectedAsset = null}>
-                Remove
-              </sp-button>
-            </div>
-          ` : html`
-            <div class="no-asset-selected">
-              <div class="no-asset-icon">\u{1F5BC}</div>
-              <div class="no-asset-text">No image selected. Browse the asset library to choose one.</div>
-              <sp-button variant="accent" @click=${() => this.showAssetBrowser = true}>
-                Browse Asset Library
-              </sp-button>
-            </div>
-          `}
+          ${
+            this.selectedAsset
+              ? html`
+                  <div class="selected-asset-card">
+                    <img
+                      class="selected-asset-thumbnail"
+                      src="${this.selectedAsset.thumbnailUrl || this.selectedAsset.url}"
+                      alt="${this.selectedAsset.name}"
+                    />
+                    <div class="selected-asset-info">
+                      <div class="selected-asset-name">${this.selectedAsset.name}</div>
+                      <div class="selected-asset-tags">
+                        ${this.selectedAsset.tags
+                    .slice(0, 4)
+                    .map((tag) => html` <span class="selected-asset-tag">${tag}</span> `)}
+                      </div>
+                      ${
+                  this.selectedAsset.brandAligned
+                    ? html` <span class="selected-asset-badge">✓ Brand Aligned</span> `
+                    : ''
+                }
+                    </div>
+                  </div>
+                  <div class="asset-actions">
+                    <sp-button variant="secondary" @click=${() => (this.showAssetBrowser = true)}> Change </sp-button>
+                    <sp-button variant="secondary" @click=${() => (this.selectedAsset = null)}> Remove </sp-button>
+                  </div>
+                `
+              : html`
+                  <div class="no-asset-selected">
+                    <div class="no-asset-icon">🖼</div>
+                    <div class="no-asset-text">No image selected. Browse the asset library to choose one.</div>
+                    <sp-button variant="accent" @click=${() => (this.showAssetBrowser = true)}>
+                      Browse Asset Library
+                    </sp-button>
+                  </div>
+                `
+          }
         </div>
       </div>
 
@@ -1101,7 +1113,7 @@ export class ContentWizard extends LitElement {
           rows="3"
           placeholder="e.g., Summer sale promotion for outdoor furniture with 30% discount..."
           .value=${this.description}
-          @input=${(e: Event) => this.description = (e.target as HTMLInputElement).value}
+          @input=${(e: Event) => (this.description = (e.target as HTMLInputElement).value)}
         ></sp-textfield>
         <p class="description-hint">Be specific about the topic, audience, and key message</p>
       </div>
@@ -1109,19 +1121,17 @@ export class ContentWizard extends LitElement {
       <div class="quick-examples">
         <p class="quick-examples-label">Quick examples:</p>
         <div class="example-chips">
-          ${this.getExamplesForType().map(example => html`
-            <span class="example-chip" @click=${() => this.description = example}>${example}</span>
-          `)}
+          ${this.getExamplesForType().map(
+            (example) => html`
+              <span class="example-chip" @click=${() => (this.description = example)}>${example}</span>
+            `,
+          )}
         </div>
       </div>
 
       <div class="step-navigation">
         <sp-button variant="secondary" @click=${() => this.prevStep()}>Back</sp-button>
-        <sp-button
-          variant="accent"
-          @click=${() => this.nextStep()}
-          ?disabled=${!this.description.trim()}
-        >
+        <sp-button variant="accent" @click=${() => this.nextStep()} ?disabled=${!this.description.trim()}>
           Next: Review
         </sp-button>
       </div>
@@ -1129,9 +1139,9 @@ export class ContentWizard extends LitElement {
   }
 
   private renderStep3() {
-    const selectedTypeInfo = COMPONENT_TYPES.find(t => t.id === this.selectedType);
-    const selectedToneInfo = TONES.find(t => t.id === this.selectedTone);
-    const selectedStyleInfo = IMAGE_STYLES.find(s => s.id === this.selectedImageStyle);
+    const selectedTypeInfo = COMPONENT_TYPES.find((t) => t.id === this.selectedType);
+    const selectedToneInfo = TONES.find((t) => t.id === this.selectedTone);
+    const selectedStyleInfo = IMAGE_STYLES.find((s) => s.id === this.selectedImageStyle);
 
     return html`
       <h2 class="step-title">Ready to generate!</h2>
@@ -1164,42 +1174,44 @@ export class ContentWizard extends LitElement {
         </div>
       </div>
 
-      ${this.selectedAsset ? html`
-        <div class="summary" style="margin-top: 16px;">
-          <div class="summary-title">Selected Image</div>
-          <div class="asset-preview-container">
-            <div class="selected-asset-card">
-              <img
-                class="selected-asset-thumbnail"
-                src="${this.selectedAsset.thumbnailUrl || this.selectedAsset.url}"
-                alt="${this.selectedAsset.name}"
-              />
-              <div class="selected-asset-info">
-                <div class="selected-asset-name">${this.selectedAsset.name}</div>
-                <div class="selected-asset-tags">
-                  ${this.selectedAsset.tags.slice(0, 4).map(tag => html`
-                    <span class="selected-asset-tag">${tag}</span>
-                  `)}
+      ${
+        this.selectedAsset
+          ? html`
+              <div class="summary" style="margin-top: 16px;">
+                <div class="summary-title">Selected Image</div>
+                <div class="asset-preview-container">
+                  <div class="selected-asset-card">
+                    <img
+                      class="selected-asset-thumbnail"
+                      src="${this.selectedAsset.thumbnailUrl || this.selectedAsset.url}"
+                      alt="${this.selectedAsset.name}"
+                    />
+                    <div class="selected-asset-info">
+                      <div class="selected-asset-name">${this.selectedAsset.name}</div>
+                      <div class="selected-asset-tags">
+                        ${this.selectedAsset.tags
+                    .slice(0, 4)
+                    .map((tag) => html` <span class="selected-asset-tag">${tag}</span> `)}
+                      </div>
+                      ${
+                  this.selectedAsset.brandAligned
+                    ? html` <span class="selected-asset-badge">✓ Brand Aligned</span> `
+                    : ''
+                }
+                    </div>
+                  </div>
                 </div>
-                ${this.selectedAsset.brandAligned ? html`
-                  <span class="selected-asset-badge">\u2713 Brand Aligned</span>
-                ` : ''}
               </div>
-            </div>
-          </div>
-        </div>
-      ` : ''}
+            `
+          : ''
+      }
 
       <label class="section-label">Content Description</label>
-      <div class="description-preview">
-        ${this.description}
-      </div>
+      <div class="description-preview">${this.description}</div>
 
       <div class="step-navigation">
         <sp-button variant="secondary" @click=${() => this.prevStep()}>Back</sp-button>
-        <sp-button variant="accent" @click=${() => this.generate()}>
-          Generate Content
-        </sp-button>
+        <sp-button variant="accent" @click=${() => this.generate()}> Generate Content </sp-button>
       </div>
     `;
   }
@@ -1211,128 +1223,88 @@ export class ContentWizard extends LitElement {
         return [
           'Summer sale with 50% off outdoor furniture',
           'New product launch for tech gadgets',
-          'Company anniversary celebration'
+          'Company anniversary celebration',
         ];
       case 'banner':
-        return [
-          'Flash sale ending in 24 hours',
-          'Free shipping on orders over $50',
-          'New feature announcement'
-        ];
+        return ['Flash sale ending in 24 hours', 'Free shipping on orders over $50', 'New feature announcement'];
       case 'carousel':
         return [
           'Featured products of the month',
           'Customer success stories slideshow',
-          'New arrivals collection showcase'
+          'New arrivals collection showcase',
         ];
       // Content
       case 'teaser':
         return [
           'Blog post about sustainable living tips',
           'Case study featuring customer success',
-          'Upcoming webinar on digital marketing'
+          'Upcoming webinar on digital marketing',
         ];
       case 'quote':
         return [
           'Customer testimonial for software product',
           'CEO quote about company vision',
-          'Industry expert endorsement'
+          'Industry expert endorsement',
         ];
       case 'accordion':
         return [
           'Frequently asked questions about shipping',
           'Product specifications and details',
-          'Service tier comparison breakdown'
+          'Service tier comparison breakdown',
         ];
       case 'tabs':
-        return [
-          'Product features, specs, and reviews',
-          'Different plan comparisons',
-          'Content organized by category'
-        ];
+        return ['Product features, specs, and reviews', 'Different plan comparisons', 'Content organized by category'];
       // Commerce
       case 'product':
         return [
           'Wireless headphones with noise cancellation',
           'Organic skincare product line',
-          'Smart home security camera'
+          'Smart home security camera',
         ];
       case 'productList':
         return [
           'Summer collection clothing items',
           'Best-selling electronics this month',
-          'New arrivals in home decor'
+          'New arrivals in home decor',
         ];
       case 'pricing':
         return [
           'SaaS subscription tiers comparison',
           'Service packages for agencies',
-          'Membership levels and benefits'
+          'Membership levels and benefits',
         ];
       // Media
       case 'video':
-        return [
-          'Product demo and tutorial video',
-          'Brand story promotional video',
-          'Customer testimonial video'
-        ];
+        return ['Product demo and tutorial video', 'Brand story promotional video', 'Customer testimonial video'];
       case 'gallery':
         return [
           'Product photos from multiple angles',
           'Event highlights photo collection',
-          'Portfolio of completed projects'
+          'Portfolio of completed projects',
         ];
       // Navigation
       case 'navigation':
-        return [
-          'E-commerce site main navigation',
-          'Corporate website mega menu',
-          'Mobile-friendly navigation menu'
-        ];
+        return ['E-commerce site main navigation', 'Corporate website mega menu', 'Mobile-friendly navigation menu'];
       case 'footer':
         return [
           'Corporate footer with social links',
           'E-commerce footer with support info',
-          'Newsletter signup and contact info'
+          'Newsletter signup and contact info',
         ];
       case 'breadcrumb':
-        return [
-          'Product category navigation path',
-          'Documentation section hierarchy',
-          'Multi-level page structure'
-        ];
+        return ['Product category navigation path', 'Documentation section hierarchy', 'Multi-level page structure'];
       // Interactive
       case 'form':
-        return [
-          'Contact us inquiry form',
-          'Newsletter signup form',
-          'Event registration form'
-        ];
+        return ['Contact us inquiry form', 'Newsletter signup form', 'Event registration form'];
       case 'search':
-        return [
-          'Site-wide search with filters',
-          'Product search with autocomplete',
-          'Knowledge base search'
-        ];
+        return ['Site-wide search with filters', 'Product search with autocomplete', 'Knowledge base search'];
       case 'cta':
-        return [
-          'Get started free trial signup',
-          'Download our mobile app',
-          'Schedule a demo consultation'
-        ];
+        return ['Get started free trial signup', 'Download our mobile app', 'Schedule a demo consultation'];
       // Social
       case 'socialShare':
-        return [
-          'Article sharing buttons',
-          'Product page social share',
-          'Event invite sharing'
-        ];
+        return ['Article sharing buttons', 'Product page social share', 'Event invite sharing'];
       case 'team':
-        return [
-          'Leadership team profiles',
-          'Department team showcase',
-          'Advisory board members'
-        ];
+        return ['Leadership team profiles', 'Department team showcase', 'Advisory board members'];
       default:
         return ['Describe your content needs...'];
     }
@@ -1363,22 +1335,24 @@ export class ContentWizard extends LitElement {
     this.loading = true;
 
     // Build the prompt from selections
-    const selectedToneInfo = TONES.find(t => t.id === this.selectedTone);
+    const selectedToneInfo = TONES.find((t) => t.id === this.selectedTone);
     const prompt = `${this.selectedType} for: ${this.description}. Tone: ${selectedToneInfo?.name}. Style: ${this.selectedImageStyle}`;
 
     // Dispatch event to parent
-    this.dispatchEvent(new CustomEvent('generate', {
-      detail: {
-        componentType: this.selectedType,
-        tone: this.selectedTone,
-        imageStyle: this.selectedImageStyle,
-        description: this.description,
-        prompt: prompt,
-        selectedAsset: this.selectedAsset
-      },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('generate', {
+        detail: {
+          componentType: this.selectedType,
+          tone: this.selectedTone,
+          imageStyle: this.selectedImageStyle,
+          description: this.description,
+          prompt: prompt,
+          selectedAsset: this.selectedAsset,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   // Public method to reset loading state

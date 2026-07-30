@@ -66,10 +66,7 @@ function injectUEMetaTags(): void {
  * @param componentType - The component type (hero, teaser, etc.)
  * @returns Object with data-aue-* attributes
  */
-export function getEditableAttributes(
-  content: ContentSuggestion,
-  componentType: string
-): Record<string, string> {
+export function getEditableAttributes(content: ContentSuggestion, componentType: string): Record<string, string> {
   if (!config.enabled) {
     return {};
   }
@@ -132,10 +129,7 @@ export function getMediaFieldAttributes(fieldName: string): Record<string, strin
 /**
  * Generate attributes for a container that can have child components
  */
-export function getContainerAttributes(
-  containerId: string,
-  filter: string = 'page-content'
-): Record<string, string> {
+export function getContainerAttributes(containerId: string, filter: string = 'page-content'): Record<string, string> {
   if (!config.enabled) {
     return {};
   }
@@ -192,7 +186,7 @@ export function getUEConfig(): UEConfig {
  */
 export function onUEEvent(
   eventType: 'aue:content-patch' | 'aue:ui-select' | 'aue:ui-preview',
-  callback: (event: CustomEvent) => void
+  callback: (event: CustomEvent) => void,
 ): () => void {
   const handler = (e: Event) => callback(e as CustomEvent);
   document.addEventListener(eventType, handler);
@@ -204,11 +198,7 @@ export function onUEEvent(
 /**
  * Notify Universal Editor of content changes
  */
-export function notifyContentChange(
-  resourcePath: string,
-  property: string,
-  value: string
-): void {
+export function notifyContentChange(resourcePath: string, property: string, value: string): void {
   if (!config.enabled) return;
 
   const event = new CustomEvent('aue:content-update', {

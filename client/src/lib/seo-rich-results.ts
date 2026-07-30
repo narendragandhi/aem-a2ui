@@ -150,8 +150,20 @@ const SCHEMA_REQUIREMENTS: Record<string, SchemaRequirement[]> = {
     { property: 'performer', required: false, type: 'object|array', description: 'Performer(s)' },
     { property: 'organizer', required: false, type: 'object', description: 'Event organizer' },
     { property: 'offers', required: false, type: 'object|array', description: 'Ticket information' },
-    { property: 'eventStatus', required: false, type: 'string', description: 'Event status', validValues: ['EventScheduled', 'EventCancelled', 'EventPostponed', 'EventRescheduled'] },
-    { property: 'eventAttendanceMode', required: false, type: 'string', description: 'Attendance mode', validValues: ['OfflineEventAttendanceMode', 'OnlineEventAttendanceMode', 'MixedEventAttendanceMode'] },
+    {
+      property: 'eventStatus',
+      required: false,
+      type: 'string',
+      description: 'Event status',
+      validValues: ['EventScheduled', 'EventCancelled', 'EventPostponed', 'EventRescheduled'],
+    },
+    {
+      property: 'eventAttendanceMode',
+      required: false,
+      type: 'string',
+      description: 'Attendance mode',
+      validValues: ['OfflineEventAttendanceMode', 'OnlineEventAttendanceMode', 'MixedEventAttendanceMode'],
+    },
   ],
   VideoObject: [
     { property: '@type', required: true, type: 'string', description: 'Must be VideoObject' },
@@ -168,9 +180,19 @@ const SCHEMA_REQUIREMENTS: Record<string, SchemaRequirement[]> = {
     { property: '@type', required: true, type: 'string', description: 'Must be BreadcrumbList' },
     { property: 'itemListElement', required: true, type: 'array', description: 'Array of ListItem' },
     { property: 'itemListElement[].@type', required: true, type: 'string', description: 'Must be ListItem' },
-    { property: 'itemListElement[].position', required: true, type: 'number', description: 'Position in breadcrumb (1-indexed)' },
+    {
+      property: 'itemListElement[].position',
+      required: true,
+      type: 'number',
+      description: 'Position in breadcrumb (1-indexed)',
+    },
     { property: 'itemListElement[].name', required: true, type: 'string', description: 'Breadcrumb text' },
-    { property: 'itemListElement[].item', required: false, type: 'string', description: 'URL (not required for last item)' },
+    {
+      property: 'itemListElement[].item',
+      required: false,
+      type: 'string',
+      description: 'URL (not required for last item)',
+    },
   ],
   Organization: [
     { property: '@type', required: true, type: 'string', description: 'Organization or more specific type' },
@@ -272,7 +294,7 @@ export class RichResultsValidator {
     const eligibleFeatures = this.getEligibleFeatures(schema, schemaType, errors);
 
     return {
-      valid: errors.filter(e => e.severity === 'critical').length === 0,
+      valid: errors.filter((e) => e.severity === 'critical').length === 0,
       schemaType,
       richResultsEligible: errors.length === 0 && eligibleFeatures.length > 0,
       eligibleFeatures,
@@ -319,7 +341,7 @@ export class RichResultsValidator {
       if (!enhanced['mainEntityOfPage']) {
         suggestions.push('Add mainEntityOfPage with the canonical URL');
       }
-      if (!enhanced['publisher']?.['logo']) {
+      if (!(enhanced['publisher'] as Record<string, unknown> | undefined)?.['logo']) {
         suggestions.push('Add publisher logo for better article appearance');
       }
     }
@@ -368,8 +390,8 @@ export class RichResultsValidator {
     return {
       success: validation.valid && validation.richResultsEligible,
       renderableItems: validation.eligibleFeatures.length,
-      errors: validation.errors.map(e => e.message),
-      warnings: validation.warnings.map(w => w.message),
+      errors: validation.errors.map((e) => e.message),
+      warnings: validation.warnings.map((w) => w.message),
       detectedTypes: [validation.schemaType],
     };
   }
@@ -425,7 +447,7 @@ export class RichResultsValidator {
     schemaType: string,
     errors: ValidationError[],
     warnings: ValidationWarning[],
-    recommendations: string[]
+    recommendations: string[],
   ): void {
     switch (schemaType) {
       case 'Article':
@@ -522,9 +544,9 @@ export class RichResultsValidator {
   private getEligibleFeatures(
     schema: Record<string, unknown>,
     schemaType: string,
-    errors: ValidationError[]
+    errors: ValidationError[],
   ): RichResultFeature[] {
-    if (errors.some(e => e.severity === 'critical')) {
+    if (errors.some((e) => e.severity === 'critical')) {
       return [];
     }
 
@@ -555,7 +577,7 @@ export class RichResultsValidator {
     schema: Record<string, unknown>,
     schemaType: string,
     feature: RichResultFeature,
-    validation: ValidationResult
+    validation: ValidationResult,
   ): RichResultPreview {
     const previewTemplates: Record<RichResultFeature, Partial<RichResultPreview>> = {
       search_appearance: {
@@ -661,7 +683,7 @@ export class RichResultsValidator {
     };
 
     const template = previewTemplates[feature] || previewTemplates.search_appearance;
-    const missingRequired = validation.errors.filter(e => e.severity === 'error').length;
+    const missingRequired = validation.errors.filter((e) => e.severity === 'error').length;
 
     return {
       feature,
@@ -669,7 +691,7 @@ export class RichResultsValidator {
       description: template.description || '',
       visualElements: template.visualElements || [],
       searchAppearance: this.generateSearchAppearanceHtml(schema, schemaType),
-      requirements: SCHEMA_REQUIREMENTS[schemaType]?.filter(r => r.required).map(r => r.property) || [],
+      requirements: SCHEMA_REQUIREMENTS[schemaType]?.filter((r) => r.required).map((r) => r.property) || [],
       implementationStatus: missingRequired === 0 ? 'complete' : missingRequired < 3 ? 'partial' : 'missing',
     };
   }
@@ -700,7 +722,9 @@ export class RichResultsValidator {
       BreadcrumbList: 'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb',
     };
 
-    return docs[schemaType] || 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data';
+    return (
+      docs[schemaType] || 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'
+    );
   }
 }
 

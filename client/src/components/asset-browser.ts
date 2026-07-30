@@ -17,7 +17,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Clean modern office workspace with natural lighting'
+    description: 'Clean modern office workspace with natural lighting',
   },
   {
     id: 'asset-2',
@@ -29,7 +29,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Dynamic abstract gradient background'
+    description: 'Dynamic abstract gradient background',
   },
   {
     id: 'asset-3',
@@ -41,7 +41,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Diverse team collaborating in modern meeting room'
+    description: 'Diverse team collaborating in modern meeting room',
   },
   {
     id: 'asset-4',
@@ -53,7 +53,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Software developer working at multiple monitors'
+    description: 'Software developer working at multiple monitors',
   },
   {
     id: 'asset-5',
@@ -65,7 +65,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Clean minimal home office desk setup'
+    description: 'Clean minimal home office desk setup',
   },
   {
     id: 'asset-6',
@@ -77,7 +77,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Young startup team brainstorming session'
+    description: 'Young startup team brainstorming session',
   },
   {
     id: 'asset-7',
@@ -89,7 +89,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 800, height: 800 },
     format: 'jpg',
     brandAligned: false,
-    description: 'Luxury watch product photography'
+    description: 'Luxury watch product photography',
   },
   {
     id: 'asset-8',
@@ -101,7 +101,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 800, height: 533 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Professional video production studio'
+    description: 'Professional video production studio',
   },
   {
     id: 'asset-9',
@@ -113,7 +113,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 800, height: 533 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Business professionals analyzing data charts'
+    description: 'Business professionals analyzing data charts',
   },
   {
     id: 'asset-10',
@@ -125,7 +125,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Modern data center server room'
+    description: 'Modern data center server room',
   },
   // Additional lifestyle images
   {
@@ -138,7 +138,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: false,
-    description: 'Person enjoying coffee in a cozy setting'
+    description: 'Person enjoying coffee in a cozy setting',
   },
   {
     id: 'asset-12',
@@ -150,7 +150,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Team celebrating a successful project'
+    description: 'Team celebrating a successful project',
   },
   // Hero banners
   {
@@ -163,7 +163,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Digital globe with network connections'
+    description: 'Digital globe with network connections',
   },
   {
     id: 'asset-14',
@@ -175,7 +175,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: true,
-    description: 'Modern co-working space with open layout'
+    description: 'Modern co-working space with open layout',
   },
   // Nature images
   {
@@ -188,7 +188,7 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: false,
-    description: 'Sunlight streaming through forest trees'
+    description: 'Sunlight streaming through forest trees',
   },
   {
     id: 'asset-16',
@@ -200,8 +200,8 @@ const SAMPLE_ASSETS: ImageAsset[] = [
     dimensions: { width: 1200, height: 800 },
     format: 'jpg',
     brandAligned: false,
-    description: 'Majestic mountain peaks at sunrise'
-  }
+    description: 'Majestic mountain peaks at sunrise',
+  },
 ];
 
 const CATEGORIES: { id: AssetCategory | 'all'; name: string; icon: string }[] = [
@@ -243,7 +243,9 @@ export class AssetBrowser extends LitElement {
       justify-content: center;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
+      transition:
+        opacity 0.3s,
+        visibility 0.3s;
     }
 
     .overlay.open {
@@ -480,7 +482,7 @@ export class AssetBrowser extends LitElement {
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 50%);
       opacity: 0;
       transition: opacity 0.2s;
       display: flex;
@@ -498,7 +500,7 @@ export class AssetBrowser extends LitElement {
       font-size: 14px;
       font-weight: 600;
       margin-bottom: 4px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .asset-tags {
@@ -508,7 +510,7 @@ export class AssetBrowser extends LitElement {
     }
 
     .asset-tag {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       color: white;
       padding: 2px 6px;
       border-radius: 4px;
@@ -548,7 +550,7 @@ export class AssetBrowser extends LitElement {
       position: absolute;
       top: 8px;
       left: 8px;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
       padding: 6px 10px;
@@ -564,7 +566,7 @@ export class AssetBrowser extends LitElement {
     }
 
     .preview-button:hover {
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.7);
     }
 
     /* Empty State */
@@ -714,21 +716,22 @@ export class AssetBrowser extends LitElement {
 
     // Filter by category
     if (this.filter.category && this.filter.category !== 'all') {
-      assets = assets.filter(a => a.category === this.filter.category);
+      assets = assets.filter((a) => a.category === this.filter.category);
     }
 
     // Filter by brand alignment
     if (this.filter.brandAligned) {
-      assets = assets.filter(a => a.brandAligned);
+      assets = assets.filter((a) => a.brandAligned);
     }
 
     // Filter by search
     if (this.filter.search) {
       const searchLower = this.filter.search.toLowerCase();
-      assets = assets.filter(a =>
-        a.name.toLowerCase().includes(searchLower) ||
-        a.tags.some(t => t.toLowerCase().includes(searchLower)) ||
-        (a.description && a.description.toLowerCase().includes(searchLower))
+      assets = assets.filter(
+        (a) =>
+          a.name.toLowerCase().includes(searchLower) ||
+          a.tags.some((t) => t.toLowerCase().includes(searchLower)) ||
+          (a.description && a.description.toLowerCase().includes(searchLower)),
       );
     }
 
@@ -737,32 +740,24 @@ export class AssetBrowser extends LitElement {
 
   private getCategoryCount(categoryId: AssetCategory | 'all'): number {
     if (categoryId === 'all') {
-      return this.filter.brandAligned
-        ? SAMPLE_ASSETS.filter(a => a.brandAligned).length
-        : SAMPLE_ASSETS.length;
+      return this.filter.brandAligned ? SAMPLE_ASSETS.filter((a) => a.brandAligned).length : SAMPLE_ASSETS.length;
     }
-    return SAMPLE_ASSETS.filter(a =>
-      a.category === categoryId &&
-      (!this.filter.brandAligned || a.brandAligned)
-    ).length;
+    return SAMPLE_ASSETS.filter((a) => a.category === categoryId && (!this.filter.brandAligned || a.brandAligned))
+      .length;
   }
 
   render() {
     const filteredAssets = this.getFilteredAssets();
     const selectedAsset = this.selectedAssetId
-      ? SAMPLE_ASSETS.find(a => a.id === this.selectedAssetId) || null
+      ? SAMPLE_ASSETS.find((a) => a.id === this.selectedAssetId) || null
       : null;
 
     return html`
       <div class="overlay ${this.open ? 'open' : ''}" @click=${this.handleOverlayClick}>
         <div class="browser-panel" @click=${(e: Event) => e.stopPropagation()}>
-          ${this.renderHeader()}
-          ${this.renderFilterBar()}
+          ${this.renderHeader()} ${this.renderFilterBar()}
 
-          <div class="browser-content">
-            ${this.renderCategorySidebar()}
-            ${this.renderAssetGrid(filteredAssets)}
-          </div>
+          <div class="browser-content">${this.renderCategorySidebar()} ${this.renderAssetGrid(filteredAssets)}</div>
 
           ${this.renderFooter(filteredAssets.length, selectedAsset)}
         </div>
@@ -781,7 +776,7 @@ export class AssetBrowser extends LitElement {
         </div>
         <button class="close-button" @click=${this.close}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
       </div>
@@ -801,10 +796,7 @@ export class AssetBrowser extends LitElement {
           </sp-textfield>
         </div>
         <div class="filter-toggles">
-          <div
-            class="brand-filter ${this.filter.brandAligned ? 'active' : ''}"
-            @click=${this.toggleBrandFilter}
-          >
+          <div class="brand-filter ${this.filter.brandAligned ? 'active' : ''}" @click=${this.toggleBrandFilter}>
             <span class="brand-indicator"></span>
             Brand Aligned Only
           </div>
@@ -816,16 +808,18 @@ export class AssetBrowser extends LitElement {
   private renderCategorySidebar() {
     return html`
       <div class="category-sidebar">
-        ${CATEGORIES.map(category => html`
-          <div
-            class="category-item ${this.filter.category === category.id ? 'selected' : ''}"
-            @click=${() => this.selectCategory(category.id)}
-          >
-            <span class="category-icon">${category.icon}</span>
-            <span>${category.name}</span>
-            <span class="category-count">${this.getCategoryCount(category.id)}</span>
-          </div>
-        `)}
+        ${CATEGORIES.map(
+          (category) => html`
+            <div
+              class="category-item ${this.filter.category === category.id ? 'selected' : ''}"
+              @click=${() => this.selectCategory(category.id)}
+            >
+              <span class="category-icon">${category.icon}</span>
+              <span>${category.name}</span>
+              <span class="category-count">${this.getCategoryCount(category.id)}</span>
+            </div>
+          `,
+        )}
       </div>
     `;
   }
@@ -835,11 +829,9 @@ export class AssetBrowser extends LitElement {
       return html`
         <div class="asset-grid-container">
           <div class="empty-state">
-            <div class="empty-icon">\u{1F50D}</div>
+            <div class="empty-icon">🔍</div>
             <div class="empty-title">No assets found</div>
-            <div class="empty-description">
-              Try adjusting your search or filters to find what you're looking for.
-            </div>
+            <div class="empty-description">Try adjusting your search or filters to find what you're looking for.</div>
           </div>
         </div>
       `;
@@ -847,9 +839,7 @@ export class AssetBrowser extends LitElement {
 
     return html`
       <div class="asset-grid-container">
-        <div class="asset-grid">
-          ${assets.map(asset => this.renderAssetCard(asset))}
-        </div>
+        <div class="asset-grid">${assets.map((asset) => this.renderAssetCard(asset))}</div>
       </div>
     `;
   }
@@ -861,38 +851,22 @@ export class AssetBrowser extends LitElement {
       <div
         class="asset-card ${isSelected ? 'selected' : ''}"
         @click=${() => this.selectAsset(asset)}
-        @mouseenter=${() => this.hoveredAssetId = asset.id}
-        @mouseleave=${() => this.hoveredAssetId = null}
+        @mouseenter=${() => (this.hoveredAssetId = asset.id)}
+        @mouseleave=${() => (this.hoveredAssetId = null)}
       >
-        <img
-          class="asset-thumbnail"
-          src="${asset.thumbnailUrl || asset.url}"
-          alt="${asset.name}"
-          loading="lazy"
-        />
+        <img class="asset-thumbnail" src="${asset.thumbnailUrl || asset.url}" alt="${asset.name}" loading="lazy" />
 
         <div class="asset-badges">
-          ${isSelected ? html`
-            <span class="selected-badge">\u2713 Selected</span>
-          ` : ''}
-          ${asset.brandAligned ? html`
-            <span class="brand-badge">Brand Aligned</span>
-          ` : ''}
+          ${isSelected ? html` <span class="selected-badge">✓ Selected</span> ` : ''}
+          ${asset.brandAligned ? html` <span class="brand-badge">Brand Aligned</span> ` : ''}
         </div>
 
-        <button
-          class="preview-button"
-          @click=${(e: Event) => this.openPreview(e, asset)}
-        >
-          \u{1F50D} Preview
-        </button>
+        <button class="preview-button" @click=${(e: Event) => this.openPreview(e, asset)}>🔍 Preview</button>
 
         <div class="asset-overlay">
           <div class="asset-name">${asset.name}</div>
           <div class="asset-tags">
-            ${asset.tags.slice(0, 3).map(tag => html`
-              <span class="asset-tag">${tag}</span>
-            `)}
+            ${asset.tags.slice(0, 3).map((tag) => html` <span class="asset-tag">${tag}</span> `)}
           </div>
         </div>
       </div>
@@ -904,17 +878,11 @@ export class AssetBrowser extends LitElement {
       <div class="browser-footer">
         <div class="footer-info">
           ${count} asset${count !== 1 ? 's' : ''} found
-          ${selectedAsset ? html`
-            <span> | Selected: <strong>${selectedAsset.name}</strong></span>
-          ` : ''}
+          ${selectedAsset ? html` <span> | Selected: <strong>${selectedAsset.name}</strong></span> ` : ''}
         </div>
         <div class="footer-actions">
           <sp-button variant="secondary" @click=${this.close}>Cancel</sp-button>
-          <sp-button
-            variant="accent"
-            ?disabled=${!this.selectedAssetId}
-            @click=${this.confirmSelection}
-          >
+          <sp-button variant="accent" ?disabled=${!this.selectedAssetId} @click=${this.confirmSelection}>
             Use Selected Asset
           </sp-button>
         </div>
@@ -927,17 +895,13 @@ export class AssetBrowser extends LitElement {
     return html`
       <div class="preview-modal" @click=${this.closePreview}>
         <div class="preview-content" @click=${(e: Event) => e.stopPropagation()}>
-          <button class="preview-close" @click=${this.closePreview}>\u2715</button>
+          <button class="preview-close" @click=${this.closePreview}>✕</button>
           <img class="preview-image" src="${asset.url}" alt="${asset.name}" />
           <div class="preview-info">
             <div class="preview-name">${asset.name}</div>
-            ${asset.description ? html`
-              <div class="preview-description">${asset.description}</div>
-            ` : ''}
+            ${asset.description ? html` <div class="preview-description">${asset.description}</div> ` : ''}
             <div class="preview-meta">
-              ${asset.dimensions ? html`
-                <span>${asset.dimensions.width} x ${asset.dimensions.height}</span>
-              ` : ''}
+              ${asset.dimensions ? html` <span>${asset.dimensions.width} x ${asset.dimensions.height}</span> ` : ''}
               ${asset.format ? html`<span>${asset.format.toUpperCase()}</span>` : ''}
               <span>Category: ${asset.category}</span>
             </div>
@@ -985,13 +949,15 @@ export class AssetBrowser extends LitElement {
 
   private confirmSelection() {
     if (this.selectedAssetId) {
-      const asset = SAMPLE_ASSETS.find(a => a.id === this.selectedAssetId);
+      const asset = SAMPLE_ASSETS.find((a) => a.id === this.selectedAssetId);
       if (asset) {
-        this.dispatchEvent(new CustomEvent('asset-selected', {
-          detail: { asset },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('asset-selected', {
+            detail: { asset },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       }
     }
     this.close();
@@ -999,7 +965,7 @@ export class AssetBrowser extends LitElement {
 
   // Public method to get asset by ID
   public static getAssetById(id: string): ImageAsset | undefined {
-    return SAMPLE_ASSETS.find(a => a.id === id);
+    return SAMPLE_ASSETS.find((a) => a.id === id);
   }
 
   // Public method to get all assets

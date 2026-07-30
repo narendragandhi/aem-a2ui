@@ -1,7 +1,13 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ContentSuggestion } from '../lib/types.js';
-import { contentToJcr, contentToSlingModel, generateHTL, generatePageStructure, getAssetReferences } from '../lib/aem-content-structure.js';
+import {
+  contentToJcr,
+  contentToSlingModel,
+  generateHTL,
+  generatePageStructure,
+  getAssetReferences,
+} from '../lib/aem-content-structure.js';
 import { getComponentById } from '../lib/aem-components.js';
 import { logger } from '../services/logger.js';
 
@@ -276,21 +282,21 @@ export class AemExportPanel extends LitElement {
         <div class="export-tabs">
           <button
             class="export-tab ${this.activeTab === 'jcr' ? 'active' : ''}"
-            @click=${() => this.activeTab = 'jcr'}
+            @click=${() => (this.activeTab = 'jcr')}
           >
             <span class="export-tab-icon">🗂️</span>
             JCR Content
           </button>
           <button
             class="export-tab ${this.activeTab === 'sling' ? 'active' : ''}"
-            @click=${() => this.activeTab = 'sling'}
+            @click=${() => (this.activeTab = 'sling')}
           >
             <span class="export-tab-icon">📄</span>
             Sling Model
           </button>
           <button
             class="export-tab ${this.activeTab === 'htl' ? 'active' : ''}"
-            @click=${() => this.activeTab = 'htl'}
+            @click=${() => (this.activeTab = 'htl')}
           >
             <span class="export-tab-icon">🔧</span>
             HTL Template
@@ -304,26 +310,29 @@ export class AemExportPanel extends LitElement {
             <button class="action-btn secondary" @click=${this.copyToClipboard}>
               ${this.copied ? '✓ Copied!' : '📋 Copy'}
             </button>
-            <button class="action-btn primary" @click=${this.downloadFile}>
-              ⬇️ Download
-            </button>
+            <button class="action-btn primary" @click=${this.downloadFile}>⬇️ Download</button>
           </div>
 
-          ${assets.length > 0 ? html`
-            <div class="asset-warning">
-              <div class="asset-warning-title">⚠️ Assets to upload to DAM</div>
-              <ul class="asset-warning-list">
-                ${assets.map(a => html`<li>${a.sourcePath} → ${a.targetPath}</li>`)}
-              </ul>
-            </div>
-          ` : ''}
+          ${
+            assets.length > 0
+              ? html`
+                  <div class="asset-warning">
+                    <div class="asset-warning-title">⚠️ Assets to upload to DAM</div>
+                    <ul class="asset-warning-list">
+                      ${assets.map((a) => html`<li>${a.sourcePath} → ${a.targetPath}</li>`)}
+                    </ul>
+                  </div>
+                `
+              : ''
+          }
 
           <div class="deploy-section">
             <div class="deploy-header">
               🚀 Deploy to AEM
-              ${this.aemConnected
-                ? html`<span style="color: var(--spectrum-green-600)">● Connected</span>`
-                : html`<span style="color: var(--spectrum-red-600)">● Disconnected</span>`
+              ${
+                this.aemConnected
+                  ? html`<span style="color: var(--spectrum-green-600)">● Connected</span>`
+                  : html`<span style="color: var(--spectrum-red-600)">● Disconnected</span>`
               }
             </div>
 
@@ -331,7 +340,7 @@ export class AemExportPanel extends LitElement {
               <input
                 type="text"
                 .value=${this.deployPath}
-                @input=${(e: Event) => this.deployPath = (e.target as HTMLInputElement).value}
+                @input=${(e: Event) => (this.deployPath = (e.target as HTMLInputElement).value)}
                 placeholder="/content/site/page"
               />
             </div>
@@ -344,12 +353,16 @@ export class AemExportPanel extends LitElement {
               ${this.deployStatus === 'deploying' ? '⏳ Deploying...' : '🚀 Deploy Component'}
             </button>
 
-            ${this.deployStatus !== 'idle' ? html`
-              <div class="status-message ${this.deployStatus}">
-                ${this.deployStatus === 'success' ? '✓' : this.deployStatus === 'error' ? '✗' : 'ℹ️'}
-                ${this.deployMessage}
-              </div>
-            ` : ''}
+            ${
+              this.deployStatus !== 'idle'
+                ? html`
+                    <div class="status-message ${this.deployStatus}">
+                      ${this.deployStatus === 'success' ? '✓' : this.deployStatus === 'error' ? '✗' : 'ℹ️'}
+                      ${this.deployMessage}
+                    </div>
+                  `
+                : ''
+            }
           </div>
         </div>
       </div>
@@ -399,7 +412,7 @@ export class AemExportPanel extends LitElement {
     try {
       await navigator.clipboard.writeText(code);
       this.copied = true;
-      setTimeout(() => this.copied = false, 2000);
+      setTimeout(() => (this.copied = false), 2000);
       logger.info('Copied to clipboard', 'Export');
     } catch (err) {
       logger.error('Failed to copy', 'Export', err);
@@ -465,11 +478,13 @@ export class AemExportPanel extends LitElement {
         this.deployMessage = `Successfully deployed to ${this.deployPath}`;
         logger.info('Deployed to AEM', 'Export', { path: this.deployPath });
 
-        this.dispatchEvent(new CustomEvent('deployed', {
-          detail: { path: this.deployPath, content: this.content },
-          bubbles: true,
-          composed: true,
-        }));
+        this.dispatchEvent(
+          new CustomEvent('deployed', {
+            detail: { path: this.deployPath, content: this.content },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }

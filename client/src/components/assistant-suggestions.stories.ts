@@ -41,7 +41,8 @@ const mockSuggestions: ContentSuggestion[] = [
     description: 'A vibrant hero banner for your summer sale, featuring beach imagery and clear call to action.',
     ctaText: 'Shop Now',
     ctaUrl: '#',
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961c3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+    imageUrl:
+      'https://images.unsplash.com/photo-1507525428034-b723cf961c3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     imageAlt: 'Beach with palm trees',
     componentType: 'hero',
   },
@@ -52,7 +53,8 @@ const mockSuggestions: ContentSuggestion[] = [
     description: 'Catchy teaser for an upcoming gadget, emphasizing exclusivity and innovation.',
     ctaText: 'Learn More',
     ctaUrl: '#',
-    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06f163?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+    imageUrl:
+      'https://images.unsplash.com/photo-1505740420928-5e560c06f163?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     imageAlt: 'Close-up of a new gadget',
     componentType: 'teaser',
   },
@@ -63,7 +65,8 @@ const mockSuggestions: ContentSuggestion[] = [
     description: 'Product card showcasing a warm winter sweater with compelling sales copy.',
     ctaText: 'View Product',
     ctaUrl: '#',
-    imageUrl: 'https://images.unsplash.com/photo-1523309015091-c16f283281b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+    imageUrl:
+      'https://images.unsplash.com/photo-1523309015091-c16f283281b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     imageAlt: 'Winter sweater on a model',
     componentType: 'product',
     price: '$79.99',

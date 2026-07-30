@@ -1,12 +1,9 @@
 package com.example.aema2ui.service;
 
-import com.embabel.agent.api.invocation.AgentInvocation;
-import com.embabel.agent.core.AgentPlatform;
 import com.example.aema2ui.agent.AemContentAgent;
 import com.example.aema2ui.model.BrandConfig;
 import com.example.aema2ui.model.BrandValidationResult;
 import com.example.aema2ui.model.ContentSuggestion;
-import com.example.aema2ui.model.UserInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class StreamingContentService {
 
-    private final AgentPlatform agentPlatform;
+    private final LlmService llmService;
     private final ObjectMapper objectMapper;
     private final AemContentAgent contentAgent;
 
@@ -504,14 +501,17 @@ public class StreamingContentService {
     }
 
     private ContentSuggestion invokeAgentWithFallback(String userInput) {
-        try {
-            ContentSuggestion result = AgentInvocation.create(agentPlatform, ContentSuggestion.class)
-                .invoke(userInput);
-            if (result != null) {
-                return result;
+        if (llmService.isEnabled()) {
+            try {
+                String prompt = AemContentAgent.BRAND_GUIDELINES + "\n\nGenerate " + userInput +
+                    " content. Reply ONLY with JSON: {\"title\":\"...\",\"subtitle\":\"...\",\"description\":\"...\",\"ctaText\":\"...\",\"ctaUrl\":\"/...\",\"imageUrl\":\"...\",\"componentType\":\"...\"}";
+                ContentSuggestion result = llmService.generateObject(prompt, ContentSuggestion.class);
+                if (result != null) {
+                    return result;
+                }
+            } catch (Exception e) {
+                log.warn("LLM invocation failed, falling back to templates: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Embabel agent invocation failed, falling back to templates: {}", e.getMessage());
         }
         return contentAgent.generateTemplateContent(userInput, null);
     }

@@ -124,10 +124,22 @@ export class WorkflowPanel extends LitElement {
       text-transform: uppercase;
     }
 
-    .status-RUNNING { background: #cce5ff; color: #004085; }
-    .status-COMPLETED { background: #d4edda; color: #155724; }
-    .status-SUSPENDED { background: #fff3cd; color: #856404; }
-    .status-ABORTED { background: #f8d7da; color: #721c24; }
+    .status-RUNNING {
+      background: #cce5ff;
+      color: #004085;
+    }
+    .status-COMPLETED {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-SUSPENDED {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-ABORTED {
+      background: #f8d7da;
+      color: #721c24;
+    }
 
     .progress-section {
       margin-top: 12px;
@@ -296,8 +308,8 @@ export class WorkflowPanel extends LitElement {
       if (response.ok) {
         const workflows: WorkflowInstance[] = await response.json();
         // Get the most recent running workflow
-        this.activeWorkflow = workflows.find(w => w.status === 'RUNNING') ||
-                              (workflows.length > 0 ? workflows[0] : null);
+        this.activeWorkflow =
+          workflows.find((w) => w.status === 'RUNNING') || (workflows.length > 0 ? workflows[0] : null);
       }
     } catch (error) {
       console.error('Failed to load active workflow:', error);
@@ -318,18 +330,20 @@ export class WorkflowPanel extends LitElement {
           workflowModelId: this.selectedWorkflowId,
           initiatedBy: this.currentUser,
           metadata: {
-            reviewId: this.review?.id
-          }
-        })
+            reviewId: this.review?.id,
+          },
+        }),
       });
 
       if (response.ok) {
         this.activeWorkflow = await response.json();
-        this.dispatchEvent(new CustomEvent('workflow-started', {
-          detail: { workflow: this.activeWorkflow },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('workflow-started', {
+            detail: { workflow: this.activeWorkflow },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       }
     } catch (error) {
       console.error('Failed to submit to workflow:', error);
@@ -346,16 +360,18 @@ export class WorkflowPanel extends LitElement {
       const response = await fetch(`${API_BASE}/workflows/${this.activeWorkflow.id}/advance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment: 'Approved by ' + this.currentUser })
+        body: JSON.stringify({ comment: 'Approved by ' + this.currentUser }),
       });
 
       if (response.ok) {
         this.activeWorkflow = await response.json();
-        this.dispatchEvent(new CustomEvent('workflow-advanced', {
-          detail: { workflow: this.activeWorkflow },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('workflow-advanced', {
+            detail: { workflow: this.activeWorkflow },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       }
     } catch (error) {
       console.error('Failed to advance workflow:', error);
@@ -374,16 +390,18 @@ export class WorkflowPanel extends LitElement {
     try {
       const response = await fetch(
         `${API_BASE}/workflows/${this.activeWorkflow.id}?reason=${encodeURIComponent(reason)}`,
-        { method: 'DELETE' }
+        { method: 'DELETE' },
       );
 
       if (response.ok) {
         this.activeWorkflow = await response.json();
-        this.dispatchEvent(new CustomEvent('workflow-cancelled', {
-          detail: { workflow: this.activeWorkflow },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('workflow-cancelled', {
+            detail: { workflow: this.activeWorkflow },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       }
     } catch (error) {
       console.error('Failed to cancel workflow:', error);
@@ -397,7 +415,7 @@ export class WorkflowPanel extends LitElement {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -426,28 +444,36 @@ export class WorkflowPanel extends LitElement {
           <span class="panel-title">AEM Workflow</span>
         </div>
 
-        ${!canSubmit ? html`
-          <div class="info-box">
-            Content must be approved before submitting to an AEM workflow.
-            ${this.review ? html`Current status: <strong>${this.review.status}</strong>` : ''}
-          </div>
-        ` : ''}
+        ${
+          !canSubmit
+            ? html`
+                <div class="info-box">
+                  Content must be approved before submitting to an AEM workflow.
+                  ${this.review ? html`Current status: <strong>${this.review.status}</strong>` : ''}
+                </div>
+              `
+            : ''
+        }
 
         <div class="workflow-selector">
           <label class="selector-label">Select Workflow</label>
           <div class="workflow-cards">
-            ${this.availableWorkflows.map(wf => html`
-              <div
-                class="workflow-card ${this.selectedWorkflowId === wf.id ? 'selected' : ''}"
-                @click=${() => this.selectedWorkflowId = wf.id}
-              >
-                <div class="workflow-name">${wf.name}</div>
-                <div class="workflow-description">${wf.description}</div>
-                ${wf.requiresApproval ? html`
-                  <span class="workflow-badge badge-approval">Requires Approval</span>
-                ` : ''}
-              </div>
-            `)}
+            ${this.availableWorkflows.map(
+              (wf) => html`
+                <div
+                  class="workflow-card ${this.selectedWorkflowId === wf.id ? 'selected' : ''}"
+                  @click=${() => (this.selectedWorkflowId = wf.id)}
+                >
+                  <div class="workflow-name">${wf.name}</div>
+                  <div class="workflow-description">${wf.description}</div>
+                  ${
+                  wf.requiresApproval
+                    ? html` <span class="workflow-badge badge-approval">Requires Approval</span> `
+                    : ''
+                }
+                </div>
+              `,
+            )}
           </div>
         </div>
 
@@ -461,14 +487,21 @@ export class WorkflowPanel extends LitElement {
           </sp-button>
         </div>
 
-        ${this.activeWorkflow && this.activeWorkflow.status !== 'RUNNING' ? html`
-          <div class="status-section" style="margin-top: 24px; border-top: 1px solid var(--spectrum-gray-300); padding-top: 16px;">
-            <div style="font-size: 12px; color: var(--spectrum-gray-600); margin-bottom: 8px;">
-              Previous Workflow
-            </div>
-            ${this.renderCompletedWorkflow()}
-          </div>
-        ` : ''}
+        ${
+          this.activeWorkflow && this.activeWorkflow.status !== 'RUNNING'
+            ? html`
+                <div
+                  class="status-section"
+                  style="margin-top: 24px; border-top: 1px solid var(--spectrum-gray-300); padding-top: 16px;"
+                >
+                  <div style="font-size: 12px; color: var(--spectrum-gray-600); margin-bottom: 8px;">
+                    Previous Workflow
+                  </div>
+                  ${this.renderCompletedWorkflow()}
+                </div>
+              `
+            : ''
+        }
       </div>
     `;
   }
@@ -482,9 +515,7 @@ export class WorkflowPanel extends LitElement {
       <div class="panel">
         <div class="panel-header">
           <span class="panel-title">Workflow Status</span>
-          <span class="status-badge status-${this.activeWorkflow.status}">
-            ${this.activeWorkflow.status}
-          </span>
+          <span class="status-badge status-${this.activeWorkflow.status}"> ${this.activeWorkflow.status} </span>
         </div>
 
         <div style="font-size: 13px; color: var(--spectrum-gray-700); margin-bottom: 8px;">
@@ -502,36 +533,42 @@ export class WorkflowPanel extends LitElement {
         </div>
 
         <div class="steps-list">
-          ${this.activeWorkflow.steps.map((step, index) => html`
-            <div class="step">
-              <div class="step-indicator step-${step.status}">
-                ${step.status === 'completed' ? '✓' :
-                  step.status === 'active' ? '●' :
-                  step.status === 'skipped' ? '—' :
-                  index + 1}
+          ${this.activeWorkflow.steps.map(
+            (step, index) => html`
+              <div class="step">
+                <div class="step-indicator step-${step.status}">
+                  ${
+                  step.status === 'completed'
+                    ? '✓'
+                    : step.status === 'active'
+                      ? '●'
+                      : step.status === 'skipped'
+                        ? '—'
+                        : index + 1
+                }
+                </div>
+                <div class="step-info">
+                  <div class="step-name">${step.name}</div>
+                  ${
+                  step.completedAt
+                    ? html`
+                        <div class="step-meta">
+                          Completed ${this.formatDate(step.completedAt)} ${step.comment ? html` - ${step.comment}` : ''}
+                        </div>
+                      `
+                    : step.startedAt
+                      ? html` <div class="step-meta">Started ${this.formatDate(step.startedAt)}</div> `
+                      : ''
+                }
+                </div>
               </div>
-              <div class="step-info">
-                <div class="step-name">${step.name}</div>
-                ${step.completedAt ? html`
-                  <div class="step-meta">
-                    Completed ${this.formatDate(step.completedAt)}
-                    ${step.comment ? html` - ${step.comment}` : ''}
-                  </div>
-                ` : step.startedAt ? html`
-                  <div class="step-meta">Started ${this.formatDate(step.startedAt)}</div>
-                ` : ''}
-              </div>
-            </div>
-          `)}
+            `,
+          )}
         </div>
 
         <div class="actions-section">
-          <sp-button variant="primary" @click=${this.advanceWorkflow}>
-            Complete Current Step
-          </sp-button>
-          <sp-button variant="secondary" @click=${this.cancelWorkflow}>
-            Cancel Workflow
-          </sp-button>
+          <sp-button variant="primary" @click=${this.advanceWorkflow}> Complete Current Step </sp-button>
+          <sp-button variant="secondary" @click=${this.cancelWorkflow}> Cancel Workflow </sp-button>
         </div>
       </div>
     `;
@@ -543,18 +580,20 @@ export class WorkflowPanel extends LitElement {
     return html`
       <div style="font-size: 12px;">
         <div style="margin-bottom: 8px;">
-          <span class="status-badge status-${this.activeWorkflow.status}">
-            ${this.activeWorkflow.status}
-          </span>
+          <span class="status-badge status-${this.activeWorkflow.status}"> ${this.activeWorkflow.status} </span>
           <span style="margin-left: 8px; color: var(--spectrum-gray-600);">
             ${this.activeWorkflow.workflowModelName}
           </span>
         </div>
-        ${this.activeWorkflow.completedAt ? html`
-          <div style="color: var(--spectrum-gray-600);">
-            Completed ${this.formatDate(this.activeWorkflow.completedAt)}
-          </div>
-        ` : ''}
+        ${
+          this.activeWorkflow.completedAt
+            ? html`
+                <div style="color: var(--spectrum-gray-600);">
+                  Completed ${this.formatDate(this.activeWorkflow.completedAt)}
+                </div>
+              `
+            : ''
+        }
       </div>
     `;
   }

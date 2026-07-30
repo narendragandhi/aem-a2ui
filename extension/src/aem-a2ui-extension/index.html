@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Content Assistant</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Adobe Clean', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--spectrum-gray-50, #f8f8f8);
+      color: var(--spectrum-gray-800, #2c2c2c);
+    }
+    #root {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #888;
+      font-size: 14px;
+    }
+    .error {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #e34850;
+      font-size: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="loading" id="loading">Loading AI Content Assistant...</div>
+    <div class="error" id="error"></div>
+  </div>
+  <script type="module" src="./index.js"></script>
+</body>
+</html>

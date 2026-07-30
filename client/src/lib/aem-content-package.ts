@@ -50,13 +50,14 @@ function generatePropertiesXml(config: PackageConfig): string {
  * Generate filter.xml for package
  */
 function generateFilterXml(filters: PackageFilter[]): string {
-  const filterEntries = filters.map(filter => {
-    const rules = filter.rules?.map(rule =>
-      `      <${rule.modifier} pattern="${rule.pattern}" />`
-    ).join('\n') || '';
+  const filterEntries = filters
+    .map((filter) => {
+      const rules =
+        filter.rules?.map((rule) => `      <${rule.modifier} pattern="${rule.pattern}" />`).join('\n') || '';
 
-    return `    <filter root="${filter.root}">${rules ? '\n' + rules + '\n    ' : ''}</filter>`;
-  }).join('\n');
+      return `    <filter root="${filter.root}">${rules ? '\n' + rules + '\n    ' : ''}</filter>`;
+    })
+    .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
@@ -78,7 +79,9 @@ function generateContentXml(jcrContent: Record<string, unknown>, indent = 0): st
     if (typeof value === 'object' && !Array.isArray(value)) {
       // Child node
       const childXml = generateContentXml(value as Record<string, unknown>, indent + 1);
-      children.push(`${spaces}  <${escapeXmlName(key)}${childXml.startsWith('\n') ? '' : ' '}${childXml}</${escapeXmlName(key)}>`);
+      children.push(
+        `${spaces}  <${escapeXmlName(key)}${childXml.startsWith('\n') ? '' : ' '}${childXml}</${escapeXmlName(key)}>`,
+      );
     } else {
       // Property
       const propValue = formatXmlProperty(key, value);
@@ -94,7 +97,7 @@ function generateContentXml(jcrContent: Record<string, unknown>, indent = 0): st
 
   let result = '';
   if (props.length > 0) {
-    result += '\n' + props.map(p => `${spaces}  ${p}`).join('\n');
+    result += '\n' + props.map((p) => `${spaces}  ${p}`).join('\n');
   }
 
   if (children.length > 0) {
@@ -124,7 +127,7 @@ function formatXmlProperty(key: string, value: unknown): string | null {
     }
     return `${xmlKey}="{Double}${value}"`;
   } else if (Array.isArray(value)) {
-    const items = value.map(v => escapeXmlValue(String(v))).join(',');
+    const items = value.map((v) => escapeXmlValue(String(v))).join(',');
     return `${xmlKey}="[${items}]"`;
   }
 
@@ -157,10 +160,7 @@ function generateFullContentXml(jcrContent: Record<string, unknown>): string {
 /**
  * Create content package from content suggestions
  */
-export async function createContentPackage(
-  contents: ContentSuggestion[],
-  config: PackageConfig
-): Promise<Blob> {
+export async function createContentPackage(contents: ContentSuggestion[], config: PackageConfig): Promise<Blob> {
   const zip = new JSZip();
 
   // Create META-INF structure
@@ -171,30 +171,38 @@ export async function createContentPackage(
   vault!.file('properties.xml', generatePropertiesXml(config));
 
   // Create filters for content
-  const filters: PackageFilter[] = [{
-    root: config.contentPath,
-    rules: [{ modifier: 'include', pattern: `${config.contentPath}/.*` }]
-  }];
+  const filters: PackageFilter[] = [
+    {
+      root: config.contentPath,
+      rules: [{ modifier: 'include', pattern: `${config.contentPath}/.*` }],
+    },
+  ];
   vault!.file('filter.xml', generateFilterXml(filters));
 
   // Add config.xml
-  vault!.file('config.xml', `<?xml version="1.0" encoding="UTF-8"?>
+  vault!.file(
+    'config.xml',
+    `<?xml version="1.0" encoding="UTF-8"?>
 <vaultfs version="1.1">
   <aggregates>
     <aggregate name="page" primaryType="cq:Page"/>
     <aggregate name="component" primaryType="cq:Component"/>
   </aggregates>
-</vaultfs>`);
+</vaultfs>`,
+  );
 
   // Add definition/.content.xml
   const definition = vault!.folder('definition');
-  definition!.file('.content.xml', `<?xml version="1.0" encoding="UTF-8"?>
+  definition!.file(
+    '.content.xml',
+    `<?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0"
           xmlns:vlt="http://www.day.com/jcr/vault/1.0"
           jcr:primaryType="vlt:PackageDefinition"
           name="${config.name}"
           group="${config.group}"
-          version="${config.version}"/>`);
+          version="${config.version}"/>`,
+  );
 
   // Create jcr_root structure
   const jcrRoot = zip.folder('jcr_root');
@@ -204,11 +212,11 @@ export async function createContentPackage(
     const content = contents[i];
     const jcrContent = contentToJcr(content, {
       path: `${config.contentPath}/component-${i + 1}`,
-      resourceType: `aem-component-factory/components/${content.componentType || 'teaser'}`
+      resourceType: `aem-component-factory/components/${content.componentType || 'teaser'}`,
     });
 
     // Create folder structure
-    const pathParts = config.contentPath.split('/').filter(p => p);
+    const pathParts = config.contentPath.split('/').filter((p) => p);
     let currentFolder = jcrRoot;
 
     for (const part of pathParts) {
@@ -224,7 +232,7 @@ export async function createContentPackage(
   return await zip.generateAsync({
     type: 'blob',
     compression: 'DEFLATE',
-    compressionOptions: { level: 9 }
+    compressionOptions: { level: 9 },
   });
 }
 
@@ -238,7 +246,7 @@ export async function createPagePackage(
     pageTitle: string;
     template: string;
   },
-  packageConfig: PackageConfig
+  packageConfig: PackageConfig,
 ): Promise<Blob> {
   const zip = new JSZip();
 
@@ -248,14 +256,16 @@ export async function createPagePackage(
 
   vault!.file('properties.xml', generatePropertiesXml(packageConfig));
 
-  const filters: PackageFilter[] = [{
-    root: pageConfig.pagePath,
-  }];
+  const filters: PackageFilter[] = [
+    {
+      root: pageConfig.pagePath,
+    },
+  ];
   vault!.file('filter.xml', generateFilterXml(filters));
 
   // Create jcr_root with page structure
   const jcrRoot = zip.folder('jcr_root');
-  const pathParts = pageConfig.pagePath.split('/').filter(p => p);
+  const pathParts = pageConfig.pagePath.split('/').filter((p) => p);
 
   let currentFolder = jcrRoot;
   for (const part of pathParts) {
@@ -270,17 +280,20 @@ export async function createPagePackage(
       'jcr:title': pageConfig.pageTitle,
       'sling:resourceType': pageConfig.template,
       'cq:template': `/conf/aem-component-factory/settings/wcm/templates/${pageConfig.template.split('/').pop()}`,
-    }
+    },
   };
 
   // Add components to page
   const jcrContent = pageJcr['jcr:content'] as Record<string, unknown>;
-  const root = { 'jcr:primaryType': 'nt:unstructured', 'sling:resourceType': 'wcm/foundation/components/responsivegrid' } as Record<string, unknown>;
+  const root = {
+    'jcr:primaryType': 'nt:unstructured',
+    'sling:resourceType': 'wcm/foundation/components/responsivegrid',
+  } as Record<string, unknown>;
 
   contents.forEach((content, index) => {
     root[`component_${index}`] = contentToJcr(content, {
       path: `${pageConfig.pagePath}/jcr:content/root/component_${index}`,
-      resourceType: `core/wcm/components/${content.componentType || 'teaser'}/v2/${content.componentType || 'teaser'}`
+      resourceType: `core/wcm/components/${content.componentType || 'teaser'}/v2/${content.componentType || 'teaser'}`,
     });
   });
 
@@ -291,7 +304,7 @@ export async function createPagePackage(
   return await zip.generateAsync({
     type: 'blob',
     compression: 'DEFLATE',
-    compressionOptions: { level: 9 }
+    compressionOptions: { level: 9 },
   });
 }
 

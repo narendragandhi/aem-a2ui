@@ -10,7 +10,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Collapsible panel displaying brand guidelines. Shows voice/tone, colors, value pillars, and example headlines loaded from brand-config.json.',
+        component:
+          'Collapsible panel displaying brand guidelines. Shows voice/tone, colors, value pillars, and example headlines loaded from brand-config.json.',
       },
     },
   },

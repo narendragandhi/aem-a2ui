@@ -16,7 +16,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Connection status indicator for AEM. Shows green (connected), red (disconnected), or gray (disabled) dot with expandable details panel.',
+        component:
+          'Connection status indicator for AEM. Shows green (connected), red (disconnected), or gray (disabled) dot with expandable details panel.',
       },
     },
   },
@@ -63,14 +64,16 @@ export const InHeader: Story = {
     showLabel: true,
   },
   render: (args) => html`
-    <header style="
+    <header
+      style="
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 24px;
       background: white;
       border-bottom: 1px solid #e0e0e0;
-    ">
+    "
+    >
       <div style="font-size: 18px; font-weight: 600;">AEM Content Assistant</div>
       <div style="display: flex; align-items: center; gap: 16px;">
         <aem-status .showLabel=${args.showLabel}></aem-status>
@@ -105,7 +108,8 @@ export const ClickToExpand: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'The status indicator expands on click to show: Connection status, Integration enabled/disabled, Author URL, Test Connection button, and Open AEM link.',
+        story:
+          'The status indicator expands on click to show: Connection status, Integration enabled/disabled, Author URL, Test Connection button, and Open AEM link.',
       },
     },
   },

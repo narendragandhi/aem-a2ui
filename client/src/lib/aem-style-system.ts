@@ -27,14 +27,19 @@ export interface ComponentStylePolicy {
  * Pre-defined Style Groups for AEM Core Components
  */
 export const STYLE_GROUPS: Record<string, StyleGroup[]> = {
-  'teaser': [
+  teaser: [
     {
       id: 'layout',
       name: 'Layout',
       styles: [
         { id: 'default', name: 'Default', cssClasses: '', description: 'Standard teaser layout' },
         { id: 'card', name: 'Card', cssClasses: 'cmp-teaser--card', description: 'Card-style with shadow' },
-        { id: 'horizontal', name: 'Horizontal', cssClasses: 'cmp-teaser--horizontal', description: 'Side-by-side layout' },
+        {
+          id: 'horizontal',
+          name: 'Horizontal',
+          cssClasses: 'cmp-teaser--horizontal',
+          description: 'Side-by-side layout',
+        },
         { id: 'overlay', name: 'Overlay', cssClasses: 'cmp-teaser--overlay', description: 'Text overlays image' },
       ],
     },
@@ -58,7 +63,7 @@ export const STYLE_GROUPS: Record<string, StyleGroup[]> = {
       ],
     },
   ],
-  'hero': [
+  hero: [
     {
       id: 'height',
       name: 'Height',
@@ -88,7 +93,7 @@ export const STYLE_GROUPS: Record<string, StyleGroup[]> = {
       ],
     },
   ],
-  'button': [
+  button: [
     {
       id: 'variant',
       name: 'Variant',
@@ -109,7 +114,7 @@ export const STYLE_GROUPS: Record<string, StyleGroup[]> = {
       ],
     },
   ],
-  'image': [
+  image: [
     {
       id: 'shape',
       name: 'Shape',
@@ -129,7 +134,7 @@ export const STYLE_GROUPS: Record<string, StyleGroup[]> = {
       ],
     },
   ],
-  'text': [
+  text: [
     {
       id: 'typography',
       name: 'Typography',
@@ -154,10 +159,7 @@ export const STYLE_GROUPS: Record<string, StyleGroup[]> = {
 /**
  * Generate Style Policy for a component
  */
-export function generateStylePolicy(
-  componentType: string,
-  policyPath: string
-): Record<string, unknown> {
+export function generateStylePolicy(componentType: string, policyPath: string): Record<string, unknown> {
   const styleGroups = STYLE_GROUPS[componentType] || [];
 
   const policy: Record<string, unknown> = {
@@ -168,9 +170,9 @@ export function generateStylePolicy(
 
   // Add style groups
   if (styleGroups.length > 0) {
-    policy['cq:styleGroups'] = styleGroups.map(group => ({
+    policy['cq:styleGroups'] = styleGroups.map((group) => ({
       'cq:styleGroupLabel': group.name,
-      'cq:styles': group.styles.map(style => ({
+      'cq:styles': group.styles.map((style) => ({
         'cq:styleId': style.id,
         'cq:styleLabel': style.name,
         'cq:styleCssClasses': style.cssClasses,
@@ -394,7 +396,7 @@ export function getStyleGroupsForComponent(componentType: string): StyleGroup[] 
  */
 export function generatePolicyMapping(
   templatePath: string,
-  components: Array<{ type: string; policyName: string }>
+  components: Array<{ type: string; policyName: string }>,
 ): Record<string, unknown> {
   const mapping: Record<string, unknown> = {
     'jcr:primaryType': 'nt:unstructured',

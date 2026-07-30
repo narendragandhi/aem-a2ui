@@ -36,32 +36,32 @@ export interface SchemaOptions {
  */
 export function generateArticleSchema(
   content: ContentSuggestion,
-  options: SchemaOptions = {}
+  options: SchemaOptions = {},
 ): Record<string, unknown> {
   const now = new Date().toISOString();
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    'headline': content.title,
-    'description': content.description,
-    'image': content.imageUrl ? [content.imageUrl] : [],
-    'author': {
+    headline: content.title,
+    description: content.description,
+    image: content.imageUrl ? [content.imageUrl] : [],
+    author: {
       '@type': 'Person',
-      'name': options.authorName || 'Content Team',
-      'url': options.authorUrl,
+      name: options.authorName || 'Content Team',
+      url: options.authorUrl,
     },
-    'publisher': {
+    publisher: {
       '@type': 'Organization',
-      'name': options.organizationName || 'AEM Component Factory',
-      'logo': {
+      name: options.organizationName || 'AEM Component Factory',
+      logo: {
         '@type': 'ImageObject',
-        'url': options.organizationLogo || '',
+        url: options.organizationLogo || '',
       },
     },
-    'datePublished': options.datePublished || now,
-    'dateModified': options.dateModified || now,
-    'mainEntityOfPage': {
+    datePublished: options.datePublished || now,
+    dateModified: options.dateModified || now,
+    mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': options.baseUrl || '',
     },
@@ -80,18 +80,18 @@ export function generateProductSchema(
     currency?: string;
     ratingValue?: number;
     reviewCount?: number;
-  } = {}
+  } = {},
 ): Record<string, unknown> {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    'name': content.title,
-    'description': content.description,
-    'image': content.imageUrl,
-    'sku': options.sku || content.id,
-    'brand': {
+    name: content.title,
+    description: content.description,
+    image: content.imageUrl,
+    sku: options.sku || content.id,
+    brand: {
       '@type': 'Brand',
-      'name': options.brand || options.organizationName || 'Brand',
+      name: options.brand || options.organizationName || 'Brand',
     },
   };
 
@@ -100,10 +100,10 @@ export function generateProductSchema(
     const priceValue = parseFloat(content.price.replace(/[^0-9.]/g, ''));
     schema['offers'] = {
       '@type': 'Offer',
-      'price': priceValue,
-      'priceCurrency': options.currency || 'USD',
-      'availability': `https://schema.org/${options.availability || 'InStock'}`,
-      'url': options.baseUrl,
+      price: priceValue,
+      priceCurrency: options.currency || 'USD',
+      availability: `https://schema.org/${options.availability || 'InStock'}`,
+      url: options.baseUrl,
     };
   }
 
@@ -111,10 +111,10 @@ export function generateProductSchema(
   if (options.ratingValue) {
     schema['aggregateRating'] = {
       '@type': 'AggregateRating',
-      'ratingValue': options.ratingValue,
-      'reviewCount': options.reviewCount || 1,
-      'bestRating': 5,
-      'worstRating': 1,
+      ratingValue: options.ratingValue,
+      reviewCount: options.reviewCount || 1,
+      bestRating: 5,
+      worstRating: 1,
     };
   }
 
@@ -128,38 +128,36 @@ export function generateWebPageSchema(
   content: ContentSuggestion,
   options: SchemaOptions & {
     pageType?: 'WebPage' | 'AboutPage' | 'ContactPage' | 'FAQPage' | 'CollectionPage';
-  } = {}
+  } = {},
 ): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': options.pageType || 'WebPage',
-    'name': content.title,
-    'description': content.description,
-    'url': options.baseUrl,
-    'image': content.imageUrl,
-    'publisher': {
+    name: content.title,
+    description: content.description,
+    url: options.baseUrl,
+    image: content.imageUrl,
+    publisher: {
       '@type': 'Organization',
-      'name': options.organizationName || 'AEM Component Factory',
+      name: options.organizationName || 'AEM Component Factory',
     },
-    'datePublished': options.datePublished,
-    'dateModified': options.dateModified,
+    datePublished: options.datePublished,
+    dateModified: options.dateModified,
   };
 }
 
 /**
  * Generate BreadcrumbList schema
  */
-export function generateBreadcrumbSchema(
-  items: Array<{ name: string; url: string }>
-): Record<string, unknown> {
+export function generateBreadcrumbSchema(items: Array<{ name: string; url: string }>): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    'itemListElement': items.map((item, index) => ({
+    itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
-      'position': index + 1,
-      'name': item.name,
-      'item': item.url,
+      position: index + 1,
+      name: item.name,
+      item: item.url,
     })),
   };
 }
@@ -167,18 +165,16 @@ export function generateBreadcrumbSchema(
 /**
  * Generate FAQ schema
  */
-export function generateFaqSchema(
-  faqs: Array<{ question: string; answer: string }>
-): Record<string, unknown> {
+export function generateFaqSchema(faqs: Array<{ question: string; answer: string }>): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    'mainEntity': faqs.map(faq => ({
+    mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
-      'name': faq.question,
-      'acceptedAnswer': {
+      name: faq.question,
+      acceptedAnswer: {
         '@type': 'Answer',
-        'text': faq.answer,
+        text: faq.answer,
       },
     })),
   };
@@ -193,20 +189,20 @@ export function generateHowToSchema(
   options: SchemaOptions & {
     totalTime?: string; // ISO 8601 duration, e.g., "PT30M"
     estimatedCost?: { value: number; currency: string };
-  } = {}
+  } = {},
 ): Record<string, unknown> {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    'name': content.title,
-    'description': content.description,
-    'image': content.imageUrl,
-    'step': steps.map((step, index) => ({
+    name: content.title,
+    description: content.description,
+    image: content.imageUrl,
+    step: steps.map((step, index) => ({
       '@type': 'HowToStep',
-      'position': index + 1,
-      'name': step.name,
-      'text': step.text,
-      'image': step.image,
+      position: index + 1,
+      name: step.name,
+      text: step.text,
+      image: step.image,
     })),
   };
 
@@ -217,8 +213,8 @@ export function generateHowToSchema(
   if (options.estimatedCost) {
     schema['estimatedCost'] = {
       '@type': 'MonetaryAmount',
-      'value': options.estimatedCost.value,
-      'currency': options.estimatedCost.currency,
+      value: options.estimatedCost.value,
+      currency: options.estimatedCost.currency,
     };
   }
 
@@ -228,34 +224,32 @@ export function generateHowToSchema(
 /**
  * Generate Organization schema
  */
-export function generateOrganizationSchema(
-  options: {
-    name: string;
-    url: string;
-    logo: string;
-    description?: string;
-    sameAs?: string[]; // Social media profiles
-    contactPoint?: {
-      type: string;
-      telephone: string;
-      email?: string;
-    };
-    address?: {
-      street: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-    };
-  }
-): Record<string, unknown> {
+export function generateOrganizationSchema(options: {
+  name: string;
+  url: string;
+  logo: string;
+  description?: string;
+  sameAs?: string[]; // Social media profiles
+  contactPoint?: {
+    type: string;
+    telephone: string;
+    email?: string;
+  };
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+}): Record<string, unknown> {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    'name': options.name,
-    'url': options.url,
-    'logo': options.logo,
-    'description': options.description,
+    name: options.name,
+    url: options.url,
+    logo: options.logo,
+    description: options.description,
   };
 
   if (options.sameAs) {
@@ -265,20 +259,20 @@ export function generateOrganizationSchema(
   if (options.contactPoint) {
     schema['contactPoint'] = {
       '@type': 'ContactPoint',
-      'contactType': options.contactPoint.type,
-      'telephone': options.contactPoint.telephone,
-      'email': options.contactPoint.email,
+      contactType: options.contactPoint.type,
+      telephone: options.contactPoint.telephone,
+      email: options.contactPoint.email,
     };
   }
 
   if (options.address) {
     schema['address'] = {
       '@type': 'PostalAddress',
-      'streetAddress': options.address.street,
-      'addressLocality': options.address.city,
-      'addressRegion': options.address.state,
-      'postalCode': options.address.postalCode,
-      'addressCountry': options.address.country,
+      streetAddress: options.address.street,
+      addressLocality: options.address.city,
+      addressRegion: options.address.state,
+      postalCode: options.address.postalCode,
+      addressCountry: options.address.country,
     };
   }
 
@@ -288,48 +282,46 @@ export function generateOrganizationSchema(
 /**
  * Generate LocalBusiness schema
  */
-export function generateLocalBusinessSchema(
-  options: {
-    name: string;
-    description?: string;
-    url: string;
-    image: string;
-    telephone: string;
-    address: {
-      street: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-    };
-    geo?: { latitude: number; longitude: number };
-    openingHours?: string[]; // e.g., ["Mo-Fr 09:00-17:00", "Sa 10:00-14:00"]
-    priceRange?: string; // e.g., "$$"
-  }
-): Record<string, unknown> {
+export function generateLocalBusinessSchema(options: {
+  name: string;
+  description?: string;
+  url: string;
+  image: string;
+  telephone: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  geo?: { latitude: number; longitude: number };
+  openingHours?: string[]; // e.g., ["Mo-Fr 09:00-17:00", "Sa 10:00-14:00"]
+  priceRange?: string; // e.g., "$$"
+}): Record<string, unknown> {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    'name': options.name,
-    'description': options.description,
-    'url': options.url,
-    'image': options.image,
-    'telephone': options.telephone,
-    'address': {
+    name: options.name,
+    description: options.description,
+    url: options.url,
+    image: options.image,
+    telephone: options.telephone,
+    address: {
       '@type': 'PostalAddress',
-      'streetAddress': options.address.street,
-      'addressLocality': options.address.city,
-      'addressRegion': options.address.state,
-      'postalCode': options.address.postalCode,
-      'addressCountry': options.address.country,
+      streetAddress: options.address.street,
+      addressLocality: options.address.city,
+      addressRegion: options.address.state,
+      postalCode: options.address.postalCode,
+      addressCountry: options.address.country,
     },
   };
 
   if (options.geo) {
     schema['geo'] = {
       '@type': 'GeoCoordinates',
-      'latitude': options.geo.latitude,
-      'longitude': options.geo.longitude,
+      latitude: options.geo.latitude,
+      longitude: options.geo.longitude,
     };
   }
 
@@ -363,54 +355,54 @@ export function generateEventSchema(
     ticketUrl?: string;
     price?: number;
     currency?: string;
-  }
+  },
 ): Record<string, unknown> {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Event',
-    'name': content.title,
-    'description': content.description,
-    'image': content.imageUrl,
-    'startDate': options.startDate,
-    'endDate': options.endDate,
+    name: content.title,
+    description: content.description,
+    image: content.imageUrl,
+    startDate: options.startDate,
+    endDate: options.endDate,
   };
 
   if (options.isOnline) {
     schema['eventAttendanceMode'] = 'https://schema.org/OnlineEventAttendanceMode';
     schema['location'] = {
       '@type': 'VirtualLocation',
-      'url': options.onlineUrl,
+      url: options.onlineUrl,
     };
   } else if (options.location) {
     schema['eventAttendanceMode'] = 'https://schema.org/OfflineEventAttendanceMode';
     schema['location'] = {
       '@type': 'Place',
-      'name': options.location.name,
-      'address': options.location.address,
+      name: options.location.name,
+      address: options.location.address,
     };
   }
 
   if (options.performer) {
     schema['performer'] = {
       '@type': 'Person',
-      'name': options.performer,
+      name: options.performer,
     };
   }
 
   if (options.organizer) {
     schema['organizer'] = {
       '@type': 'Organization',
-      'name': options.organizer,
+      name: options.organizer,
     };
   }
 
   if (options.ticketUrl && options.price !== undefined) {
     schema['offers'] = {
       '@type': 'Offer',
-      'url': options.ticketUrl,
-      'price': options.price,
-      'priceCurrency': options.currency || 'USD',
-      'availability': 'https://schema.org/InStock',
+      url: options.ticketUrl,
+      price: options.price,
+      priceCurrency: options.currency || 'USD',
+      availability: 'https://schema.org/InStock',
     };
   }
 
@@ -428,28 +420,25 @@ export function generateVideoSchema(
     duration?: string; // ISO 8601 duration
     uploadDate?: string;
     embedUrl?: string;
-  }
+  },
 ): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
-    'name': content.title,
-    'description': content.description,
-    'thumbnailUrl': options.thumbnailUrl || content.imageUrl,
-    'contentUrl': options.videoUrl,
-    'embedUrl': options.embedUrl,
-    'uploadDate': options.uploadDate || new Date().toISOString(),
-    'duration': options.duration,
+    name: content.title,
+    description: content.description,
+    thumbnailUrl: options.thumbnailUrl || content.imageUrl,
+    contentUrl: options.videoUrl,
+    embedUrl: options.embedUrl,
+    uploadDate: options.uploadDate || new Date().toISOString(),
+    duration: options.duration,
   };
 }
 
 /**
  * Auto-detect and generate appropriate schema
  */
-export function autoGenerateSchema(
-  content: ContentSuggestion,
-  options: SchemaOptions = {}
-): Record<string, unknown> {
+export function autoGenerateSchema(content: ContentSuggestion, options: SchemaOptions = {}): Record<string, unknown> {
   const type = content.componentType?.toLowerCase() || '';
 
   // Detect schema type based on component type
@@ -540,7 +529,7 @@ export function validateSchema(schema: Record<string, unknown>): {
 export function combineSchemas(schemas: Record<string, unknown>[]): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
-    '@graph': schemas.map(schema => {
+    '@graph': schemas.map((schema) => {
       const { '@context': _, ...rest } = schema;
       return rest;
     }),

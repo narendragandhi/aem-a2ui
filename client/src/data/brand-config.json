@@ -20,11 +20,7 @@
     "bodyStyle": "Clear, scannable, max 2 sentences per paragraph"
   },
   "messaging": {
-    "valuePillars": [
-      "Speed & Efficiency",
-      "Enterprise Security",
-      "Seamless Integration"
-    ],
+    "valuePillars": ["Speed & Efficiency", "Enterprise Security", "Seamless Integration"],
     "targetAudience": "Enterprise IT decision-makers and digital marketers",
     "ctaStyle": "Action verbs, urgency without pressure"
   },
@@ -34,11 +30,7 @@
       "Security That Scales With You",
       "One Platform. Endless Possibilities."
     ],
-    "goodCTAs": [
-      "Start Free Trial",
-      "See It In Action",
-      "Get Your Demo"
-    ]
+    "goodCTAs": ["Start Free Trial", "See It In Action", "Get Your Demo"]
   },
   "visuals": {
     "styleKeywords": ["natural light", "minimalist", "clean", "tech", "office"],

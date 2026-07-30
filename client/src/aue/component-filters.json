@@ -4,34 +4,17 @@
     {
       "id": "page-content",
       "title": "Page Content",
-      "components": [
-        "hero-banner",
-        "teaser",
-        "product-card",
-        "cta-banner",
-        "quote"
-      ]
+      "components": ["hero-banner", "teaser", "product-card", "cta-banner", "quote"]
     },
     {
       "id": "page-structure",
       "title": "Page Structure",
-      "components": [
-        "navigation",
-        "footer"
-      ]
+      "components": ["navigation", "footer"]
     },
     {
       "id": "all-components",
       "title": "All Components",
-      "components": [
-        "hero-banner",
-        "teaser",
-        "product-card",
-        "cta-banner",
-        "quote",
-        "navigation",
-        "footer"
-      ]
+      "components": ["hero-banner", "teaser", "product-card", "cta-banner", "quote", "navigation", "footer"]
     }
   ]
 }

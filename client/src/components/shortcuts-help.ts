@@ -26,8 +26,12 @@ export class ShortcutsHelp extends LitElement {
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     .modal {
@@ -211,18 +215,16 @@ export class ShortcutsHelp extends LitElement {
                             ${this.renderKeys(keyboardShortcuts.formatShortcut(shortcut))}
                           </div>
                         </div>
-                      `
+                      `,
                     )}
                   </div>
                 </div>
-              `
+              `,
             )}
           </div>
 
           <div class="modal-footer">
-            <span class="footer-hint">
-              Press <kbd>Shift</kbd> + <kbd>?</kbd> to toggle this help
-            </span>
+            <span class="footer-hint"> Press <kbd>Shift</kbd> + <kbd>?</kbd> to toggle this help </span>
           </div>
         </div>
       </div>
@@ -235,7 +237,7 @@ export class ShortcutsHelp extends LitElement {
       (key, index) => html`
         <span class="key">${key}</span>
         ${index < keys.length - 1 ? html`<span class="key-separator">+</span>` : ''}
-      `
+      `,
     );
   }
 

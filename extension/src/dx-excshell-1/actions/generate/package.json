@@ -1,0 +1,9 @@
+{
+  "name": "aem-a2ui-generate",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@adobe/aio-sdk": "^6.0.0",
+    "node-fetch": "^2.7.0"
+  }
+}

@@ -13,20 +13,23 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to AEM Content Assistant',
-    description: 'Generate brand-aligned content for Adobe Experience Manager with AI assistance. Let\'s take a quick tour!',
+    description:
+      "Generate brand-aligned content for Adobe Experience Manager with AI assistance. Let's take a quick tour!",
     icon: '👋',
   },
   {
     id: 'describe',
     title: 'Describe What You Need',
-    description: 'Start by describing the content you want to create. For example: "Hero banner for summer sale" or "Product card for new laptop".',
+    description:
+      'Start by describing the content you want to create. For example: "Hero banner for summer sale" or "Product card for new laptop".',
     icon: '✍️',
     highlight: '.input-section',
   },
   {
     id: 'suggestions',
     title: 'Review AI Suggestions',
-    description: 'The AI generates multiple variations for you to choose from. Each suggestion is scored for brand alignment.',
+    description:
+      'The AI generates multiple variations for you to choose from. Each suggestion is scored for brand alignment.',
     icon: '🎯',
     highlight: '.suggestions-section',
   },
@@ -40,7 +43,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'export',
     title: 'Export to AEM',
-    description: 'When you\'re happy with the content, export it as JSON or HTML ready for AEM, or save directly to your AEM instance.',
+    description:
+      "When you're happy with the content, export it as JSON or HTML ready for AEM, or save directly to your AEM instance.",
     icon: '🚀',
     highlight: '.export-actions',
   },
@@ -75,8 +79,12 @@ export class AppOnboarding extends LitElement {
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     /* Modal */
@@ -312,9 +320,11 @@ export class AppOnboarding extends LitElement {
           <div class="modal-header">
             <span class="step-icon">${step.icon}</span>
             <h2 class="step-title">${step.title}</h2>
-            ${!isFirstStep
-              ? html`<span class="step-counter">Step ${this.currentStep} of ${ONBOARDING_STEPS.length - 1}</span>`
-              : ''}
+            ${
+              !isFirstStep
+                ? html`<span class="step-counter">Step ${this.currentStep} of ${ONBOARDING_STEPS.length - 1}</span>`
+                : ''
+            }
           </div>
 
           <div class="modal-body">
@@ -328,31 +338,31 @@ export class AppOnboarding extends LitElement {
                   <div
                     class="progress-dot ${index === this.currentStep ? 'active' : ''} ${index < this.currentStep ? 'completed' : ''}"
                   ></div>
-                `
+                `,
               )}
             </div>
 
-            ${isFirstStep
-              ? html`
-                  <div class="quick-start">
-                    <p class="quick-start-text">Already know how to use content assistants?</p>
-                    <button class="btn btn-quick-start" @click=${this.skipTour}>
-                      Skip Tour & Start Creating
-                    </button>
-                  </div>
-                `
-              : ''}
+            ${
+              isFirstStep
+                ? html`
+                    <div class="quick-start">
+                      <p class="quick-start-text">Already know how to use content assistants?</p>
+                      <button class="btn btn-quick-start" @click=${this.skipTour}>Skip Tour & Start Creating</button>
+                    </div>
+                  `
+                : ''
+            }
           </div>
 
           <div class="modal-footer">
             <button class="btn btn-skip" @click=${this.skipTour}>Skip</button>
             <div class="btn-nav">
-              ${!isFirstStep
-                ? html`<button class="btn btn-back" @click=${this.prevStep}>Back</button>`
-                : ''}
-              ${isLastStep
-                ? html`<button class="btn btn-finish" @click=${this.finishTour}>Get Started</button>`
-                : html`<button class="btn btn-next" @click=${this.nextStep}>Next</button>`}
+              ${!isFirstStep ? html`<button class="btn btn-back" @click=${this.prevStep}>Back</button>` : ''}
+              ${
+                isLastStep
+                  ? html`<button class="btn btn-finish" @click=${this.finishTour}>Get Started</button>`
+                  : html`<button class="btn btn-next" @click=${this.nextStep}>Next</button>`
+              }
             </div>
           </div>
         </div>
@@ -379,7 +389,7 @@ export class AppOnboarding extends LitElement {
                 ${f.text}
               </span>
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -443,7 +453,7 @@ export class AppOnboarding extends LitElement {
       new CustomEvent('onboarding-complete', {
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 

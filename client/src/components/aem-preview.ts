@@ -112,7 +112,7 @@ export class AemPreview extends LitElement {
     .view-modes {
       display: flex;
       gap: 2px;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
       border-radius: 4px;
       padding: 2px;
     }
@@ -121,7 +121,7 @@ export class AemPreview extends LitElement {
       padding: 6px 12px;
       border: none;
       background: transparent;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255, 255, 255, 0.7);
       font-size: 11px;
       cursor: pointer;
       border-radius: 3px;
@@ -130,11 +130,11 @@ export class AemPreview extends LitElement {
 
     .view-mode-btn:hover {
       color: white;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .view-mode-btn.active {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       color: white;
     }
 
@@ -153,8 +153,8 @@ export class AemPreview extends LitElement {
       width: 32px;
       height: 32px;
       border: none;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.7);
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
@@ -162,7 +162,7 @@ export class AemPreview extends LitElement {
     }
 
     .device-btn:hover {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       color: white;
     }
 
@@ -198,7 +198,7 @@ export class AemPreview extends LitElement {
 
     .preview-frame {
       background: white;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
       transition: all 0.3s;
       overflow: hidden;
     }
@@ -274,7 +274,7 @@ export class AemPreview extends LitElement {
     .chrome-icon {
       width: 16px;
       height: 16px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 3px;
       display: flex;
       align-items: center;
@@ -300,7 +300,7 @@ export class AemPreview extends LitElement {
       width: 20px;
       height: 20px;
       border: none;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       color: white;
       border-radius: 3px;
       cursor: pointer;
@@ -311,7 +311,7 @@ export class AemPreview extends LitElement {
     }
 
     .chrome-btn:hover {
-      background: rgba(255,255,255,0.3);
+      background: rgba(255, 255, 255, 0.3);
     }
 
     /* Structure View */
@@ -382,7 +382,7 @@ export class AemPreview extends LitElement {
     .hero-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 100%);
     }
 
     .hero-content {
@@ -396,7 +396,7 @@ export class AemPreview extends LitElement {
       font-size: 42px;
       font-weight: 700;
       margin-bottom: 16px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .hero-subtitle {
@@ -524,7 +524,7 @@ export class AemPreview extends LitElement {
 
     .footer-link {
       display: block;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       font-size: 13px;
       margin-bottom: 8px;
@@ -606,9 +606,15 @@ export class AemPreview extends LitElement {
     .social-share-button:hover {
       opacity: 0.9;
     }
-    .social-share-button.facebook { background-color: #1877F2; }
-    .social-share-button.twitter { background-color: #1DA1F2; }
-    .social-share-button.linkedin { background-color: #0A66C2; }
+    .social-share-button.facebook {
+      background-color: #1877f2;
+    }
+    .social-share-button.twitter {
+      background-color: #1da1f2;
+    }
+    .social-share-button.linkedin {
+      background-color: #0a66c2;
+    }
 
     /* Pricing component */
     .pricing-component {
@@ -701,7 +707,6 @@ export class AemPreview extends LitElement {
       background: var(--spectrum-gray-200, #e8e8e8);
       border-radius: 8px;
     }
-
 
     .empty-component {
       padding: 40px;
@@ -1000,10 +1005,7 @@ export class AemPreview extends LitElement {
       <div class="aem-preview">
         ${this.renderToolbar()}
         <div class="preview-container">
-          ${this.viewMode === 'structure'
-            ? this.renderStructureView()
-            : this.renderPreviewFrame()
-          }
+          ${this.viewMode === 'structure' ? this.renderStructureView() : this.renderPreviewFrame()}
         </div>
       </div>
     `;
@@ -1020,35 +1022,47 @@ export class AemPreview extends LitElement {
           <div class="view-modes">
             <button
               class="view-mode-btn ${this.viewMode === 'preview' ? 'active' : ''}"
-              @click=${() => this.viewMode = 'preview'}
-            >Preview</button>
+              @click=${() => (this.viewMode = 'preview')}
+            >
+              Preview
+            </button>
             <button
               class="view-mode-btn ${this.viewMode === 'edit' ? 'active' : ''}"
-              @click=${() => this.viewMode = 'edit'}
-            >Edit</button>
+              @click=${() => (this.viewMode = 'edit')}
+            >
+              Edit
+            </button>
             <button
               class="view-mode-btn ${this.viewMode === 'structure' ? 'active' : ''}"
-              @click=${() => this.viewMode = 'structure'}
-            >Structure</button>
+              @click=${() => (this.viewMode = 'structure')}
+            >
+              Structure
+            </button>
           </div>
         </div>
         <div class="toolbar-right">
           <div class="device-toggle">
             <button
               class="device-btn ${this.deviceMode === 'desktop' ? 'active' : ''}"
-              @click=${() => this.deviceMode = 'desktop'}
+              @click=${() => (this.deviceMode = 'desktop')}
               title="Desktop"
-            >🖥️</button>
+            >
+              🖥️
+            </button>
             <button
               class="device-btn ${this.deviceMode === 'tablet' ? 'active' : ''}"
-              @click=${() => this.deviceMode = 'tablet'}
+              @click=${() => (this.deviceMode = 'tablet')}
               title="Tablet"
-            >📱</button>
+            >
+              📱
+            </button>
             <button
               class="device-btn ${this.deviceMode === 'mobile' ? 'active' : ''}"
-              @click=${() => this.deviceMode = 'mobile'}
+              @click=${() => (this.deviceMode = 'mobile')}
               title="Mobile"
-            >📲</button>
+            >
+              📲
+            </button>
           </div>
           <button class="publish-btn">Publish Page</button>
         </div>
@@ -1060,9 +1074,10 @@ export class AemPreview extends LitElement {
     return html`
       <div class="preview-frame ${this.deviceMode}">
         <div class="page-content">
-          ${this.sections.length === 0
-            ? html`<div class="empty-component">No components on this page yet</div>`
-            : this.sections.map(section => this.renderComponent(section))
+          ${
+            this.sections.length === 0
+              ? html`<div class="empty-component">No components on this page yet</div>`
+              : this.sections.map((section) => this.renderComponent(section))
           }
         </div>
       </div>
@@ -1078,20 +1093,24 @@ export class AemPreview extends LitElement {
         class="component-wrapper ${isEditMode ? 'edit-mode' : ''} ${isSelected ? 'selected' : ''}"
         @click=${() => isEditMode && (this.selectedComponent = section.id)}
       >
-        ${isEditMode ? html`
-          <div class="component-chrome">
-            <div class="chrome-info">
-              <span class="chrome-icon">📦</span>
-              <span class="chrome-name">${this.getComponentName(section.type)}</span>
-              <span class="chrome-path">/content/site/page/jcr:content/${section.type}</span>
-            </div>
-            <div class="chrome-actions">
-              <button class="chrome-btn" title="Edit">✏️</button>
-              <button class="chrome-btn" title="Configure">⚙️</button>
-              <button class="chrome-btn" title="Delete">🗑️</button>
-            </div>
-          </div>
-        ` : ''}
+        ${
+          isEditMode
+            ? html`
+                <div class="component-chrome">
+                  <div class="chrome-info">
+                    <span class="chrome-icon">📦</span>
+                    <span class="chrome-name">${this.getComponentName(section.type)}</span>
+                    <span class="chrome-path">/content/site/page/jcr:content/${section.type}</span>
+                  </div>
+                  <div class="chrome-actions">
+                    <button class="chrome-btn" title="Edit">✏️</button>
+                    <button class="chrome-btn" title="Configure">⚙️</button>
+                    <button class="chrome-btn" title="Delete">🗑️</button>
+                  </div>
+                </div>
+              `
+            : ''
+        }
         ${this.renderComponentContent(section)}
       </div>
     `;
@@ -1137,12 +1156,19 @@ export class AemPreview extends LitElement {
 
       case 'hero':
         return html`
-          <div class="hero-component" style="background-image: ${content.imageUrl ? `url('${content.imageUrl}')` : 'linear-gradient(135deg, #4a4a4a 0%, #303030 100%)'}">
-            ${content.visualScore !== undefined ? html`
-              <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
-                ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
-              </span>
-            ` : ''}
+          <div
+            class="hero-component"
+            style="background-image: ${content.imageUrl ? `url('${content.imageUrl}')` : 'linear-gradient(135deg, #4a4a4a 0%, #303030 100%)'}"
+          >
+            ${
+              content.visualScore !== undefined
+                ? html`
+                    <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
+                      ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
+                    </span>
+                  `
+                : ''
+            }
             <div class="hero-overlay"></div>
             <div class="hero-content">
               <h1 class="hero-title">${content.title}</h1>
@@ -1157,11 +1183,15 @@ export class AemPreview extends LitElement {
           <div class="teaser-component">
             <div class="teaser-image">
               <img src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
-              ${content.visualScore !== undefined ? html`
-                <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
-                  ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
-                </span>
-              ` : ''}
+              ${
+                content.visualScore !== undefined
+                  ? html`
+                      <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
+                        ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
+                      </span>
+                    `
+                  : ''
+              }
             </div>
             <div class="teaser-content">
               <h2 class="teaser-title">${content.title}</h2>
@@ -1209,43 +1239,55 @@ export class AemPreview extends LitElement {
             </div>
           </div>
         `;
-      
+
       case 'accordion':
       case 'tabs':
-          return html`
-            <div class="accordion-component">
-              <h2 class="teaser-title">${content.title || 'Titled Component'}</h2>
-              <p class="teaser-description">${content.description || ''}</p>
-              ${Array.isArray(content.items) ? content.items.map(item => html`
-                <div class="accordion-item">
-                  <div class="accordion-header">${item.title || 'Item Title'}</div>
-                  <div class="accordion-content">${item.description || 'Item description.'}</div>
-                </div>
-              `) : html`<p>No items found for this component.</p>`}
-            </div>
-          `;
+        return html`
+          <div class="accordion-component">
+            <h2 class="teaser-title">${content.title || 'Titled Component'}</h2>
+            <p class="teaser-description">${content.description || ''}</p>
+            ${
+                Array.isArray(content.items)
+                  ? content.items.map(
+                      (item) => html`
+                        <div class="accordion-item">
+                          <div class="accordion-header">${item.title || 'Item Title'}</div>
+                          <div class="accordion-content">${item.description || 'Item description.'}</div>
+                        </div>
+                      `,
+                    )
+                  : html`<p>No items found for this component.</p>`
+              }
+          </div>
+        `;
 
       case 'product':
       case 'banner':
       case 'team':
         return html`
-            <div class="teaser-component">
-              <div class="teaser-content" style="flex: 1;">
-                <h2 class="teaser-title">${content.title || 'Title'}</h2>
-                <p class="teaser-description">${content.description || 'Description'}</p>
-                ${content.cta || content.ctaText ? html`
-                  <a href="${content.ctaUrl || '#'}" class="teaser-cta">${content.cta || content.ctaText}</a>
-                ` : ''}
-              </div>
-              ${content.imageUrl ? html`
-                <div class="teaser-image">
-                  <img src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
-                </div>
-              ` : html`
-                <div class="image-placeholder">🖼️</div>
-              `}
+          <div class="teaser-component">
+            <div class="teaser-content" style="flex: 1;">
+              <h2 class="teaser-title">${content.title || 'Title'}</h2>
+              <p class="teaser-description">${content.description || 'Description'}</p>
+              ${
+                  content.cta || content.ctaText
+                    ? html`
+                        <a href="${content.ctaUrl || '#'}" class="teaser-cta">${content.cta || content.ctaText}</a>
+                      `
+                    : ''
+                }
             </div>
-          `;
+            ${
+                content.imageUrl
+                  ? html`
+                      <div class="teaser-image">
+                        <img src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
+                      </div>
+                    `
+                  : html` <div class="image-placeholder">🖼️</div> `
+              }
+          </div>
+        `;
 
       case 'quote':
         return html`
@@ -1263,16 +1305,16 @@ export class AemPreview extends LitElement {
             <div class="media-placeholder">▶️</div>
           </div>
         `;
-      
+
       case 'gallery':
         return html`
           <div class="media-component">
             <h2 class="teaser-title">${content.title || 'Gallery'}</h2>
             <p class="teaser-description">${content.description || ''}</p>
             <div class="gallery-grid">
-              ${(Array.isArray(content.images) ? content.images : [1, 2, 3]).map(() => html`
-                <div class="gallery-image-placeholder"></div>
-              `)}
+              ${(Array.isArray(content.images) ? content.images : [1, 2, 3]).map(
+                () => html` <div class="gallery-image-placeholder"></div> `,
+              )}
             </div>
           </div>
         `;
@@ -1293,13 +1335,19 @@ export class AemPreview extends LitElement {
       case 'pricing':
         return html`
           <div class="pricing-component">
-            ${Array.isArray(content.items) ? content.items.map(item => html`
-              <div class="pricing-tier">
-                <h3>${item.title || 'Tier'}</h3>
-                <div class="price">${item.price || '$0'}</div>
-                <p>${item.description || 'Tier description.'}</p>
-              </div>
-            `) : html`<p>No pricing tiers found.</p>`}
+            ${
+              Array.isArray(content.items)
+                ? content.items.map(
+                    (item) => html`
+                      <div class="pricing-tier">
+                        <h3>${item.title || 'Tier'}</h3>
+                        <div class="price">${item.price || '$0'}</div>
+                        <p>${item.description || 'Tier description.'}</p>
+                      </div>
+                    `,
+                  )
+                : html`<p>No pricing tiers found.</p>`
+            }
           </div>
         `;
 
@@ -1308,15 +1356,21 @@ export class AemPreview extends LitElement {
           <div class="form-component">
             <h2 class="teaser-title">${content.title || 'Form'}</h2>
             <p class="teaser-description">${content.description || ''}</p>
-            ${Array.isArray(content.items) ? content.items.map(item => html`
-              <div class="form-field">
-                <label>${item.title || 'Field'}</label>
-                <input type="${item.type || 'text'}" placeholder="${item.placeholder || ''}" />
-              </div>
-            `) : html`<p>No form fields found.</p>`}
+            ${
+              Array.isArray(content.items)
+                ? content.items.map(
+                    (item) => html`
+                      <div class="form-field">
+                        <label>${item.title || 'Field'}</label>
+                        <input type="${item.type || 'text'}" placeholder="${item.placeholder || ''}" />
+                      </div>
+                    `,
+                  )
+                : html`<p>No form fields found.</p>`
+            }
           </div>
         `;
-      
+
       case 'carousel':
         return html`
           <div class="teaser-component">
@@ -1331,15 +1385,21 @@ export class AemPreview extends LitElement {
             <div class="teaser-content" style="flex: 1;">
               <h2 class="teaser-title">${content.title}</h2>
               <p class="teaser-description">${content.description}</p>
-              ${content.cta || content.ctaText ? html`
-                <a href="${content.ctaUrl || '#'}" class="teaser-cta">${content.cta || content.ctaText}</a>
-              ` : ''}
+              ${
+                content.cta || content.ctaText
+                  ? html` <a href="${content.ctaUrl || '#'}" class="teaser-cta">${content.cta || content.ctaText}</a> `
+                  : ''
+              }
             </div>
-            ${content.imageUrl ? html`
-              <div class="teaser-image">
-                <img src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
-              </div>
-            ` : ''}
+            ${
+              content.imageUrl
+                ? html`
+                    <div class="teaser-image">
+                      <img src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
+                    </div>
+                  `
+                : ''
+            }
           </div>
         `;
     }
@@ -1371,34 +1431,46 @@ export class AemPreview extends LitElement {
                       <span class="tree-value">"acme/components/container"</span>
                     </div>
                     <div class="tree-children">
-                      ${this.sections.map((section, index) => html`
-                        <div class="tree-node">
-                          <div class="tree-node-content">
-                            <span class="tree-icon">📦</span>
-                            <span class="tree-tag">&lt;${section.type}_${index}&gt;</span>
-                            <span class="tree-attr">sling:resourceType=</span>
-                            <span class="tree-value">"acme/components/${section.type}"</span>
-                          </div>
-                          ${section.content ? html`
-                            <div class="tree-children">
-                              <div class="tree-node">
-                                <div class="tree-node-content">
-                                  <span class="tree-attr">jcr:title=</span>
-                                  <span class="tree-value">"${section.content.title}"</span>
-                                </div>
-                              </div>
-                              ${section.content.description ? html`
-                                <div class="tree-node">
-                                  <div class="tree-node-content">
-                                    <span class="tree-attr">description=</span>
-                                    <span class="tree-value">"${section.content.description.substring(0, 50)}..."</span>
-                                  </div>
-                                </div>
-                              ` : ''}
+                      ${this.sections.map(
+                        (section, index) => html`
+                          <div class="tree-node">
+                            <div class="tree-node-content">
+                              <span class="tree-icon">📦</span>
+                              <span class="tree-tag">&lt;${section.type}_${index}&gt;</span>
+                              <span class="tree-attr">sling:resourceType=</span>
+                              <span class="tree-value">"acme/components/${section.type}"</span>
                             </div>
-                          ` : ''}
-                        </div>
-                      `)}
+                            ${
+                            section.content
+                              ? html`
+                                  <div class="tree-children">
+                                    <div class="tree-node">
+                                      <div class="tree-node-content">
+                                        <span class="tree-attr">jcr:title=</span>
+                                        <span class="tree-value">"${section.content.title}"</span>
+                                      </div>
+                                    </div>
+                                    ${
+                                section.content.description
+                                  ? html`
+                                      <div class="tree-node">
+                                        <div class="tree-node-content">
+                                          <span class="tree-attr">description=</span>
+                                          <span class="tree-value"
+                                            >"${section.content.description.substring(0, 50)}..."</span
+                                          >
+                                        </div>
+                                      </div>
+                                    `
+                                  : ''
+                              }
+                                  </div>
+                                `
+                              : ''
+                          }
+                          </div>
+                        `,
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1428,7 +1500,7 @@ export class AemPreview extends LitElement {
       team: 'Team Grid',
       pricing: 'Pricing Table',
       socialShare: 'Social Share',
-      footer: 'Footer'
+      footer: 'Footer',
     };
     return names[type] || type;
   }

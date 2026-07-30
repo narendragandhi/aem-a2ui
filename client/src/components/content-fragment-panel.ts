@@ -276,11 +276,11 @@ export class ContentFragmentPanel extends LitElement {
 
   private variationOptions = ['Mobile', 'Tablet', 'Holiday', 'Sale', 'A/B Test'];
   private modelIcons: Record<string, string> = {
-    'article': '📰',
-    'product': '🛒',
-    'hero': '🎯',
-    'testimonial': '💬',
-    'faq': '❓',
+    article: '📰',
+    product: '🛒',
+    hero: '🎯',
+    testimonial: '💬',
+    faq: '❓',
     'team-member': '👤',
   };
 
@@ -291,9 +291,7 @@ export class ContentFragmentPanel extends LitElement {
           <div class="panel-header">
             <span class="panel-title">📦 Content Fragment</span>
           </div>
-          <div class="empty-state">
-            Select content to export as Content Fragment
-          </div>
+          <div class="empty-state">Select content to export as Content Fragment</div>
         </div>
       `;
     }
@@ -305,9 +303,7 @@ export class ContentFragmentPanel extends LitElement {
     return html`
       <div class="cf-panel">
         <div class="panel-header">
-          <span class="panel-title">
-            📦 Content Fragment Export
-          </span>
+          <span class="panel-title"> 📦 Content Fragment Export </span>
         </div>
 
         <div class="panel-body">
@@ -315,15 +311,17 @@ export class ContentFragmentPanel extends LitElement {
           <div class="model-selector">
             <label>Fragment Model</label>
             <div class="model-grid">
-              ${CF_MODELS.map(model => html`
-                <div
-                  class="model-card ${this.selectedModel === model.id ? 'selected' : ''}"
-                  @click=${() => this.selectedModel = model.id}
-                >
-                  <div class="model-card-icon">${this.modelIcons[model.id] || '📄'}</div>
-                  <div class="model-card-name">${model.name}</div>
-                </div>
-              `)}
+              ${CF_MODELS.map(
+                (model) => html`
+                  <div
+                    class="model-card ${this.selectedModel === model.id ? 'selected' : ''}"
+                    @click=${() => (this.selectedModel = model.id)}
+                  >
+                    <div class="model-card-icon">${this.modelIcons[model.id] || '📄'}</div>
+                    <div class="model-card-name">${model.name}</div>
+                  </div>
+                `,
+              )}
             </div>
           </div>
 
@@ -331,45 +329,51 @@ export class ContentFragmentPanel extends LitElement {
           <div class="variations-input">
             <label>Content Variations (optional)</label>
             <div class="variations-chips">
-              ${this.variationOptions.map(v => html`
-                <button
-                  class="variation-chip ${this.selectedVariations.includes(v) ? 'selected' : ''}"
-                  @click=${() => this.toggleVariation(v)}
-                >
-                  ${v}
-                </button>
-              `)}
+              ${this.variationOptions.map(
+                (v) => html`
+                  <button
+                    class="variation-chip ${this.selectedVariations.includes(v) ? 'selected' : ''}"
+                    @click=${() => this.toggleVariation(v)}
+                  >
+                    ${v}
+                  </button>
+                `,
+              )}
             </div>
           </div>
 
           <!-- Field Preview -->
           <div class="field-preview">
             <div class="field-preview-title">Mapped Fields</div>
-            ${Object.entries(fragment.data).slice(0, 5).map(([key, value]) => html`
-              <div class="field-row">
-                <span class="field-name">${key}</span>
-                <span class="field-value">${this.formatValue(value)}</span>
-              </div>
-            `)}
+            ${Object.entries(fragment.data)
+              .slice(0, 5)
+              .map(
+                ([key, value]) => html`
+                  <div class="field-row">
+                    <span class="field-name">${key}</span>
+                    <span class="field-value">${this.formatValue(value)}</span>
+                  </div>
+                `,
+              )}
           </div>
 
           <!-- Export Tabs -->
           <div class="export-tabs">
             <button
               class="export-tab ${this.activeTab === 'jcr' ? 'active' : ''}"
-              @click=${() => this.activeTab = 'jcr'}
+              @click=${() => (this.activeTab = 'jcr')}
             >
               JCR JSON
             </button>
             <button
               class="export-tab ${this.activeTab === 'graphql' ? 'active' : ''}"
-              @click=${() => this.activeTab = 'graphql'}
+              @click=${() => (this.activeTab = 'graphql')}
             >
               GraphQL
             </button>
             <button
               class="export-tab ${this.activeTab === 'model' ? 'active' : ''}"
-              @click=${() => this.activeTab = 'model'}
+              @click=${() => (this.activeTab = 'model')}
             >
               Model Def
             </button>
@@ -383,22 +387,35 @@ export class ContentFragmentPanel extends LitElement {
             <button class="action-btn secondary" @click=${this.copyToClipboard}>
               ${this.copied ? '✓ Copied!' : '📋 Copy'}
             </button>
-            <button class="action-btn primary" @click=${this.downloadFile}>
-              ⬇️ Download
-            </button>
-            <button class="action-btn primary" ?disabled=${!this.aemConnected || this.deployStatus === 'saving'} @click=${this.saveToAem}>
+            <button class="action-btn primary" @click=${this.downloadFile}>⬇️ Download</button>
+            <button
+              class="action-btn primary"
+              ?disabled=${!this.aemConnected || this.deployStatus === 'saving'}
+              @click=${this.saveToAem}
+            >
               ${this.deployStatus === 'saving' ? '⏳ Saving...' : 'Save to AEM'}
             </button>
-            <button class="action-btn secondary" ?disabled=${!this.aemConnected || !this.savedPath || this.deployStatus === 'updating'} @click=${this.updateInAem}>
+            <button
+              class="action-btn secondary"
+              ?disabled=${!this.aemConnected || !this.savedPath || this.deployStatus === 'updating'}
+              @click=${this.updateInAem}
+            >
               ${this.deployStatus === 'updating' ? '⏳ Updating...' : 'Update in AEM'}
             </button>
           </div>
-          ${this.deployStatus !== 'idle' ? html`
-            <div class="field-preview" style="margin-top: 12px;">
-              <div class="field-preview-title">${this.deployStatus === 'success' ? '✓' : this.deployStatus === 'error' ? '✗' : 'ℹ️'} ${this.deployMessage}</div>
-              ${this.savedPath ? html`<div class="field-row"><span class="field-name">Path</span><span class="field-value">${this.savedPath}</span></div>` : ''}
-            </div>
-          ` : ''}
+          ${
+            this.deployStatus !== 'idle'
+              ? html`
+                  <div class="field-preview" style="margin-top: 12px;">
+                    <div class="field-preview-title">
+                      ${this.deployStatus === 'success' ? '✓' : this.deployStatus === 'error' ? '✗' : 'ℹ️'}
+                      ${this.deployMessage}
+                    </div>
+                    ${this.savedPath ? html`<div class="field-row"><span class="field-name">Path</span><span class="field-value">${this.savedPath}</span></div>` : ''}
+                  </div>
+                `
+              : ''
+          }
         </div>
       </div>
     `;
@@ -406,7 +423,7 @@ export class ContentFragmentPanel extends LitElement {
 
   private toggleVariation(variation: string) {
     if (this.selectedVariations.includes(variation)) {
-      this.selectedVariations = this.selectedVariations.filter(v => v !== variation);
+      this.selectedVariations = this.selectedVariations.filter((v) => v !== variation);
     } else {
       this.selectedVariations = [...this.selectedVariations, variation];
     }
@@ -437,7 +454,7 @@ export class ContentFragmentPanel extends LitElement {
       case 'graphql':
         return JSON.stringify(fragmentToGraphQL(fragment, this.selectedModel), null, 2);
       case 'model':
-        const model = CF_MODELS.find(m => m.id === this.selectedModel);
+        const model = CF_MODELS.find((m) => m.id === this.selectedModel);
         return model ? JSON.stringify(generateModelDefinition(model), null, 2) : '';
       default:
         return '';
@@ -448,7 +465,7 @@ export class ContentFragmentPanel extends LitElement {
     try {
       await navigator.clipboard.writeText(this.getExportCode());
       this.copied = true;
-      setTimeout(() => this.copied = false, 2000);
+      setTimeout(() => (this.copied = false), 2000);
       logger.info('Copied Content Fragment to clipboard', 'ContentFragment');
     } catch (err) {
       logger.error('Failed to copy', 'ContentFragment', err);
@@ -486,7 +503,7 @@ export class ContentFragmentPanel extends LitElement {
 
   private async saveToAem() {
     if (!this.content || !this.aemConnected) return;
-    const model = CF_MODELS.find(m => m.id === this.selectedModel);
+    const model = CF_MODELS.find((m) => m.id === this.selectedModel);
     const fragment = contentToFragment(this.content, this.selectedModel, {
       variations: this.selectedVariations,
     });

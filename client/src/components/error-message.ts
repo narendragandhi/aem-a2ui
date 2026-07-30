@@ -177,41 +177,43 @@ export class ErrorMessage extends LitElement {
           <span class="error-icon">!</span>
           <div class="error-content">
             <p class="error-title">${this.error.userMessage}</p>
-            ${this.error.message !== this.error.userMessage
-              ? html`<p class="error-message">${this.error.message}</p>`
-              : ''}
+            ${
+              this.error.message !== this.error.userMessage
+                ? html`<p class="error-message">${this.error.message}</p>`
+                : ''
+            }
           </div>
         </div>
-        ${this.error.suggestion || this.error.retryable
-          ? html`
-              <div class="error-suggestion">
-                ${this.error.suggestion
-                  ? html`
-                      <span class="suggestion-text">
-                        <span class="suggestion-icon">💡</span>
-                        ${this.error.suggestion}
-                      </span>
-                    `
-                  : html`<span></span>`}
-                <div class="error-actions">
-                  ${this.error.retryable && this.showRetry
+        ${
+          this.error.suggestion || this.error.retryable
+            ? html`
+                <div class="error-suggestion">
+                  ${
+                  this.error.suggestion
                     ? html`
-                        <button class="btn btn-retry" @click=${this.handleRetry}>
-                          Try Again
-                        </button>
+                        <span class="suggestion-text">
+                          <span class="suggestion-icon">💡</span>
+                          ${this.error.suggestion}
+                        </span>
                       `
-                    : ''}
-                  ${this.dismissible
-                    ? html`
-                        <button class="btn btn-dismiss" @click=${this.handleDismiss}>
-                          Dismiss
-                        </button>
-                      `
-                    : ''}
+                    : html`<span></span>`
+                }
+                  <div class="error-actions">
+                    ${
+                    this.error.retryable && this.showRetry
+                      ? html` <button class="btn btn-retry" @click=${this.handleRetry}>Try Again</button> `
+                      : ''
+                  }
+                    ${
+                    this.dismissible
+                      ? html` <button class="btn btn-dismiss" @click=${this.handleDismiss}>Dismiss</button> `
+                      : ''
+                  }
+                  </div>
                 </div>
-              </div>
-            `
-          : ''}
+              `
+            : ''
+        }
       </div>
     `;
   }

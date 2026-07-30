@@ -26,7 +26,9 @@ export class LiveChat extends LitElement {
       justify-content: center;
       font-size: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      transition: transform 0.2s, background 0.2s;
+      transition:
+        transform 0.2s,
+        background 0.2s;
     }
 
     .chat-toggle:hover {
@@ -34,7 +36,7 @@ export class LiveChat extends LitElement {
       background: var(--spectrum-blue-600);
     }
 
-    .chat-toggle[data-open="true"] {
+    .chat-toggle[data-open='true'] {
       display: none;
     }
 
@@ -132,8 +134,14 @@ export class LiveChat extends LitElement {
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .message-header {
@@ -248,13 +256,18 @@ export class LiveChat extends LitElement {
   }
 
   private getInitials(name: string): string {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
   }
 
   private formatTime(timestamp: string): string {
     return new Date(timestamp).toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -265,11 +278,13 @@ export class LiveChat extends LitElement {
   private handleSend() {
     if (!this.newMessage.trim()) return;
 
-    this.dispatchEvent(new CustomEvent('send-message', {
-      detail: { message: this.newMessage },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('send-message', {
+        detail: { message: this.newMessage },
+        bubbles: true,
+        composed: true,
+      }),
+    );
 
     this.newMessage = '';
   }
@@ -304,63 +319,69 @@ export class LiveChat extends LitElement {
 
   render() {
     return html`
-      ${!this.showPanel ? html`
-        <button class="chat-toggle" @click=${this.toggleChat} data-open="${this.open}">
-          💬
-          ${this.unreadCount > 0 ? html`
-            <span class="unread-badge">${this.unreadCount}</span>
-          ` : ''}
-        </button>
-      ` : ''}
-
-      ${this.showPanel ? html`
-        <div class="chat-panel">
-          <div class="chat-header">
-            <div class="chat-header-title">
-              <span>Team Chat</span>
-              <span class="live-badge">LIVE</span>
-            </div>
-            <button class="close-btn" @click=${this.closeChat}>×</button>
-          </div>
-
-          <div class="messages-container">
-            ${this.messages.length === 0 ? html`
-              <div class="empty-state">
-                <div class="empty-icon">💬</div>
-                <div>No messages yet</div>
-                <div style="font-size: 12px; margin-top: 8px;">
-                  Start a conversation with your team!
-                </div>
-              </div>
-            ` : this.messages.map(msg => html`
-              <div class="message">
-                <div class="message-header">
-                  <div class="message-avatar" style="background: ${this.getAvatarColor(msg.sessionId)}">
-                    ${this.getInitials(msg.username)}
+      ${
+        !this.showPanel
+          ? html`
+              <button class="chat-toggle" @click=${this.toggleChat} data-open="${this.open}">
+                💬 ${this.unreadCount > 0 ? html` <span class="unread-badge">${this.unreadCount}</span> ` : ''}
+              </button>
+            `
+          : ''
+      }
+      ${
+        this.showPanel
+          ? html`
+              <div class="chat-panel">
+                <div class="chat-header">
+                  <div class="chat-header-title">
+                    <span>Team Chat</span>
+                    <span class="live-badge">LIVE</span>
                   </div>
-                  <span class="message-author">${msg.username}</span>
-                  <span class="message-time">${this.formatTime(msg.timestamp)}</span>
+                  <button class="close-btn" @click=${this.closeChat}>×</button>
                 </div>
-                <div class="message-content">${msg.content}</div>
-              </div>
-            `)}
-          </div>
 
-          <div class="input-container">
-            <input
-              type="text"
-              class="message-input"
-              placeholder="Type a message..."
-              .value=${this.newMessage}
-              @input=${this.handleInput}
-              @keypress=${this.handleKeyPress}
-            />
-            <button class="send-btn" ?disabled=${!this.newMessage.trim()} @click=${this.handleSend}>
-              →
-            </button>
-          </div>
-        </div>
-      ` : ''}
+                <div class="messages-container">
+                  ${
+              this.messages.length === 0
+                ? html`
+                    <div class="empty-state">
+                      <div class="empty-icon">💬</div>
+                      <div>No messages yet</div>
+                      <div style="font-size: 12px; margin-top: 8px;">Start a conversation with your team!</div>
+                    </div>
+                  `
+                : this.messages.map(
+                    (msg) => html`
+                      <div class="message">
+                        <div class="message-header">
+                          <div class="message-avatar" style="background: ${this.getAvatarColor(msg.sessionId)}">
+                            ${this.getInitials(msg.username)}
+                          </div>
+                          <span class="message-author">${msg.username}</span>
+                          <span class="message-time">${this.formatTime(msg.timestamp)}</span>
+                        </div>
+                        <div class="message-content">${msg.content}</div>
+                      </div>
+                    `,
+                  )
+            }
+                </div>
+
+                <div class="input-container">
+                  <input
+                    type="text"
+                    class="message-input"
+                    placeholder="Type a message..."
+                    .value=${this.newMessage}
+                    @input=${this.handleInput}
+                    @keypress=${this.handleKeyPress}
+                  />
+                  <button class="send-btn" ?disabled=${!this.newMessage.trim()} @click=${this.handleSend}>→</button>
+                </div>
+              </div>
+            `
+          : ''
+      }
     `;
   }
 }

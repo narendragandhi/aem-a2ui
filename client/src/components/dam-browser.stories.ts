@@ -20,7 +20,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Modal browser for selecting assets from AEM DAM. Features folder navigation, search, type filtering, and grid/list views.',
+        component:
+          'Modal browser for selecting assets from AEM DAM. Features folder navigation, search, type filtering, and grid/list views.',
       },
     },
   },
@@ -129,10 +130,7 @@ export const Disconnected: Story = {
     open: true,
   },
   render: (args) => html`
-    <dam-browser
-      .open=${args.open}
-      @close=${() => console.log('Browser closed')}
-    ></dam-browser>
+    <dam-browser .open=${args.open} @close=${() => console.log('Browser closed')}></dam-browser>
   `,
   parameters: {
     docs: {

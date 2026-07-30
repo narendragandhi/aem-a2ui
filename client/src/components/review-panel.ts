@@ -52,12 +52,30 @@ export class ReviewPanel extends LitElement {
       text-transform: uppercase;
     }
 
-    .status-draft { background: var(--spectrum-gray-300); color: var(--spectrum-gray-700); }
-    .status-pending_review { background: #fff3cd; color: #856404; }
-    .status-in_review { background: #cce5ff; color: #004085; }
-    .status-approved { background: #d4edda; color: #155724; }
-    .status-rejected { background: #f8d7da; color: #721c24; }
-    .status-changes_requested { background: #fff3cd; color: #856404; }
+    .status-draft {
+      background: var(--spectrum-gray-300);
+      color: var(--spectrum-gray-700);
+    }
+    .status-pending_review {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-in_review {
+      background: #cce5ff;
+      color: #004085;
+    }
+    .status-approved {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-changes_requested {
+      background: #fff3cd;
+      color: #856404;
+    }
 
     .reviewers-section {
       margin-bottom: 16px;
@@ -261,14 +279,14 @@ export class ReviewPanel extends LitElement {
           content: this.content,
           reviewers: [
             { id: 'reviewer-1', name: 'Content Reviewer', role: 'REVIEWER', hasReviewed: false },
-            { id: 'approver-1', name: 'Content Approver', role: 'APPROVER', hasReviewed: false }
+            { id: 'approver-1', name: 'Content Approver', role: 'APPROVER', hasReviewed: false },
           ],
-          createdBy: this.currentUser
-        })
+          createdBy: this.currentUser,
+        }),
       });
 
       if (response.ok) {
-        const review = await response.json() as Review;
+        const review = (await response.json()) as Review;
         this.review = review;
         this.showStartForm = false;
         this.dispatchReviewEvent('review-started', review);
@@ -288,11 +306,11 @@ export class ReviewPanel extends LitElement {
       const response = await fetch(`${API_BASE}/reviews/${this.review.id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approvedBy: this.currentUserName })
+        body: JSON.stringify({ approvedBy: this.currentUserName }),
       });
 
       if (response.ok) {
-        const review = await response.json() as Review;
+        const review = (await response.json()) as Review;
         this.review = review;
         this.dispatchReviewEvent('review-approved', review);
       }
@@ -314,11 +332,11 @@ export class ReviewPanel extends LitElement {
       const response = await fetch(`${API_BASE}/reviews/${this.review.id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rejectedBy: this.currentUserName, reason })
+        body: JSON.stringify({ rejectedBy: this.currentUserName, reason }),
       });
 
       if (response.ok) {
-        const review = await response.json() as Review;
+        const review = (await response.json()) as Review;
         this.review = review;
         this.dispatchReviewEvent('review-rejected', review);
       }
@@ -340,11 +358,11 @@ export class ReviewPanel extends LitElement {
       const response = await fetch(`${API_BASE}/reviews/${this.review.id}/request-changes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestedBy: this.currentUserName, reason })
+        body: JSON.stringify({ requestedBy: this.currentUserName, reason }),
       });
 
       if (response.ok) {
-        const review = await response.json() as Review;
+        const review = (await response.json()) as Review;
         this.review = review;
         this.dispatchReviewEvent('changes-requested', review);
       }
@@ -356,19 +374,23 @@ export class ReviewPanel extends LitElement {
   }
 
   private dispatchReviewEvent(eventName: string, review: Review) {
-    this.dispatchEvent(new CustomEvent(eventName, {
-      detail: { review },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent(eventName, {
+        detail: { review },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private openComments() {
-    this.dispatchEvent(new CustomEvent('open-comments', {
-      detail: { review: this.review },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('open-comments', {
+        detail: { review: this.review },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private getStatusLabel(status: ReviewStatusType): string {
@@ -378,7 +400,7 @@ export class ReviewPanel extends LitElement {
       in_review: 'In Review',
       approved: 'Approved',
       rejected: 'Rejected',
-      changes_requested: 'Changes Requested'
+      changes_requested: 'Changes Requested',
     };
     return labels[status] || status;
   }
@@ -388,7 +410,7 @@ export class ReviewPanel extends LitElement {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -409,16 +431,14 @@ export class ReviewPanel extends LitElement {
           <div class="empty-state">
             <div class="empty-state-title">No Review Started</div>
             <div class="empty-state-text">Start a review to get feedback from your team</div>
-            <sp-button variant="primary" @click=${this.startReview}>
-              Start Review
-            </sp-button>
+            <sp-button variant="primary" @click=${this.startReview}> Start Review </sp-button>
           </div>
         </div>
       `;
     }
 
     const status = this.review.status.toLowerCase() as ReviewStatusType;
-    const unresolvedComments = this.review.comments.filter(c => !c.resolved).length;
+    const unresolvedComments = this.review.comments.filter((c) => !c.resolved).length;
 
     return html`
       <div class="panel">
@@ -427,34 +447,31 @@ export class ReviewPanel extends LitElement {
             Review Status
             <span class="version-badge">v${this.review.version}</span>
           </div>
-          <span class="status-badge status-${status}">
-            ${this.getStatusLabel(status)}
-          </span>
+          <span class="status-badge status-${status}"> ${this.getStatusLabel(status)} </span>
         </div>
 
         <div class="reviewers-section">
           <div class="reviewers-title">Reviewers</div>
           <div class="reviewers-list">
-            ${this.review.reviewers.map(reviewer => html`
-              <div class="reviewer-chip">
-                <div class="reviewer-avatar">${reviewer.name.charAt(0)}</div>
-                <span>${reviewer.name}</span>
-                ${reviewer.hasReviewed ? html`<span class="reviewer-reviewed">✓</span>` : ''}
-              </div>
-            `)}
+            ${this.review.reviewers.map(
+              (reviewer) => html`
+                <div class="reviewer-chip">
+                  <div class="reviewer-avatar">${reviewer.name.charAt(0)}</div>
+                  <span>${reviewer.name}</span>
+                  ${reviewer.hasReviewed ? html`<span class="reviewer-reviewed">✓</span>` : ''}
+                </div>
+              `,
+            )}
           </div>
         </div>
 
         <div class="comments-count">
           ${this.review.comments.length} comments
           ${unresolvedComments > 0 ? html`<span>(${unresolvedComments} unresolved)</span>` : ''}
-          <sp-button variant="secondary" size="s" @click=${this.openComments}>
-            View Comments
-          </sp-button>
+          <sp-button variant="secondary" size="s" @click=${this.openComments}> View Comments </sp-button>
         </div>
 
-        ${this.renderActions()}
-        ${this.renderTimeline()}
+        ${this.renderActions()} ${this.renderTimeline()}
       </div>
     `;
   }
@@ -471,21 +488,13 @@ export class ReviewPanel extends LitElement {
 
     return html`
       <div class="actions-section">
-        ${canApprove ? html`
-          <sp-button variant="primary" @click=${this.approveReview}>
-            Approve
-          </sp-button>
-        ` : ''}
-        ${canRequestChanges ? html`
-          <sp-button variant="secondary" @click=${this.requestChanges}>
-            Request Changes
-          </sp-button>
-        ` : ''}
-        ${canReject ? html`
-          <sp-button variant="negative" @click=${this.rejectReview}>
-            Reject
-          </sp-button>
-        ` : ''}
+        ${canApprove ? html` <sp-button variant="primary" @click=${this.approveReview}> Approve </sp-button> ` : ''}
+        ${
+          canRequestChanges
+            ? html` <sp-button variant="secondary" @click=${this.requestChanges}> Request Changes </sp-button> `
+            : ''
+        }
+        ${canReject ? html` <sp-button variant="negative" @click=${this.rejectReview}> Reject </sp-button> ` : ''}
       </div>
     `;
   }
@@ -498,14 +507,14 @@ export class ReviewPanel extends LitElement {
     events.push({
       action: 'Review started',
       user: this.review.createdBy,
-      date: this.review.createdAt
+      date: this.review.createdAt,
     });
 
     if (this.review.approvedAt) {
       events.push({
         action: 'Approved',
         user: this.review.approvedBy,
-        date: this.review.approvedAt
+        date: this.review.approvedAt,
       });
     }
 
@@ -513,24 +522,24 @@ export class ReviewPanel extends LitElement {
       events.push({
         action: `Rejected: ${this.review.rejectionReason}`,
         user: this.review.rejectedBy,
-        date: this.review.rejectedAt
+        date: this.review.rejectedAt,
       });
     }
 
     return html`
       <div class="timeline">
         <div class="timeline-title">Activity</div>
-        ${events.map(event => html`
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <div class="timeline-action">${event.action}</div>
-              <div class="timeline-meta">
-                ${event.user} · ${this.formatDate(event.date)}
+        ${events.map(
+          (event) => html`
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-action">${event.action}</div>
+                <div class="timeline-meta">${event.user} · ${this.formatDate(event.date)}</div>
               </div>
             </div>
-          </div>
-        `)}
+          `,
+        )}
       </div>
     `;
   }

@@ -53,15 +53,7 @@ export interface ImageAsset {
 }
 
 export type AssetCategory =
-  | 'hero'
-  | 'product'
-  | 'lifestyle'
-  | 'abstract'
-  | 'team'
-  | 'office'
-  | 'technology'
-  | 'nature'
-  | 'illustration';
+  'hero' | 'product' | 'lifestyle' | 'abstract' | 'team' | 'office' | 'technology' | 'nature' | 'illustration';
 
 export interface AssetFilter {
   search?: string;
@@ -72,13 +64,7 @@ export interface AssetFilter {
 
 // Review & Collaboration Types
 
-export type ReviewStatusType =
-  | 'draft'
-  | 'pending_review'
-  | 'in_review'
-  | 'approved'
-  | 'rejected'
-  | 'changes_requested';
+export type ReviewStatusType = 'draft' | 'pending_review' | 'in_review' | 'approved' | 'rejected' | 'changes_requested';
 
 export interface ReviewComment {
   id: string;

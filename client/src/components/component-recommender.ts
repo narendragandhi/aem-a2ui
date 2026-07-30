@@ -80,7 +80,9 @@ export class ComponentRecommender extends LitElement {
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition:
+        transform 0.2s,
+        box-shadow 0.2s;
     }
 
     .recommend-btn:hover:not(:disabled) {
@@ -112,7 +114,9 @@ export class ComponentRecommender extends LitElement {
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .result-section {
@@ -120,8 +124,14 @@ export class ComponentRecommender extends LitElement {
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .result-header {
@@ -199,7 +209,9 @@ export class ComponentRecommender extends LitElement {
       border: 1px solid var(--spectrum-gray-200);
       border-radius: 8px;
       margin-bottom: 8px;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
     }
 
     .section-item:hover {
@@ -443,7 +455,7 @@ export class ComponentRecommender extends LitElement {
     'Product page for enterprise software',
     'Blog post about AI trends',
     'Company about page with team',
-    'Contact page with FAQ'
+    'Contact page with FAQ',
   ];
 
   override render() {
@@ -457,7 +469,7 @@ export class ComponentRecommender extends LitElement {
               type="text"
               placeholder="Describe the page you want to create..."
               .value=${this.inputValue}
-              @input=${(e: Event) => this.inputValue = (e.target as HTMLInputElement).value}
+              @input=${(e: Event) => (this.inputValue = (e.target as HTMLInputElement).value)}
               @keypress=${(e: KeyboardEvent) => e.key === 'Enter' && this.getRecommendation()}
             />
             <button
@@ -470,13 +482,15 @@ export class ComponentRecommender extends LitElement {
           </div>
         </div>
 
-        ${this.loading
-          ? this.renderLoading()
-          : this.error
-            ? this.renderError()
-            : this.recommendation
-              ? this.renderRecommendation()
-              : this.renderEmptyState()}
+        ${
+          this.loading
+            ? this.renderLoading()
+            : this.error
+              ? this.renderError()
+              : this.recommendation
+                ? this.renderRecommendation()
+                : this.renderEmptyState()
+        }
       </div>
     `;
   }
@@ -494,7 +508,7 @@ export class ComponentRecommender extends LitElement {
     return html`
       <div class="error">
         <span>Error: ${this.error}</span>
-        <button class="secondary-btn" @click=${() => this.error = ''}>Dismiss</button>
+        <button class="secondary-btn" @click=${() => (this.error = '')}>Dismiss</button>
       </div>
     `;
   }
@@ -506,11 +520,9 @@ export class ComponentRecommender extends LitElement {
         <h4>Let AI Design Your Page</h4>
         <p>Describe what you want to create and the agent will recommend the optimal components and layout.</p>
         <div class="example-chips">
-          ${this.examplePrompts.map(prompt => html`
-            <button class="example-chip" @click=${() => this.useExample(prompt)}>
-              ${prompt}
-            </button>
-          `)}
+          ${this.examplePrompts.map(
+            (prompt) => html` <button class="example-chip" @click=${() => this.useExample(prompt)}>${prompt}</button> `,
+          )}
         </div>
       </div>
     `;
@@ -538,30 +550,28 @@ export class ComponentRecommender extends LitElement {
 
         <div class="reasoning">${rec.reasoning}</div>
 
-        <div class="sections-list">
-          ${rec.sections.map((section, index) => this.renderSection(section, index))}
-        </div>
+        <div class="sections-list">${rec.sections.map((section, index) => this.renderSection(section, index))}</div>
 
-        ${rec.alternatives?.length > 0 ? html`
-          <div class="alternatives">
-            <div class="alternatives-label">Alternative layouts to consider:</div>
-            <div class="alternatives-list">
-              ${rec.alternatives.map(alt => html`
-                <button class="alternative-chip" @click=${() => this.tryAlternative(alt)}>
-                  ${alt}
-                </button>
-              `)}
-            </div>
-          </div>
-        ` : ''}
+        ${
+          rec.alternatives?.length > 0
+            ? html`
+                <div class="alternatives">
+                  <div class="alternatives-label">Alternative layouts to consider:</div>
+                  <div class="alternatives-list">
+                    ${rec.alternatives.map(
+                (alt) => html`
+                  <button class="alternative-chip" @click=${() => this.tryAlternative(alt)}>${alt}</button>
+                `,
+              )}
+                  </div>
+                </div>
+              `
+            : ''
+        }
 
         <div class="action-buttons">
-          <button class="secondary-btn" @click=${this.regenerate}>
-            Regenerate
-          </button>
-          <button class="primary-btn" @click=${this.acceptRecommendation}>
-            Accept & Build Page
-          </button>
+          <button class="secondary-btn" @click=${this.regenerate}>Regenerate</button>
+          <button class="primary-btn" @click=${this.acceptRecommendation}>Accept & Build Page</button>
         </div>
       </div>
     `;
@@ -575,9 +585,11 @@ export class ComponentRecommender extends LitElement {
         <div class="section-details">
           <div class="section-name">
             ${section.displayName}
-            ${section.required
-              ? html`<span class="required-badge">Required</span>`
-              : html`<span class="optional-badge">Optional</span>`}
+            ${
+              section.required
+                ? html`<span class="required-badge">Required</span>`
+                : html`<span class="optional-badge">Optional</span>`
+            }
           </div>
           <div class="section-reason">${section.reason}</div>
           <div class="section-prompt">"${section.suggestedPrompt}"</div>
@@ -588,18 +600,18 @@ export class ComponentRecommender extends LitElement {
             title="Move up"
             ?disabled=${index === 0}
             @click=${() => this.moveSection(index, -1)}
-          >↑</button>
+          >
+            ↑
+          </button>
           <button
             class="section-action-btn"
             title="Move down"
             ?disabled=${index === this.recommendation!.sections.length - 1}
             @click=${() => this.moveSection(index, 1)}
-          >↓</button>
-          <button
-            class="section-action-btn remove"
-            title="Remove"
-            @click=${() => this.removeSection(index)}
-          >×</button>
+          >
+            ↓
+          </button>
+          <button class="section-action-btn remove" title="Remove" @click=${() => this.removeSection(index)}>×</button>
         </div>
       </div>
     `;
@@ -620,7 +632,7 @@ export class ComponentRecommender extends LitElement {
       const response = await fetch(`${this.agentUrl}/recommend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: this.inputValue })
+        body: JSON.stringify({ input: this.inputValue }),
       });
 
       if (!response.ok) {
@@ -657,7 +669,7 @@ export class ComponentRecommender extends LitElement {
     [sections[index], sections[newIndex]] = [sections[newIndex], sections[index]];
 
     // Update positions
-    sections.forEach((s, i) => s.position = i + 1);
+    sections.forEach((s, i) => (s.position = i + 1));
 
     this.recommendation = { ...this.recommendation, sections };
   }
@@ -666,7 +678,7 @@ export class ComponentRecommender extends LitElement {
     if (!this.recommendation) return;
 
     const sections = this.recommendation.sections.filter((_, i) => i !== index);
-    sections.forEach((s, i) => s.position = i + 1);
+    sections.forEach((s, i) => (s.position = i + 1));
 
     this.recommendation = { ...this.recommendation, sections };
   }
@@ -674,14 +686,16 @@ export class ComponentRecommender extends LitElement {
   private acceptRecommendation() {
     if (!this.recommendation) return;
 
-    this.dispatchEvent(new CustomEvent('recommendation-accepted', {
-      detail: {
-        recommendation: this.recommendation,
-        userInput: this.inputValue
-      },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('recommendation-accepted', {
+        detail: {
+          recommendation: this.recommendation,
+          userInput: this.inputValue,
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 }
 

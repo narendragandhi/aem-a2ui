@@ -120,7 +120,7 @@ export class SerpAnalyzerService {
    */
   async compareWithCompetitors(
     content: ContentSuggestion,
-    keyword: string
+    keyword: string,
   ): Promise<{
     score: number;
     strengths: string[];
@@ -134,9 +134,8 @@ export class SerpAnalyzerService {
     let score = 50;
 
     // Title analysis
-    const avgTitleLength = serp.competitorInsights.reduce(
-      (acc, c) => acc + c.avgTitleLength, 0
-    ) / serp.competitorInsights.length;
+    const avgTitleLength =
+      serp.competitorInsights.reduce((acc, c) => acc + c.avgTitleLength, 0) / serp.competitorInsights.length;
 
     const titleLength = content.title?.length || 0;
     if (titleLength >= avgTitleLength - 5 && titleLength <= avgTitleLength + 10) {
@@ -159,9 +158,8 @@ export class SerpAnalyzerService {
     }
 
     // Description analysis
-    const avgDescLength = serp.competitorInsights.reduce(
-      (acc, c) => acc + c.avgDescriptionLength, 0
-    ) / serp.competitorInsights.length;
+    const avgDescLength =
+      serp.competitorInsights.reduce((acc, c) => acc + c.avgDescriptionLength, 0) / serp.competitorInsights.length;
 
     const descLength = content.description?.length || 0;
     if (descLength >= avgDescLength - 10) {
@@ -174,21 +172,17 @@ export class SerpAnalyzerService {
 
     // Content gap opportunities
     if (serp.contentGap.missingTopics.length > 0) {
-      recommendations.push(
-        `Cover these topics: ${serp.contentGap.missingTopics.slice(0, 3).join(', ')}`
-      );
+      recommendations.push(`Cover these topics: ${serp.contentGap.missingTopics.slice(0, 3).join(', ')}`);
     }
 
     // Feature opportunities
-    const hasSnippetOpportunity = serp.opportunities.some(
-      o => o.type === 'featured_snippet'
-    );
+    const hasSnippetOpportunity = serp.opportunities.some((o) => o.type === 'featured_snippet');
     if (hasSnippetOpportunity) {
       recommendations.push('Structure content for featured snippet (use lists, tables, or direct answers)');
     }
 
     // FAQ opportunity
-    if (serp.opportunities.some(o => o.type === 'faq')) {
+    if (serp.opportunities.some((o) => o.type === 'faq')) {
       recommendations.push('Add FAQ section to target People Also Ask');
     }
 
@@ -251,7 +245,7 @@ export class SerpAnalyzerService {
           headers: {
             'Ocp-Apim-Subscription-Key': this.config.apiKey,
           },
-        }
+        },
       );
       const data = await response.json();
 
@@ -278,9 +272,16 @@ export class SerpAnalyzerService {
    */
   private generateMockResults(keyword: string): SerpResult[] {
     const domains = [
-      'example.com', 'competitor1.com', 'industry-leader.com',
-      'blog.techsite.com', 'news.website.org', 'guide.expert.io',
-      'reviews.site.com', 'howto.hub.net', 'tips.portal.com', 'learn.edu.org'
+      'example.com',
+      'competitor1.com',
+      'industry-leader.com',
+      'blog.techsite.com',
+      'news.website.org',
+      'guide.expert.io',
+      'reviews.site.com',
+      'howto.hub.net',
+      'tips.portal.com',
+      'learn.edu.org',
     ];
 
     const titleTemplates = [
@@ -302,8 +303,7 @@ export class SerpAnalyzerService {
       title: titleTemplates[index],
       description: `Learn everything about ${keyword}. Our comprehensive guide covers all aspects including tips, strategies, and best practices for success with ${keyword}.`,
       domain,
-      features: index === 0 ? ['featured_snippet'] :
-                index < 3 ? ['sitelinks'] : [],
+      features: index === 0 ? ['featured_snippet'] : index < 3 ? ['sitelinks'] : [],
     }));
   }
 
@@ -329,15 +329,15 @@ export class SerpAnalyzerService {
   private analyzeCompetitors(results: SerpResult[]): CompetitorInsight[] {
     const domainMap = new Map<string, SerpResult[]>();
 
-    results.forEach(result => {
+    results.forEach((result) => {
       const existing = domainMap.get(result.domain) || [];
       existing.push(result);
       domainMap.set(result.domain, existing);
     });
 
     return Array.from(domainMap.entries()).map(([domain, domainResults]) => {
-      const titles = domainResults.map(r => r.title);
-      const descriptions = domainResults.map(r => r.description);
+      const titles = domainResults.map((r) => r.title);
+      const descriptions = domainResults.map((r) => r.description);
 
       return {
         domain,
@@ -346,7 +346,7 @@ export class SerpAnalyzerService {
         commonWords: this.extractCommonWords(titles.concat(descriptions)),
         avgTitleLength: titles.reduce((acc, t) => acc + t.length, 0) / titles.length,
         avgDescriptionLength: descriptions.reduce((acc, d) => acc + d.length, 0) / descriptions.length,
-        hasSchema: domainResults.some(r => r.features.length > 0),
+        hasSchema: domainResults.some((r) => r.features.length > 0),
         schemaTypes: this.inferSchemaTypes(domainResults),
       };
     });
@@ -358,10 +358,11 @@ export class SerpAnalyzerService {
   private extractPatterns(titles: string[]): string[] {
     const patterns: string[] = [];
 
-    const hasNumbers = titles.filter(t => /\d+/.test(t)).length > titles.length / 2;
-    const hasYear = titles.filter(t => /202\d/.test(t)).length > titles.length / 3;
-    const hasHowTo = titles.filter(t => /how to/i.test(t)).length > titles.length / 4;
-    const hasList = titles.filter(t => /top \d+|best \d+|\d+ (ways|tips|strategies)/i.test(t)).length > titles.length / 4;
+    const hasNumbers = titles.filter((t) => /\d+/.test(t)).length > titles.length / 2;
+    const hasYear = titles.filter((t) => /202\d/.test(t)).length > titles.length / 3;
+    const hasHowTo = titles.filter((t) => /how to/i.test(t)).length > titles.length / 4;
+    const hasList =
+      titles.filter((t) => /top \d+|best \d+|\d+ (ways|tips|strategies)/i.test(t)).length > titles.length / 4;
 
     if (hasNumbers) patterns.push('Uses numbers');
     if (hasYear) patterns.push('Includes current year');
@@ -376,19 +377,68 @@ export class SerpAnalyzerService {
    */
   private extractCommonWords(texts: string[]): string[] {
     const stopWords = new Set([
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-      'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
-      'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-      'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'this',
-      'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
-      'your', 'our', 'their', 'its', 'my', 'his', 'her'
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'in',
+      'on',
+      'at',
+      'to',
+      'for',
+      'of',
+      'with',
+      'by',
+      'from',
+      'as',
+      'is',
+      'was',
+      'are',
+      'were',
+      'been',
+      'be',
+      'have',
+      'has',
+      'had',
+      'do',
+      'does',
+      'did',
+      'will',
+      'would',
+      'could',
+      'should',
+      'may',
+      'might',
+      'must',
+      'shall',
+      'can',
+      'this',
+      'that',
+      'these',
+      'those',
+      'i',
+      'you',
+      'he',
+      'she',
+      'it',
+      'we',
+      'they',
+      'your',
+      'our',
+      'their',
+      'its',
+      'my',
+      'his',
+      'her',
     ]);
 
     const wordCounts = new Map<string, number>();
 
-    texts.forEach(text => {
+    texts.forEach((text) => {
       const words = text.toLowerCase().match(/\b[a-z]{3,}\b/g) || [];
-      words.forEach(word => {
+      words.forEach((word) => {
         if (!stopWords.has(word)) {
           wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
         }
@@ -407,8 +457,8 @@ export class SerpAnalyzerService {
   private inferSchemaTypes(results: SerpResult[]): string[] {
     const types: Set<string> = new Set();
 
-    results.forEach(r => {
-      r.features.forEach(f => {
+    results.forEach((r) => {
+      r.features.forEach((f) => {
         if (f === 'faq_schema') types.add('FAQPage');
         if (f === 'how_to_schema') types.add('HowTo');
         if (f === 'reviews') types.add('Review');
@@ -488,24 +538,19 @@ export class SerpAnalyzerService {
    * Analyze content gaps
    */
   private analyzeContentGap(results: SerpResult[], keyword: string): ContentGapAnalysis {
-    const allText = results.map(r => `${r.title} ${r.description}`).join(' ');
+    const allText = results.map((r) => `${r.title} ${r.description}`).join(' ');
     const commonWords = this.extractCommonWords([allText]);
 
     // Generate related questions
     const questionStarters = ['what is', 'how to', 'why', 'when to', 'where to', 'who should'];
-    const missingQuestions = questionStarters.map(
-      starter => `${starter} ${keyword}?`
-    );
+    const missingQuestions = questionStarters.map((starter) => `${starter} ${keyword}?`);
 
     // Extract potential subtopics
-    const missingTopics = commonWords.slice(0, 5).map(word =>
-      `${keyword} ${word}`
-    );
+    const missingTopics = commonWords.slice(0, 5).map((word) => `${keyword} ${word}`);
 
     // Calculate recommended word count from competitors
-    const avgPosition1To3Length = results
-      .filter(r => r.position <= 3)
-      .reduce((acc, r) => acc + r.description.length * 10, 0) / 3; // Estimate full content
+    const avgPosition1To3Length =
+      results.filter((r) => r.position <= 3).reduce((acc, r) => acc + r.description.length * 10, 0) / 3; // Estimate full content
 
     return {
       missingTopics,
@@ -528,7 +573,7 @@ export class SerpAnalyzerService {
    */
   private extractSerpFeatures(results: SerpResult[]): SerpFeature[] {
     const features = new Set<SerpFeature>();
-    results.forEach(r => r.features.forEach(f => features.add(f)));
+    results.forEach((r) => r.features.forEach((f) => features.add(f)));
     return Array.from(features);
   }
 
@@ -548,9 +593,7 @@ export class SerpAnalyzerService {
   private estimateDifficulty(results: SerpResult[]): number {
     // Estimate based on competitor authority
     const authorityDomains = ['wikipedia.org', 'amazon.com', 'google.com', 'youtube.com'];
-    const authorityCount = results.filter(r =>
-      authorityDomains.some(d => r.domain.includes(d))
-    ).length;
+    const authorityCount = results.filter((r) => authorityDomains.some((d) => r.domain.includes(d))).length;
 
     return Math.min(100, 30 + authorityCount * 10);
   }
@@ -560,7 +603,7 @@ export class SerpAnalyzerService {
    */
   private estimateCpc(keyword: string): number {
     const commercialTerms = ['buy', 'price', 'cost', 'cheap', 'best', 'top', 'review'];
-    const hasCommercial = commercialTerms.some(t => keyword.toLowerCase().includes(t));
+    const hasCommercial = commercialTerms.some((t) => keyword.toLowerCase().includes(t));
     return hasCommercial ? 2.5 + Math.random() * 5 : 0.5 + Math.random() * 2;
   }
 }

@@ -25,7 +25,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Content review panel with status tracking, reviewers list, approve/reject actions, and activity timeline.',
+        component:
+          'Content review panel with status tracking, reviewers list, approve/reject actions, and activity timeline.',
       },
     },
   },

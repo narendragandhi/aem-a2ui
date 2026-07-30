@@ -191,7 +191,9 @@ export class ContentCreator extends LitElement {
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* Quick Prompts */
@@ -363,20 +365,12 @@ export class ContentCreator extends LitElement {
               class="type-selector-btn ${this.selectedType ? 'has-selection' : ''}"
               @click=${this.toggleTypeSelector}
             >
-              ${this.selectedType
-                ? this.getTypeDisplay(this.selectedType)
-                : html`<span>📦</span> Component`}
+              ${this.selectedType ? this.getTypeDisplay(this.selectedType) : html`<span>📦</span> Component`}
               <span>▼</span>
             </button>
 
-            <button
-              class="generate-btn"
-              ?disabled=${!this.prompt.trim() || this.loading}
-              @click=${this.generate}
-            >
-              ${this.loading
-                ? html`<span class="spinner"></span> Generating...`
-                : html`Generate ✨`}
+            <button class="generate-btn" ?disabled=${!this.prompt.trim() || this.loading} @click=${this.generate}>
+              ${this.loading ? html`<span class="spinner"></span> Generating...` : html`Generate ✨`}
             </button>
 
             ${this.showTypeSelector ? this.renderTypeDropdown() : ''}
@@ -386,10 +380,8 @@ export class ContentCreator extends LitElement {
             <span class="quick-prompt-label">Try:</span>
             ${QUICK_PROMPTS.map(
               (prompt) => html`
-                <button class="quick-prompt" @click=${() => this.useQuickPrompt(prompt)}>
-                  ${prompt}
-                </button>
-              `
+                <button class="quick-prompt" @click=${() => this.useQuickPrompt(prompt)}>${prompt}</button>
+              `,
             )}
           </div>
         </div>
@@ -419,11 +411,11 @@ export class ContentCreator extends LitElement {
                         <div class="type-desc">${type.description}</div>
                       </div>
                     </div>
-                  `
+                  `,
                 )}
               </div>
             </div>
-          `
+          `,
         )}
       </div>
     `;
@@ -434,9 +426,7 @@ export class ContentCreator extends LitElement {
       <div class="empty-state">
         <div class="empty-icon">✨</div>
         <h3 class="empty-title">Ready to create</h3>
-        <p class="empty-text">
-          Describe your content above or select a component type to get started.
-        </p>
+        <p class="empty-text">Describe your content above or select a component type to get started.</p>
       </div>
     `;
   }
@@ -515,7 +505,7 @@ export class ContentCreator extends LitElement {
           detail: { suggestions },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
 
       // Update global state
@@ -529,7 +519,7 @@ export class ContentCreator extends LitElement {
           detail: { error: appError },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     } finally {
       this.loading = false;
@@ -566,11 +556,7 @@ export class ContentCreator extends LitElement {
 
     // If no suggestions found, create mock for demo
     if (suggestions.length === 0) {
-      suggestions.push(
-        this.createMockSuggestion('1'),
-        this.createMockSuggestion('2'),
-        this.createMockSuggestion('3')
-      );
+      suggestions.push(this.createMockSuggestion('1'), this.createMockSuggestion('2'), this.createMockSuggestion('3'));
     }
 
     return suggestions;

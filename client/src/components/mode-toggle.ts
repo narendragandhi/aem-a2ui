@@ -108,10 +108,7 @@ export class ModeToggle extends LitElement {
             </span>
           </button>
 
-          <button
-            class="toggle-btn ${this.mode === 'build' ? 'active' : ''}"
-            @click=${() => this.selectMode('build')}
-          >
+          <button class="toggle-btn ${this.mode === 'build' ? 'active' : ''}" @click=${() => this.selectMode('build')}>
             <span class="toggle-icon">🏗️</span>
             <span class="toggle-label">
               <span class="toggle-title">Build Page</span>
@@ -131,7 +128,7 @@ export class ModeToggle extends LitElement {
           detail: { mode },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
   }

@@ -11,7 +11,7 @@ export interface AemComponentDefinition {
   icon: string;
 
   // AEM paths
-  resourceType: string;  // e.g., 'core/wcm/components/teaser/v2/teaser'
+  resourceType: string; // e.g., 'core/wcm/components/teaser/v2/teaser'
   componentGroup: string;
 
   // Content structure
@@ -23,10 +23,13 @@ export interface AemComponentDefinition {
 
 export interface AemProperty {
   name: string;
-  type: 'String' | 'Long' | 'Boolean' | 'Date' | 'Binary' | 'Reference';
-  jcrName: string;  // The actual JCR property name
+  type: string;
+  jcrName: string; // The actual JCR property name
   required?: boolean;
   defaultValue?: string | number | boolean;
+  label?: string;
+  description?: string;
+  options?: Array<{ text: string; value: string }>;
 }
 
 /**
@@ -277,7 +280,12 @@ export const AEM_COMPONENTS: AemComponentDefinition[] = [
     resourceType: 'core/wcm/components/form/container/v2/container',
     componentGroup: 'AEM Component Factory - Form',
     properties: [
-      { name: 'actionType', type: 'String', jcrName: 'actionType', defaultValue: 'foundation/components/form/actions/mail' },
+      {
+        name: 'actionType',
+        type: 'String',
+        jcrName: 'actionType',
+        defaultValue: 'foundation/components/form/actions/mail',
+      },
       { name: 'redirect', type: 'String', jcrName: 'redirect' },
     ],
     childComponents: ['form-text', 'form-button'],
@@ -288,14 +296,14 @@ export const AEM_COMPONENTS: AemComponentDefinition[] = [
  * Get component definition by ID
  */
 export function getComponentById(id: string): AemComponentDefinition | undefined {
-  return AEM_COMPONENTS.find(c => c.id === id);
+  return AEM_COMPONENTS.find((c) => c.id === id);
 }
 
 /**
  * Get components by category
  */
 export function getComponentsByCategory(category: AemComponentDefinition['category']): AemComponentDefinition[] {
-  return AEM_COMPONENTS.filter(c => c.category === category);
+  return AEM_COMPONENTS.filter((c) => c.category === category);
 }
 
 /**

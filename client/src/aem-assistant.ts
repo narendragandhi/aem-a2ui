@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Task } from '@lit/task';
-import brandConfig from "./data/brand-config.json";
+import brandConfig from './data/brand-config.json';
 import './spectrum-imports.js';
 
 // Core components
@@ -54,12 +54,25 @@ import './components/mode-toggle.js';
 import './components/shortcuts-help.js';
 
 // Types
-import { ContentSuggestion, ImageAsset, Review, DamAsset, PageRecommendation, LiveUser, ChatMessage, CursorPosition } from './lib/types.js';
+import {
+  ContentSuggestion,
+  ImageAsset,
+  Review,
+  DamAsset,
+  PageRecommendation,
+  LiveUser,
+  ChatMessage,
+  CursorPosition,
+} from './lib/types.js';
 import { StreamingContent } from './components/streaming-content.js';
 
 // Services
 import { HistoryService } from './services/history-service.js';
-import { collaborationService, LiveUser as CollaborationLiveUser, ChatMessage as CollabChatMessage } from './services/collaboration-service.js';
+import {
+  collaborationService,
+  LiveUser as CollaborationLiveUser,
+  ChatMessage as CollabChatMessage,
+} from './services/collaboration-service.js';
 import { logger, uiLogger, contentLogger } from './services/logger.js';
 import { api } from './services/api.js';
 import { appState, ViewMode } from './services/app-state.js';
@@ -91,16 +104,46 @@ interface LocalImageAsset {
 }
 
 const PREDEFINED_IMAGES: LocalImageAsset[] = [
-  { url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200', tags: ['office', 'tech', 'clean', 'professional', 'minimalist'] }, // Hero office
-  { url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200', tags: ['abstract', 'gradient', 'dynamic', 'modern', 'colorful'] }, // Banner abstract
-  { url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200', tags: ['meeting', 'collaboration', 'people', 'diverse', 'professional'] }, // Team meeting
-  { url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200', tags: ['coding', 'development', 'software', 'screen', 'focused'] }, // Coding
-  { url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200', tags: ['laptop', 'desk', 'workspace', 'home office', 'minimalist'] }, // Laptop desk
-  { url: 'https://images.unsplash.com/photo-1522204523234-87295a3ad7f0?w=1200', tags: ['team', 'discussion', 'startup', 'innovation', 'casual'] }, // Startup team
-  { url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800', tags: ['product', 'ecommerce', 'watch', 'luxury', 'clean'] }, // Product watch
-  { url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800', tags: ['video', 'media', 'creative', 'studio', 'production'] }, // Video production
-  { url: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800', tags: ['analytics', 'data', 'charts', 'business', 'strategy'] }, // Data analytics
-  { url: 'https://images.unsplash.com/photo-1488590528505-98d2f092d077?w=1200', tags: ['server', 'datacenter', 'cloud', 'security', 'it infrastructure'] }, // Server room
+  {
+    url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200',
+    tags: ['office', 'tech', 'clean', 'professional', 'minimalist'],
+  }, // Hero office
+  {
+    url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200',
+    tags: ['abstract', 'gradient', 'dynamic', 'modern', 'colorful'],
+  }, // Banner abstract
+  {
+    url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200',
+    tags: ['meeting', 'collaboration', 'people', 'diverse', 'professional'],
+  }, // Team meeting
+  {
+    url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200',
+    tags: ['coding', 'development', 'software', 'screen', 'focused'],
+  }, // Coding
+  {
+    url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200',
+    tags: ['laptop', 'desk', 'workspace', 'home office', 'minimalist'],
+  }, // Laptop desk
+  {
+    url: 'https://images.unsplash.com/photo-1522204523234-87295a3ad7f0?w=1200',
+    tags: ['team', 'discussion', 'startup', 'innovation', 'casual'],
+  }, // Startup team
+  {
+    url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
+    tags: ['product', 'ecommerce', 'watch', 'luxury', 'clean'],
+  }, // Product watch
+  {
+    url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800',
+    tags: ['video', 'media', 'creative', 'studio', 'production'],
+  }, // Video production
+  {
+    url: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800',
+    tags: ['analytics', 'data', 'charts', 'business', 'strategy'],
+  }, // Data analytics
+  {
+    url: 'https://images.unsplash.com/photo-1488590528505-98d2f092d077?w=1200',
+    tags: ['server', 'datacenter', 'cloud', 'security', 'it infrastructure'],
+  }, // Server room
 ];
 
 @customElement('aem-assistant')
@@ -170,7 +213,7 @@ export class AemAssistant extends LitElement {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify({
           message: {
@@ -199,14 +242,20 @@ export class AemAssistant extends LitElement {
         return suggestions;
       }
     },
-    args: () => [this.prompt]
+    args: () => [this.prompt],
   });
-
 
   static styles = css`
     :host {
       display: block;
-      font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family:
+        adobe-clean,
+        'Source Sans Pro',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
       height: 100vh;
       background-color: var(--spectrum-gray-100, #f5f5f5);
       color: var(--spectrum-gray-900, #1a1a1a);
@@ -220,7 +269,11 @@ export class AemAssistant extends LitElement {
       --background-color: var(--spectrum-gray-100, #f5f5f5);
       --card-background: var(--spectrum-gray-50, white);
       --border-color: var(--spectrum-gray-300, #e0e0e0);
-      --header-bg: linear-gradient(135deg, var(--spectrum-accent-color-default, #1473e6) 0%, var(--spectrum-blue-900, #0d66d0) 100%);
+      --header-bg: linear-gradient(
+        135deg,
+        var(--spectrum-accent-color-default, #1473e6) 0%,
+        var(--spectrum-blue-900, #0d66d0) 100%
+      );
       --header-text: white;
       --input-bg: var(--spectrum-gray-50, white);
       --input-border: var(--spectrum-gray-300, #e0e0e0);
@@ -367,7 +420,9 @@ export class AemAssistant extends LitElement {
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* Main Layout */
@@ -404,7 +459,7 @@ export class AemAssistant extends LitElement {
       padding: 12px 24px;
       border-radius: 8px;
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       animation: slideIn 0.3s ease;
       z-index: 1000;
     }
@@ -625,8 +680,8 @@ export class AemAssistant extends LitElement {
         width: 100%;
       }
     }
-		
-		@media (max-width: 480px) {
+
+    @media (max-width: 480px) {
       :host {
         font-size: 14px;
       }
@@ -659,13 +714,17 @@ export class AemAssistant extends LitElement {
         ></assistant-header>
 
         <!-- Live Collaboration -->
-        ${this.wsConnected ? html`
-          <live-presence
-            .users=${this.connectedUsers}
-            .currentUserId=${collaborationService.getSessionId()}
-            style="margin-right: 8px;"
-          ></live-presence>
-        ` : ''}
+        ${
+          this.wsConnected
+            ? html`
+                <live-presence
+                  .users=${this.connectedUsers}
+                  .currentUserId=${collaborationService.getSessionId()}
+                  style="margin-right: 8px;"
+                ></live-presence>
+              `
+            : ''
+        }
 
         <aem-connection-status
           .connected=${this.aemConnected}
@@ -682,20 +741,16 @@ export class AemAssistant extends LitElement {
         ></live-chat>
 
         <!-- Notifications -->
-        <live-notifications
-          .notifications=${this.notifications}
-        ></live-notifications>
+        <live-notifications .notifications=${this.notifications}></live-notifications>
 
         <!-- Demo Mode Toggle -->
-        <demo-mode
-          .enabled=${this.demoModeEnabled}
-        ></demo-mode>
+        <demo-mode .enabled=${this.demoModeEnabled}></demo-mode>
       </div>
 
       <!-- DAM Browser Modal -->
       <dam-browser
         .open=${this.showDamBrowser}
-        @close=${() => this.showDamBrowser = false}
+        @close=${() => (this.showDamBrowser = false)}
         @asset-selected=${this.handleDamAssetSelected}
       ></dam-browser>
 
@@ -706,265 +761,299 @@ export class AemAssistant extends LitElement {
           <brand-panel></brand-panel>
 
           <!-- SEO Panel -->
-          ${this.appliedContent?.seo ? html`
-            <seo-panel
-              .seoSuggestions=${this.appliedContent.seo}
-              .seoScore=${this.appliedContent.seoScore}
-            ></seo-panel>
-          ` : ''}
+          ${
+            this.appliedContent?.seo
+              ? html`
+                  <seo-panel
+                    .seoSuggestions=${this.appliedContent.seo}
+                    .seoScore=${this.appliedContent.seoScore}
+                  ></seo-panel>
+                `
+              : ''
+          }
 
           <!-- View Mode Toggle - Simplified to 2 modes -->
           <mode-toggle
             .mode=${this.viewMode}
-            @mode-changed=${(e: CustomEvent) => this.viewMode = e.detail.mode}
+            @mode-changed=${(e: CustomEvent) => (this.viewMode = e.detail.mode)}
           ></mode-toggle>
 
-          
-          ${this.viewMode === 'build' ? html`
-            <!-- Build Mode - Page Builder with AI Recommendations -->
-            <div class="wizard-container">
-              <component-recommender
-                .agentUrl=${this.agentUrl}
-                @recommendation-accepted=${this.handleRecommendationAccepted}
-              ></component-recommender>
-              <page-builder
-                @sections-changed=${this.handleSectionsChanged}
-                @generate-section=${this.handleGenerateSection}
-                @page-ready=${this.handlePageReady}
-              ></page-builder>
+          ${
+            this.viewMode === 'build'
+              ? html`
+                  <!-- Build Mode - Page Builder with AI Recommendations -->
+                  <div class="wizard-container">
+                    <component-recommender
+                      .agentUrl=${this.agentUrl}
+                      @recommendation-accepted=${this.handleRecommendationAccepted}
+                    ></component-recommender>
+                    <page-builder
+                      @sections-changed=${this.handleSectionsChanged}
+                      @generate-section=${this.handleGenerateSection}
+                      @page-ready=${this.handlePageReady}
+                    ></page-builder>
 
-              <!-- Bulk Component Generator -->
-              <bulk-generator
-                .agentUrl=${this.agentUrl}
-                @bulk-complete=${this.handleBulkComplete}
-              ></bulk-generator>
-            </div>
-          ` : html`
-            <!-- Create Mode - Unified wizard + quick content creation -->
-            <div class="left-panel-content">
-              <!-- Content Wizard for guided creation -->
-              <content-wizard
-                @generate=${this.handleWizardGenerate}
-              ></content-wizard>
-
-              <!-- Quick Input -->
-              <assistant-input
-                .prompt=${this.prompt}
-                .loading=${this.loading}
-                .componentType=${this.selectedComponentType}
-                @prompt-changed=${this.handlePromptChange}
-                @generate-content=${this.generateContent}
-              ></assistant-input>
-
-              <!-- Error with retry support -->
-              ${this.appError ? html`
-                <error-message
-                  .error=${this.appError}
-                  .showRetry=${this.appError.retryable}
-                  @retry=${() => this.generateContent()}
-                ></error-message>
-              ` : ''}
-
-              <!-- Loading skeleton while generating -->
-              ${this.loading ? html`
-                <content-skeleton type="suggestions"></content-skeleton>
-              ` : html`
-                <assistant-suggestions
-                  .suggestions=${this.suggestions}
-                  .selectedSuggestion=${this.selectedSuggestion}
-                  @suggestion-selected=${this.handleSuggestionSelected}
-                  @suggestion-applied=${this.handleSuggestionApplied}
-                  @copy-suggestion=${this.handleCopySuggestion}
-                ></assistant-suggestions>
-              `}
-
-              <!-- History Section -->
-              <div class="history-section">
-                <div class="history-header">
-                  <h2>History</h2>
-                  <button class="clear-history-btn" @click=${this.clearHistory}>Clear History</button>
-                </div>
-                <div class="history-list">
-                  ${this.history.length === 0 ? html`
-                    <p class="empty-history">No history yet.</p>
-                  ` : html`
-                    ${this.history.map(item => html`
-                      <div class="history-item" @click=${() => this.handleHistoryItemClick(item)}>
-                        <h3>${item.title}</h3>
-                        <p>${item.description}</p>
-                      </div>
-                    `)}
-                  `}
-                </div>
-              </div>
-
-              ${this.appliedContent ? html`
-                <div class="refinement-section">
-                  <div class="refinement-input">
-                    <input type="text" placeholder="Refine: Make it more playful, shorter, add urgency..." id="refinement-input" />
-                    <button @click=${this.refineContent}>Refine</button>
+                    <!-- Bulk Component Generator -->
+                    <bulk-generator
+                      .agentUrl=${this.agentUrl}
+                      @bulk-complete=${this.handleBulkComplete}
+                    ></bulk-generator>
                   </div>
-                </div>
-              ` : ''}
-            </div>
-          `}
+                `
+              : html`
+                  <!-- Create Mode - Unified wizard + quick content creation -->
+                  <div class="left-panel-content">
+                    <!-- Content Wizard for guided creation -->
+                    <content-wizard @generate=${this.handleWizardGenerate}></content-wizard>
+
+                    <!-- Quick Input -->
+                    <assistant-input
+                      .prompt=${this.prompt}
+                      .loading=${this.loading}
+                      .componentType=${this.selectedComponentType}
+                      @prompt-changed=${this.handlePromptChange}
+                      @generate-content=${this.generateContent}
+                    ></assistant-input>
+
+                    <!-- Error with retry support -->
+                    ${
+                this.appError
+                  ? html`
+                      <error-message
+                        .error=${this.appError}
+                        .showRetry=${this.appError.retryable}
+                        @retry=${() => this.generateContent()}
+                      ></error-message>
+                    `
+                  : ''
+              }
+
+                    <!-- Loading skeleton while generating -->
+                    ${
+                this.loading
+                  ? html` <content-skeleton type="suggestions"></content-skeleton> `
+                  : html`
+                      <assistant-suggestions
+                        .suggestions=${this.suggestions}
+                        .selectedSuggestion=${this.selectedSuggestion}
+                        @suggestion-selected=${this.handleSuggestionSelected}
+                        @suggestion-applied=${this.handleSuggestionApplied}
+                        @copy-suggestion=${this.handleCopySuggestion}
+                      ></assistant-suggestions>
+                    `
+              }
+
+                    <!-- History Section -->
+                    <div class="history-section">
+                      <div class="history-header">
+                        <h2>History</h2>
+                        <button class="clear-history-btn" @click=${this.clearHistory}>Clear History</button>
+                      </div>
+                      <div class="history-list">
+                        ${
+                    this.history.length === 0
+                      ? html` <p class="empty-history">No history yet.</p> `
+                      : html`
+                          ${this.history.map(
+                      (item) => html`
+                        <div class="history-item" @click=${() => this.handleHistoryItemClick(item)}>
+                          <h3>${item.title}</h3>
+                          <p>${item.description}</p>
+                        </div>
+                      `,
+                    )}
+                        `
+                  }
+                      </div>
+                    </div>
+
+                    ${
+                this.appliedContent
+                  ? html`
+                      <div class="refinement-section">
+                        <div class="refinement-input">
+                          <input
+                            type="text"
+                            placeholder="Refine: Make it more playful, shorter, add urgency..."
+                            id="refinement-input"
+                          />
+                          <button @click=${this.refineContent}>Refine</button>
+                        </div>
+                      </div>
+                    `
+                  : ''
+              }
+                  </div>
+                `
+          }
         </div>
 
-        ${this.viewMode === 'build' ? html`
-          <aem-preview
-            .sections=${this.pageSections}
-          ></aem-preview>
-        ` : html`
-          <div class="right-panel-content">
-            <live-cursors
-              .cursors=${this.cursors}
-              .currentUserId=${collaborationService.getSessionId()}
-            ></live-cursors>
+        ${
+          this.viewMode === 'build'
+            ? html` <aem-preview .sections=${this.pageSections}></aem-preview> `
+            : html`
+                <div class="right-panel-content">
+                  <live-cursors
+                    .cursors=${this.cursors}
+                    .currentUserId=${collaborationService.getSessionId()}
+                  ></live-cursors>
 
-            <assistant-preview
-              .appliedContent=${this.appliedContent}
-              @copy-content=${this.handleCopyContent}
-              @content-updated=${this.handleContentUpdated}
-            ></assistant-preview>
+                  <assistant-preview
+                    .appliedContent=${this.appliedContent}
+                    @copy-content=${this.handleCopyContent}
+                    @content-updated=${this.handleContentUpdated}
+                  ></assistant-preview>
 
-            <!-- AEM Export Panel -->
-            ${this.appliedContent ? html`
-              <aem-export-panel
-                .content=${this.appliedContent}
-                .aemUrl=${this.agentUrl}
-                .aemConnected=${this.aemConnected}
-                @deployed=${(e: CustomEvent) => {
+                  <!-- AEM Export Panel -->
+                  ${
+              this.appliedContent
+                ? html`
+                    <aem-export-panel
+                      .content=${this.appliedContent}
+                      .aemUrl=${this.agentUrl}
+                      .aemConnected=${this.aemConnected}
+                      @deployed=${(e: CustomEvent) => {
                   logger.info('Component deployed to AEM', 'Export', e.detail);
                 }}
-              ></aem-export-panel>
+                    ></aem-export-panel>
 
-              <!-- Content Fragment Export Panel -->
-              <content-fragment-panel
-                .content=${this.appliedContent}
-                .agentUrl=${this.agentUrl}
-                .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
-                .aemConnected=${this.aemConnected}
-              ></content-fragment-panel>
+                    <!-- Content Fragment Export Panel -->
+                    <content-fragment-panel
+                      .content=${this.appliedContent}
+                      .agentUrl=${this.agentUrl}
+                      .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
+                      .aemConnected=${this.aemConnected}
+                    ></content-fragment-panel>
 
-              <!-- Advanced Export Panel -->
-              <advanced-export-panel
-                .content=${this.appliedContent}
-                .contents=${this.suggestions}
-                .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
-                .aemConnected=${this.aemConnected}
-              ></advanced-export-panel>
+                    <!-- Advanced Export Panel -->
+                    <advanced-export-panel
+                      .content=${this.appliedContent}
+                      .contents=${this.suggestions}
+                      .aemUrl=${this.aemAuthorUrl || 'http://localhost:4502'}
+                      .aemConnected=${this.aemConnected}
+                    ></advanced-export-panel>
 
-              <!-- SEO Toolkit (Basic) -->
-              <seo-toolkit
-                .content=${this.appliedContent}
-                .baseUrl=${this.aemAuthorUrl || 'https://example.com'}
-              ></seo-toolkit>
+                    <!-- SEO Toolkit (Basic) -->
+                    <seo-toolkit
+                      .content=${this.appliedContent}
+                      .baseUrl=${this.aemAuthorUrl || 'https://example.com'}
+                    ></seo-toolkit>
 
-              <!-- SEO Dashboard (Advanced: SERP, Backlinks, PageSpeed, Rich Results) -->
-              <seo-dashboard
-                .content=${this.appliedContent}
-                .targetUrl=${this.aemAuthorUrl || 'https://example.com'}
-              ></seo-dashboard>
-            ` : ''}
+                    <!-- SEO Dashboard (Advanced: SERP, Backlinks, PageSpeed, Rich Results) -->
+                    <seo-dashboard
+                      .content=${this.appliedContent}
+                      .targetUrl=${this.aemAuthorUrl || 'https://example.com'}
+                    ></seo-dashboard>
+                  `
+                : ''
+            }
 
-            <!-- Review & Workflow Panels -->
-            ${this.appliedContent ? html`
-              <div class="collaboration-panels">
-                <review-panel
-                  .content=${this.appliedContent}
-                  .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
-                  @review-started=${this.handleReviewStarted}
-                  @review-approved=${this.handleReviewApproved}
-                  @review-rejected=${this.handleReviewRejected}
-                  @open-comments=${this.handleOpenComments}
-                ></review-panel>
+                  <!-- Review & Workflow Panels -->
+                  ${
+              this.appliedContent
+                ? html`
+                    <div class="collaboration-panels">
+                      <review-panel
+                        .content=${this.appliedContent}
+                        .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
+                        @review-started=${this.handleReviewStarted}
+                        @review-approved=${this.handleReviewApproved}
+                        @review-rejected=${this.handleReviewRejected}
+                        @open-comments=${this.handleOpenComments}
+                      ></review-panel>
 
-                <workflow-panel
-                  .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
-                  .review=${this.currentReview}
-                  @workflow-started=${this.handleWorkflowStarted}
-                  @workflow-advanced=${this.handleWorkflowAdvanced}
-                ></workflow-panel>
+                      <workflow-panel
+                        .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
+                        .review=${this.currentReview}
+                        @workflow-started=${this.handleWorkflowStarted}
+                        @workflow-advanced=${this.handleWorkflowAdvanced}
+                      ></workflow-panel>
 
-                <version-history
-                  .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
-                  .currentContent=${this.appliedContent}
-                  @version-restored=${this.handleVersionRestored}
-                ></version-history>
+                      <version-history
+                        .contentId=${this.contentId || this.appliedContent?.id || 'content-' + Date.now()}
+                        .currentContent=${this.appliedContent}
+                        @version-restored=${this.handleVersionRestored}
+                      ></version-history>
 
-                <demo-hub
-                  .agentUrl=${this.agentUrl}
-                  .content=${this.appliedContent}
-                ></demo-hub>
+                      <demo-hub .agentUrl=${this.agentUrl} .content=${this.appliedContent}></demo-hub>
 
-                <telemetry-panel
-                  .agentUrl=${this.agentUrl}
-                ></telemetry-panel>
-              </div>
-            ` : ''}
-          </div>
-        `}
+                      <telemetry-panel .agentUrl=${this.agentUrl}></telemetry-panel>
+                    </div>
+                  `
+                : ''
+            }
+                </div>
+              `
+        }
       </div>
 
       <!-- Review Comments Slide Panel -->
       <review-comments
         .open=${this.showCommentsPanel}
         .review=${this.currentReview}
-        @close=${() => this.showCommentsPanel = false}
+        @close=${() => (this.showCommentsPanel = false)}
         @comment-added=${this.handleCommentAdded}
       ></review-comments>
 
       <!-- Streaming Content Modal -->
-      ${this.showStreamingModal ? html`
-        <div class="streaming-modal-overlay" @click=${this.closeStreamingModal}>
-          <div class="streaming-modal" @click=${(e: Event) => e.stopPropagation()}>
-            <div class="streaming-modal-header">
-              <h3>Generating ${this.streamingComponentType} content...</h3>
-              <button class="streaming-modal-close" @click=${this.closeStreamingModal}>x</button>
-            </div>
-            <div class="streaming-modal-body">
-              <streaming-content
-                .agentUrl=${this.agentUrl}
-                .componentType=${this.streamingComponentType}
-                .prompt=${this.streamingPrompt}
-                @content-ready=${this.handleStreamingContentReady}
-                @content-accepted=${this.handleStreamingContentAccepted}
-              ></streaming-content>
-            </div>
-          </div>
-        </div>
-      ` : ''}
-
-      ${this.showCopiedToast ? html`
-        <div class="toast">Copied to clipboard!</div>
-      ` : ''}
-
-      ${this.loading ? html`
-        <div class="loading-overlay">
-          <div class="spinner"></div>
-        </div>
-      ` : ''}
+      ${
+        this.showStreamingModal
+          ? html`
+              <div class="streaming-modal-overlay" @click=${this.closeStreamingModal}>
+                <div class="streaming-modal" @click=${(e: Event) => e.stopPropagation()}>
+                  <div class="streaming-modal-header">
+                    <h3>Generating ${this.streamingComponentType} content...</h3>
+                    <button class="streaming-modal-close" @click=${this.closeStreamingModal}>x</button>
+                  </div>
+                  <div class="streaming-modal-body">
+                    <streaming-content
+                      .agentUrl=${this.agentUrl}
+                      .componentType=${this.streamingComponentType}
+                      .prompt=${this.streamingPrompt}
+                      @content-ready=${this.handleStreamingContentReady}
+                      @content-accepted=${this.handleStreamingContentAccepted}
+                    ></streaming-content>
+                  </div>
+                </div>
+              </div>
+            `
+          : ''
+      }
+      ${this.showCopiedToast ? html` <div class="toast">Copied to clipboard!</div> ` : ''}
+      ${
+        this.loading
+          ? html`
+              <div class="loading-overlay">
+                <div class="spinner"></div>
+              </div>
+            `
+          : ''
+      }
 
       <!-- Onboarding for first-time users -->
-      ${this.showOnboarding ? html`
-        <app-onboarding
-          @complete=${() => {
+      ${
+        this.showOnboarding
+          ? html`
+              <app-onboarding
+                @complete=${() => {
             this.showOnboarding = false;
             localStorage.setItem('aem-assistant-onboarding-complete', 'true');
           }}
-          @skip=${() => {
+                @skip=${() => {
             this.showOnboarding = false;
             localStorage.setItem('aem-assistant-onboarding-complete', 'true');
           }}
-        ></app-onboarding>
-      ` : ''}
+              ></app-onboarding>
+            `
+          : ''
+      }
 
       <!-- Keyboard Shortcuts Help -->
-      ${this.showShortcutsHelp ? html`
-        <shortcuts-help
-          @close=${() => this.showShortcutsHelp = false}
-        ></shortcuts-help>
-      ` : ''}
+      ${
+        this.showShortcutsHelp
+          ? html` <shortcuts-help @close=${() => (this.showShortcutsHelp = false)}></shortcuts-help> `
+          : ''
+      }
     `;
   }
 
@@ -1030,7 +1119,9 @@ export class AemAssistant extends LitElement {
       key: '?',
       modifiers: ['shift'],
       description: 'Show keyboard shortcuts',
-      action: () => { this.showShortcutsHelp = true; }
+      action: () => {
+        this.showShortcutsHelp = true;
+      },
     });
 
     keyboardShortcuts.register({
@@ -1038,7 +1129,9 @@ export class AemAssistant extends LitElement {
       key: 'm',
       modifiers: ['ctrl'],
       description: 'Toggle view mode',
-      action: () => { this.viewMode = this.viewMode === 'create' ? 'build' : 'create'; }
+      action: () => {
+        this.viewMode = this.viewMode === 'create' ? 'build' : 'create';
+      },
     });
 
     keyboardShortcuts.register({
@@ -1046,7 +1139,9 @@ export class AemAssistant extends LitElement {
       key: 'Enter',
       modifiers: ['ctrl'],
       description: 'Generate content',
-      action: () => { if (this.prompt.trim()) this.generateContent(); }
+      action: () => {
+        if (this.prompt.trim()) this.generateContent();
+      },
     });
 
     keyboardShortcuts.register({
@@ -1054,7 +1149,9 @@ export class AemAssistant extends LitElement {
       key: 'd',
       modifiers: ['ctrl', 'shift'],
       description: 'Toggle dark mode',
-      action: () => { this.toggleTheme(); }
+      action: () => {
+        this.toggleTheme();
+      },
     });
 
     keyboardShortcuts.register({
@@ -1064,7 +1161,7 @@ export class AemAssistant extends LitElement {
       action: () => {
         const input = this.shadowRoot?.querySelector('assistant-input');
         if (input) (input as HTMLElement).focus();
-      }
+      },
     });
 
     keyboardShortcuts.register({
@@ -1076,7 +1173,7 @@ export class AemAssistant extends LitElement {
         this.showCommentsPanel = false;
         this.showDamBrowser = false;
         this.showStreamingModal = false;
-      }
+      },
     });
   }
 
@@ -1090,7 +1187,7 @@ export class AemAssistant extends LitElement {
       });
 
       collaborationService.on('cursor', (cursor: unknown) => {
-        const existing = this.cursors.findIndex(c => c.sessionId === (cursor as CursorPosition).sessionId);
+        const existing = this.cursors.findIndex((c) => c.sessionId === (cursor as CursorPosition).sessionId);
         if (existing >= 0) {
           this.cursors[existing] = cursor as CursorPosition;
         } else {
@@ -1106,28 +1203,33 @@ export class AemAssistant extends LitElement {
       collaborationService.on('lock', (data: unknown) => {
         const lockData = data as { type: string; sessionId: string; username: string; field: string };
         if (lockData.type === 'locked') {
-          this.fieldLocks = [...this.fieldLocks, { field: lockData.field, sessionId: lockData.sessionId, username: lockData.username }];
+          this.fieldLocks = [
+            ...this.fieldLocks,
+            { field: lockData.field, sessionId: lockData.sessionId, username: lockData.username },
+          ];
         } else if (lockData.type === 'unlocked' || lockData.type === 'released') {
-          this.fieldLocks = this.fieldLocks.filter(l => !(l.field === lockData.field && l.sessionId === lockData.sessionId));
+          this.fieldLocks = this.fieldLocks.filter(
+            (l) => !(l.field === lockData.field && l.sessionId === lockData.sessionId),
+          );
         }
       });
 
       collaborationService.on('reaction', (data: unknown) => {
         const reactionData = data as { type: string; emoji: string; sessionId: string };
         if (reactionData.type === 'remove') {
-          const existing = this.fieldReactions.findIndex(r => r.emoji === reactionData.emoji);
+          const existing = this.fieldReactions.findIndex((r) => r.emoji === reactionData.emoji);
           if (existing >= 0) {
             const reaction = this.fieldReactions[existing];
-            reaction.sessionIds = reaction.sessionIds.filter(s => s !== reactionData.sessionId);
+            reaction.sessionIds = reaction.sessionIds.filter((s) => s !== reactionData.sessionId);
             reaction.count = reaction.sessionIds.length;
             if (reaction.count === 0) {
-              this.fieldReactions = this.fieldReactions.filter(r => r.emoji !== reactionData.emoji);
+              this.fieldReactions = this.fieldReactions.filter((r) => r.emoji !== reactionData.emoji);
             } else {
               this.fieldReactions = [...this.fieldReactions];
             }
           }
         } else {
-          const existing = this.fieldReactions.findIndex(r => r.emoji === reactionData.emoji);
+          const existing = this.fieldReactions.findIndex((r) => r.emoji === reactionData.emoji);
           if (existing >= 0) {
             const reaction = this.fieldReactions[existing];
             if (!reaction.sessionIds.includes(reactionData.sessionId)) {
@@ -1136,24 +1238,30 @@ export class AemAssistant extends LitElement {
               this.fieldReactions = [...this.fieldReactions];
             }
           } else {
-            this.fieldReactions = [...this.fieldReactions, { emoji: reactionData.emoji, count: 1, sessionIds: [reactionData.sessionId] }];
+            this.fieldReactions = [
+              ...this.fieldReactions,
+              { emoji: reactionData.emoji, count: 1, sessionIds: [reactionData.sessionId] },
+            ];
           }
         }
       });
 
       collaborationService.on('notification', (notification: unknown) => {
         const notif = notification as { type: string; title: string; message: string; fromUser?: string };
-        const notifType = (['info', 'success', 'warning', 'error', 'review'].includes(notif.type)
-          ? notif.type
-          : 'info') as 'info' | 'success' | 'warning' | 'error' | 'review';
-        this.notifications = [{
-          id: Date.now().toString(),
-          type: notifType,
-          title: notif.title,
-          message: notif.message,
-          fromUser: notif.fromUser,
-          timestamp: new Date().toISOString()
-        }, ...this.notifications];
+        const notifType = (
+          ['info', 'success', 'warning', 'error', 'review'].includes(notif.type) ? notif.type : 'info'
+        ) as 'info' | 'success' | 'warning' | 'error' | 'review';
+        this.notifications = [
+          {
+            id: Date.now().toString(),
+            type: notifType,
+            title: notif.title,
+            message: notif.message,
+            fromUser: notif.fromUser,
+            timestamp: new Date().toISOString(),
+          },
+          ...this.notifications,
+        ];
       });
 
       if (this.appliedContent?.id) {
@@ -1361,10 +1469,10 @@ export class AemAssistant extends LitElement {
       const pageBuilder = this.shadowRoot?.querySelector('page-builder') as PageBuilder;
       if (pageBuilder) {
         pageBuilder.setSectionsFromRecommendation(
-          recommendation.sections.map(s => ({
+          recommendation.sections.map((s) => ({
             componentType: s.componentType,
-            prompt: s.suggestedPrompt
-          }))
+            prompt: s.suggestedPrompt,
+          })),
         );
       }
     }, 100);
@@ -1381,10 +1489,7 @@ export class AemAssistant extends LitElement {
     contentLogger.info(`Generating content for: "${this.prompt.substring(0, 50)}..."`);
 
     try {
-      const data = await withRetry(
-        () => api.generateContent(this.prompt),
-        { maxRetries: 2, delay: 1000 }
-      );
+      const data = await withRetry(() => api.generateContent(this.prompt), { maxRetries: 2, delay: 1000 });
 
       contentLogger.debug('Agent response received', data);
 
@@ -1444,7 +1549,7 @@ export class AemAssistant extends LitElement {
                 if (parsed.title) {
                   suggestions.push({
                     id: `suggestion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                    ...parsed
+                    ...parsed,
                   });
                 }
               } catch (e) {
@@ -1467,7 +1572,7 @@ export class AemAssistant extends LitElement {
     if (this.selectedComponentType) {
       const normalizedType = this.selectedComponentType.toLowerCase();
       contentLogger.debug(`Setting component type to: ${normalizedType}`);
-      suggestions.forEach(suggestion => {
+      suggestions.forEach((suggestion) => {
         suggestion.componentType = normalizedType;
 
         // Use the wizard-selected asset if available, otherwise auto-select based on brand alignment
@@ -1530,12 +1635,14 @@ export class AemAssistant extends LitElement {
       '1': {
         title: 'Unleash Your Potential',
         subtitle: 'Innovation Awaits',
-        description: 'Discover innovative solutions designed to transform your digital experience and drive meaningful results.',
+        description:
+          'Discover innovative solutions designed to transform your digital experience and drive meaningful results.',
       },
       '2': {
         title: 'Experience Excellence',
         subtitle: 'Quality Redefined',
-        description: 'Premium quality meets cutting-edge technology. Elevate your journey with our award-winning solutions.',
+        description:
+          'Premium quality meets cutting-edge technology. Elevate your journey with our award-winning solutions.',
       },
       '3': {
         title: 'Transform Today',
@@ -1600,7 +1707,7 @@ export class AemAssistant extends LitElement {
     return 'hero';
   }
 
-  private generateSeoSuggestions(content: ContentSuggestion): { seo: ContentSuggestion['seo'], seoScore: number } {
+  private generateSeoSuggestions(content: ContentSuggestion): { seo: ContentSuggestion['seo']; seoScore: number } {
     const SEO_KEYWORDS_MAP: Record<string, string[]> = {
       hero: ['brand recognition', 'customer engagement', 'marketing strategy', 'digital transformation'],
       product: ['buy online', 'product features', 'best price', 'customer reviews'],
@@ -1617,17 +1724,17 @@ export class AemAssistant extends LitElement {
     const metaDescription = `${content.description.substring(0, 140)}... Discover more about ${mainKeyword} and how ${brandConfig.brand.name} can help.`;
 
     // Simple readability score (e.g., based on description length)
-    const words = content.description.split(/\s+/).filter(word => word.length > 0).length;
-    const sentences = content.description.split(/[.!?]+/).filter(sentence => sentence.length > 0).length;
-    const readabilityScore = sentences > 0 ? (206.835 - 1.015 * (words / sentences) - 84.6 * (3 / words)) : 50; // Flesch-Kincaid style approximation
+    const words = content.description.split(/\s+/).filter((word) => word.length > 0).length;
+    const sentences = content.description.split(/[.!?]+/).filter((sentence) => sentence.length > 0).length;
+    const readabilityScore = sentences > 0 ? 206.835 - 1.015 * (words / sentences) - 84.6 * (3 / words) : 50; // Flesch-Kincaid style approximation
 
     // Basic keyword density check
     let keywordCount = 0;
     const contentLower = content.description.toLowerCase();
     for (const kw of componentKeywords) {
-        if (contentLower.includes(kw.toLowerCase())) {
-            keywordCount++;
-        }
+      if (contentLower.includes(kw.toLowerCase())) {
+        keywordCount++;
+      }
     }
     const keywordDensity = words > 0 ? (keywordCount / words) * 100 : 0;
 
@@ -1637,44 +1744,45 @@ export class AemAssistant extends LitElement {
 
     // Title length
     if (content.title.length >= 20 && content.title.length <= 60) {
-        seoScore += 20;
+      seoScore += 20;
     } else {
-        issues.push('Title length not optimal (20-60 chars).');
+      issues.push('Title length not optimal (20-60 chars).');
     }
 
     // Meta Description length
     if (metaDescription.length >= 50 && metaDescription.length <= 160) {
-        seoScore += 20;
+      seoScore += 20;
     } else {
-        issues.push('Meta Description length not optimal (50-160 chars).');
+      issues.push('Meta Description length not optimal (50-160 chars).');
     }
 
     // Main keyword in title
     if (content.title.toLowerCase().includes(mainKeyword)) {
-        seoScore += 15;
+      seoScore += 15;
     } else {
-        issues.push(`Main keyword "${mainKeyword}" not found in title.`);
+      issues.push(`Main keyword "${mainKeyword}" not found in title.`);
     }
 
     // Main keyword in description
     if (content.description.toLowerCase().includes(mainKeyword)) {
-        seoScore += 15;
+      seoScore += 15;
     } else {
-        issues.push(`Main keyword "${mainKeyword}" not found in description.`);
+      issues.push(`Main keyword "${mainKeyword}" not found in description.`);
     }
 
     // Readability
-    if (readabilityScore >= 50) { // Aim for a decent score
-        seoScore += 10;
+    if (readabilityScore >= 50) {
+      // Aim for a decent score
+      seoScore += 10;
     } else {
-        issues.push('Content readability could be improved.');
+      issues.push('Content readability could be improved.');
     }
 
     // Keyword density (simple check for presence for now)
     if (keywordCount > 0) {
-        seoScore += 10;
+      seoScore += 10;
     } else {
-        issues.push('No relevant keywords found in content body.');
+      issues.push('No relevant keywords found in content body.');
     }
 
     // Add remaining score for general content quality, length etc.
@@ -1694,7 +1802,7 @@ export class AemAssistant extends LitElement {
   }
 
   private getBrandAlignedImage(componentType: string): { url: string; score: number } {
-    const brandVisualKeywords = brandConfig.visuals.styleKeywords.map(k => k.toLowerCase());
+    const brandVisualKeywords = brandConfig.visuals.styleKeywords.map((k) => k.toLowerCase());
 
     let bestMatch: LocalImageAsset | null = null;
     let highestScore = -1;
@@ -1739,22 +1847,13 @@ export class AemAssistant extends LitElement {
       this.contentId = content?.id || `content-${Date.now()}`;
     }
     if (content) {
-      api.recordContentVersion(
-        this.contentId,
-        content,
-        'demo-user',
-        'Content updated'
-      ).catch(() => undefined);
+      api.recordContentVersion(this.contentId!, content, 'demo-user', 'Content updated').catch(() => undefined);
     }
 
     // Also update in suggestions if it exists there
-    const index = this.suggestions.findIndex(s => s.id === content.id);
+    const index = this.suggestions.findIndex((s) => s.id === content.id);
     if (index >= 0) {
-      this.suggestions = [
-        ...this.suggestions.slice(0, index),
-        content,
-        ...this.suggestions.slice(index + 1)
-      ];
+      this.suggestions = [...this.suggestions.slice(0, index), content, ...this.suggestions.slice(index + 1)];
     }
   }
 
@@ -1769,12 +1868,9 @@ export class AemAssistant extends LitElement {
       this.contentId = this.appliedContent?.id || `content-${Date.now()}`;
     }
     if (this.appliedContent) {
-      api.recordContentVersion(
-        this.contentId,
-        this.appliedContent,
-        'demo-user',
-        'Applied suggestion'
-      ).catch(() => undefined);
+      api
+        .recordContentVersion(this.contentId, this.appliedContent, 'demo-user', 'Applied suggestion')
+        .catch(() => undefined);
     }
   }
 
@@ -1852,7 +1948,7 @@ export class AemAssistant extends LitElement {
       this.appliedContent = {
         ...this.appliedContent,
         imageUrl: asset.originalUrl,
-        imageAlt: asset.title || asset.name
+        imageAlt: asset.title || asset.name,
       };
     }
 

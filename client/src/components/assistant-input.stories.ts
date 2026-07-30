@@ -28,34 +28,19 @@ export default meta;
 type Story = StoryObj;
 
 export const Default: Story = {
-  render: (args) => html`
-    <assistant-input
-      .prompt=${args.prompt}
-      .loading=${args.loading}
-    ></assistant-input>
-  `,
+  render: (args) => html` <assistant-input .prompt=${args.prompt} .loading=${args.loading}></assistant-input> `,
 };
 
 export const Loading: Story = {
   args: {
     loading: true,
   },
-  render: (args) => html`
-    <assistant-input
-      .prompt=${args.prompt}
-      .loading=${args.loading}
-    ></assistant-input>
-  `,
+  render: (args) => html` <assistant-input .prompt=${args.prompt} .loading=${args.loading}></assistant-input> `,
 };
 
 export const WithPrompt: Story = {
   args: {
     prompt: 'Create a hero banner for a new product launch',
   },
-  render: (args) => html`
-    <assistant-input
-      .prompt=${args.prompt}
-      .loading=${args.loading}
-    ></assistant-input>
-  `,
+  render: (args) => html` <assistant-input .prompt=${args.prompt} .loading=${args.loading}></assistant-input> `,
 };

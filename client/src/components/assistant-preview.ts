@@ -81,8 +81,13 @@ export class AssistantPreview extends LitElement {
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
     .preview-placeholder h3 {
@@ -107,7 +112,7 @@ export class AssistantPreview extends LitElement {
       padding: 20px;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     .step-item {
@@ -149,7 +154,7 @@ export class AssistantPreview extends LitElement {
       background: white;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
     /* Hero Component */
@@ -170,7 +175,7 @@ export class AssistantPreview extends LitElement {
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -182,7 +187,7 @@ export class AssistantPreview extends LitElement {
       margin: 0 0 8px 0;
       font-size: 36px;
       font-weight: 700;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .hero-preview .subtitle {
@@ -521,7 +526,7 @@ export class AssistantPreview extends LitElement {
       left: 0;
       right: 0;
       padding: 20px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
       color: white;
     }
 
@@ -601,7 +606,7 @@ export class AssistantPreview extends LitElement {
 
     .footer-link {
       display: block;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       font-size: 14px;
       margin-bottom: 8px;
@@ -823,10 +828,18 @@ export class AssistantPreview extends LitElement {
       text-decoration: none;
     }
 
-    .social-btn.facebook { background: #1877f2; }
-    .social-btn.twitter { background: #1da1f2; }
-    .social-btn.linkedin { background: #0077b5; }
-    .social-btn.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .social-btn.facebook {
+      background: #1877f2;
+    }
+    .social-btn.twitter {
+      background: #1da1f2;
+    }
+    .social-btn.linkedin {
+      background: #0077b5;
+    }
+    .social-btn.instagram {
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    }
 
     /* Video Component */
     .video-preview {
@@ -861,7 +874,7 @@ export class AssistantPreview extends LitElement {
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -921,7 +934,7 @@ export class AssistantPreview extends LitElement {
       background: white;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .product-card-mini img {
@@ -1086,8 +1099,14 @@ export class AssistantPreview extends LitElement {
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
     }
 
     /* Responsive Styles */
@@ -1633,57 +1652,55 @@ export class AssistantPreview extends LitElement {
       <div class="right-panel">
         <div class="preview-header">
           <h2>Live Component Preview</h2>
-          ${this.appliedContent ? html`
-            <div class="preview-actions">
-              <button
-                class="edit-toggle ${this.editMode ? 'active' : ''}"
-                @click=${() => this.toggleEditMode()}
-              >
-                ${this.editMode ? '&#x2714; Editing' : '&#x270F; Edit'}
-              </button>
-              <button class="preview-action-btn" @click=${() => this.copyToClipboard('html')}>
-                Copy HTML
-              </button>
-              <button class="preview-action-btn" @click=${() => this.copyToClipboard('json')}>
-                Copy JSON
-              </button>
-            </div>
-          ` : ''}
-        </div>
-        <div class="preview-container ${this.editMode ? 'edit-mode' : ''}">
-          ${this.appliedContent
-            ? html`
-              ${this.renderComponentPreview(this.appliedContent)}
-              ${this.renderBrandScore(this.appliedContent)}
-            `
-            : html`
-              <div class="preview-placeholder">
-                <div class="preview-placeholder-icon">&#x2728;</div>
-                <h3>Ready to Create</h3>
-                <p>Use the guided wizard on the left to create stunning AEM components. Your live preview will appear here.</p>
-                <div class="preview-placeholder-steps">
-                  <div class="step-item">
-                    <div class="step-item-number">1</div>
-                    <div class="step-item-label">Choose Type</div>
+          ${
+            this.appliedContent
+              ? html`
+                  <div class="preview-actions">
+                    <button class="edit-toggle ${this.editMode ? 'active' : ''}" @click=${() => this.toggleEditMode()}>
+                      ${this.editMode ? '&#x2714; Editing' : '&#x270F; Edit'}
+                    </button>
+                    <button class="preview-action-btn" @click=${() => this.copyToClipboard('html')}>Copy HTML</button>
+                    <button class="preview-action-btn" @click=${() => this.copyToClipboard('json')}>Copy JSON</button>
                   </div>
-                  <div class="step-arrow">&#x2192;</div>
-                  <div class="step-item">
-                    <div class="step-item-number">2</div>
-                    <div class="step-item-label">Customize</div>
-                  </div>
-                  <div class="step-arrow">&#x2192;</div>
-                  <div class="step-item">
-                    <div class="step-item-number">3</div>
-                    <div class="step-item-label">Generate</div>
-                  </div>
-                </div>
-              </div>
-            `
+                `
+              : ''
           }
         </div>
-        ${this.editMode ? html`
-          <div class="edit-hint">Click on any text to edit it directly</div>
-        ` : ''}
+        <div class="preview-container ${this.editMode ? 'edit-mode' : ''}">
+          ${
+            this.appliedContent
+              ? html`
+                  ${this.renderComponentPreview(this.appliedContent)} ${this.renderBrandScore(this.appliedContent)}
+                `
+              : html`
+                  <div class="preview-placeholder">
+                    <div class="preview-placeholder-icon">&#x2728;</div>
+                    <h3>Ready to Create</h3>
+                    <p>
+                      Use the guided wizard on the left to create stunning AEM components. Your live preview will appear
+                      here.
+                    </p>
+                    <div class="preview-placeholder-steps">
+                      <div class="step-item">
+                        <div class="step-item-number">1</div>
+                        <div class="step-item-label">Choose Type</div>
+                      </div>
+                      <div class="step-arrow">&#x2192;</div>
+                      <div class="step-item">
+                        <div class="step-item-number">2</div>
+                        <div class="step-item-label">Customize</div>
+                      </div>
+                      <div class="step-arrow">&#x2192;</div>
+                      <div class="step-item">
+                        <div class="step-item-number">3</div>
+                        <div class="step-item-label">Generate</div>
+                      </div>
+                    </div>
+                  </div>
+                `
+          }
+        </div>
+        ${this.editMode ? html` <div class="edit-hint">Click on any text to edit it directly</div> ` : ''}
       </div>
     `;
   }
@@ -1698,7 +1715,7 @@ export class AssistantPreview extends LitElement {
       title: content.title,
       subtitle: content.subtitle,
       description: content.description,
-      cta: content.ctaText || content.cta?.text
+      cta: content.ctaText || content.cta?.text,
     });
 
     return html`
@@ -1717,11 +1734,15 @@ export class AssistantPreview extends LitElement {
         return html`
           <div class="component-preview hero-preview">
             <img class="hero-image" src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
-            ${content.visualScore !== undefined ? html`
-              <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
-                ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
-              </span>
-            ` : ''}
+            ${
+              content.visualScore !== undefined
+                ? html`
+                    <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
+                      ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
+                    </span>
+                  `
+                : ''
+            }
             <div class="hero-overlay">
               ${this.renderEditableField('title', content.title, 'h2')}
               ${content.subtitle ? this.renderEditableField('subtitle', content.subtitle, 'div', 'subtitle') : ''}
@@ -1735,11 +1756,15 @@ export class AssistantPreview extends LitElement {
         return html`
           <div class="component-preview product-preview">
             <img class="product-image" src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
-            ${content.visualScore !== undefined ? html`
-              <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
-                ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
-              </span>
-            ` : ''}
+            ${
+              content.visualScore !== undefined
+                ? html`
+                    <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
+                      ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
+                    </span>
+                  `
+                : ''
+            }
             <div class="product-content">
               ${this.renderEditableField('title', content.title, 'h3')}
               ${content.price ? this.renderEditableField('price', content.price, 'div', 'price') : ''}
@@ -1753,11 +1778,15 @@ export class AssistantPreview extends LitElement {
         return html`
           <div class="component-preview teaser-preview">
             <img class="teaser-image" src="${content.imageUrl}" alt="${content.imageAlt || content.title}" />
-            ${content.visualScore !== undefined ? html`
-              <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
-                ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
-              </span>
-            ` : ''}
+            ${
+              content.visualScore !== undefined
+                ? html`
+                    <span class="visual-alignment-badge ${content.visualScore > 0 ? '' : 'warning'}">
+                      ${content.visualScore > 0 ? 'Brand Aligned' : 'Review Visual'}
+                    </span>
+                  `
+                : ''
+            }
             <div class="teaser-content">
               ${this.renderEditableField('title', content.title, 'h3')}
               ${content.subtitle ? this.renderEditableField('subtitle', content.subtitle, 'div', 'subtitle') : ''}
@@ -2077,7 +2106,11 @@ export class AssistantPreview extends LitElement {
           <div class="component-preview search-preview">
             ${this.renderEditableField('title', content.title || 'Search', 'h3')}
             <div class="search-box">
-              <input type="text" placeholder="${content.description || 'Search for products, articles...'}" class="search-input" />
+              <input
+                type="text"
+                placeholder="${content.description || 'Search for products, articles...'}"
+                class="search-input"
+              />
               <button class="search-button">🔍</button>
             </div>
             <div class="search-suggestions">
@@ -2104,12 +2137,7 @@ export class AssistantPreview extends LitElement {
     }
   }
 
-  private renderEditableField(
-    field: string,
-    value: string,
-    tag: string = 'div',
-    className: string = ''
-  ) {
+  private renderEditableField(field: string, value: string, tag: string = 'div', className: string = '') {
     const isEditing = this.editingField === field;
     const content = value || '';
 
@@ -2118,23 +2146,23 @@ export class AssistantPreview extends LitElement {
       const isMultiline = field === 'description';
       return isMultiline
         ? html`
-          <textarea
-            class="editable-input ${className}"
-            .value=${content}
-            @blur=${(e: Event) => this.finishEditing(field, (e.target as HTMLTextAreaElement).value)}
-            @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, field)}
-            rows="3"
-          ></textarea>
-        `
+            <textarea
+              class="editable-input ${className}"
+              .value=${content}
+              @blur=${(e: Event) => this.finishEditing(field, (e.target as HTMLTextAreaElement).value)}
+              @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, field)}
+              rows="3"
+            ></textarea>
+          `
         : html`
-          <input
-            type="text"
-            class="editable-input ${className}"
-            .value=${content}
-            @blur=${(e: Event) => this.finishEditing(field, (e.target as HTMLInputElement).value)}
-            @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, field)}
-          />
-        `;
+            <input
+              type="text"
+              class="editable-input ${className}"
+              .value=${content}
+              @blur=${(e: Event) => this.finishEditing(field, (e.target as HTMLInputElement).value)}
+              @keydown=${(e: KeyboardEvent) => this.handleKeyDown(e, field)}
+            />
+          `;
     }
 
     // Non-editing mode - just show the element with click handler
@@ -2146,9 +2174,18 @@ export class AssistantPreview extends LitElement {
       case 'h3':
         return html`<h3 class="${editableClass} ${className}" @click=${() => this.startEditing(field)}>${content}</h3>`;
       case 'a':
-        return html`<a class="${editableClass} ${className}" @click=${(e: Event) => { e.preventDefault(); this.startEditing(field); }}>${content}</a>`;
+        return html`<a
+          class="${editableClass} ${className}"
+          @click=${(e: Event) => {
+            e.preventDefault();
+            this.startEditing(field);
+          }}
+          >${content}</a
+        >`;
       default:
-        return html`<div class="${editableClass} ${className}" @click=${() => this.startEditing(field)}>${content}</div>`;
+        return html`<div class="${editableClass} ${className}" @click=${() => this.startEditing(field)}>
+          ${content}
+        </div>`;
     }
   }
 
@@ -2173,11 +2210,13 @@ export class AssistantPreview extends LitElement {
     const updatedContent = { ...this.appliedContent, [field]: value };
 
     // Dispatch event to parent
-    this.dispatchEvent(new CustomEvent('content-updated', {
-      detail: { field, value, content: updatedContent },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('content-updated', {
+        detail: { field, value, content: updatedContent },
+        bubbles: true,
+        composed: true,
+      }),
+    );
 
     this.editingField = null;
   }
@@ -2194,11 +2233,13 @@ export class AssistantPreview extends LitElement {
 
   private copyToClipboard(format: 'json' | 'html') {
     if (!this.appliedContent) return;
-    this.dispatchEvent(new CustomEvent('copy-content', {
-      detail: { content: this.appliedContent, format },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('copy-content', {
+        detail: { content: this.appliedContent, format },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 }
 
