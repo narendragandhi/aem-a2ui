@@ -34,18 +34,20 @@
       padding: 20px;
       text-align: center;
     }
-    iframe {
+    #assistantFrame {
       flex: 1;
       border: none;
       width: 100%;
+      display: none;
     }
   </style>
 </head>
 <body>
   <div id="root">
-    <div class="loading" id="loading">Loading AI Content Assistant...</div>
+    <div class="loading" id="loading">Connecting to AI Content Assistant...</div>
     <div class="error" id="error"></div>
+    <iframe id="assistantFrame" title="AI Content Assistant"></iframe>
   </div>
-  <script type="module" src="./index.js"></script>
+  <script type="module" src="./src/panel.js"></script>
 </body>
 </html>

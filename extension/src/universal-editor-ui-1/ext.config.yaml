@@ -1,0 +1,34 @@
+operations:
+  view:
+    - type: web
+      impl: index.html
+actions: actions
+web: web-src
+hooks:
+  pre-app-run: node node_modules/@adobe/uix-guest/scripts/generate-metadata.js
+  pre-app-build: node node_modules/@adobe/uix-guest/scripts/generate-metadata.js
+runtimeManifest:
+  packages:
+    aem-a2ui-extension:
+      license: Apache-2.0
+      actions:
+        generate:
+          function: actions/generate/index.js
+          web: 'yes'
+          runtime: nodejs:18
+          inputs:
+            LOG_LEVEL: debug
+            AI_AGENT_URL: $AI_AGENT_URL
+          annotations:
+            require-adobe-auth: true
+            final: true
+        suggest:
+          function: actions/suggest/index.js
+          web: 'yes'
+          runtime: nodejs:18
+          inputs:
+            LOG_LEVEL: debug
+            AI_AGENT_URL: $AI_AGENT_URL
+          annotations:
+            require-adobe-auth: true
+            final: true

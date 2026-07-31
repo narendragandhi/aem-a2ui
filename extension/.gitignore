@@ -1,6 +1,8 @@
 node_modules/
+.parcel-cache/
 build/
 dist/
 .env
 *.log
 .DS_Store
+src/universal-editor-ui-1/web-src/src/config.json

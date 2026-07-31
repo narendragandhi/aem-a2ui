@@ -30,6 +30,14 @@ Web Client (Lit) ──→ Java Agent (Spring Boot 3.5.0)
 ### Feature Flags
 All controllers gated with `@ConditionalOnProperty`. Centralized in `FeatureFlag` enum + `FeatureFlagService` using Spring `Environment`.
 
+### App Builder Universal Editor Extension
+`extension/` is an App Builder extension on the `universal-editor/ui/1` extension point.
+- `app.config.yaml` root is a top-level `extensions:` map with `$include: src/universal-editor-ui-1/ext.config.yaml` (the legacy `application.extensions` list is NOT supported by `aio` CLI).
+- `web-src/` = Parcel web bundle; `actions/` = OpenWhisk runtime actions; hooks regenerate `src/app-metadata.json` via `@adobe/uix-guest/scripts/generate-metadata.js`.
+- Build output: `dist/universal-editor-ui-1/web-prod/` (served at namespace root, so HTML must use absolute `/...` paths).
+- Runtime actions use Node 18+ global `fetch` — do NOT add `node-fetch` (v3 is ESM-only and breaks CJS actions).
+- The rail host (`panel.html`) iframes the Java agent's `/extension-panel` endpoint; the client app does not yet handle the `ue-event` postMessages the panel relays.
+
 ## Running
 
 ### Template Mode
@@ -57,6 +65,15 @@ cd client && npm run dev
 docker compose up
 ```
 
+### Extension
+```bash
+cd extension
+npm install
+npm run build    # aio app build (actions + web bundle)
+npm run lint     # eslint src/
+# aio app deploy # requires aio login (Adobe Developer Console credentials)
+```
+
 ## Testing
 
 ```bash
@@ -66,6 +83,8 @@ cd client && npm test
 cd agent-java && mvn clean test
 # Storybook
 cd client && npm run storybook
+# Extension
+cd extension && npm test
 ```
 
 ## Troubleshooting
@@ -73,4 +92,5 @@ cd client && npm run storybook
 - **Stale class files**: Always use `mvn clean test` (not just `mvn test`)
 - **Rollup/Module error**: `rm -rf node_modules package-lock.json && npm install`
 - **Ollama connection**: Ensure `ollama serve` is running
-- **Extension deployment**: Needs Adobe Developer Console credentials
+- **`aio app build` fails with "Couldn't find configuration"**: `app.config.yaml` must use the `extensions:` top-level map with `$include` (not `application.extensions:`), and the included `ext.config.yaml` must declare `operations.view[].type: web` + `impl`
+- **Extension deployment**: Needs Adobe Developer Console credentials (`aio login`)
