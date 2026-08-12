@@ -17,6 +17,8 @@ This project is a sophisticated prototype of an AI-powered authoring assistant f
 
 ## Understanding A2UI vs AG-UI
 
+See [SLICC Integration](docs/SLICC-INTEGRATION.md) for the external browser-operator example.
+
 This project uses two complementary protocols:
 
 | Protocol | Purpose | Example |
